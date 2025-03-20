@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../Core/Utils/injector.dart';
+import '../../Global/Color/color.dart';
 import '../../Global/Widgets/app_bar.dart';
 import '../../Global/Widgets/button.dart';
 import '../../Global/Widgets/campo_desplegable.dart';
@@ -214,7 +215,7 @@ class _CreateGameViewState extends State<CreateGameView> {
             alignment: Alignment.bottomCenter,
             child: Button(
               texto: 'Confirmar',
-              color: ButtonColor.verde,
+              color: AppColor.verde,
               onPressed: () {
                 print('Botón presionado');
               },
@@ -295,7 +296,7 @@ class _CreateGameViewState extends State<CreateGameView> {
             padding: const EdgeInsets.only(bottom: 16.0),
             child: Button(
               texto: 'Confirmar',
-              color: ButtonColor.verde,
+              color: AppColor.verde,
               onPressed: () {
                 print('Botón presionado');
               },

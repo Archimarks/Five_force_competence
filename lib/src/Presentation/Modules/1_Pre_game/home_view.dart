@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 // Importación de las utilidades del proyecto, incluidas las dependencias de inyección de dependencias.
 import '../../../Core/Utils/injector.dart';
 // Importación del widget de botón personalizado.
+import '../../Global/Color/color.dart';
 import '../../Global/Widgets/button.dart';
 // Importación de rutas para la navegación entre vistas.
 import '../../Routes/routes.dart';
@@ -95,33 +96,38 @@ class _HomeViewState extends State<HomeView> {
         const SizedBox(height: 40),
         // Si el usuario es administrador, mostrar el botón para crear una partida
         if (_isAdmin) ...[
-          _buildButton(
-            context,
+          Button(
             texto: 'Crear partida',
-            color: ButtonColor.azulClaro,
+            color: AppColor.azulClaro,
             onPressed: () => Navigator.pushReplacementNamed(context, Routes.createGame),
+
+            width: 250,
+            height: 50,
           ),
           const SizedBox(height: 20),
         ],
         // Botón para unirse a una partida
-        _buildButton(
-          context,
+        Button(
           texto: 'Ingresar a una partida',
-          color: ButtonColor.azul,
+          color: AppColor.azul,
           onPressed: () => Navigator.pushReplacementNamed(context, Routes.joinGame),
+
+          width: 250,
+          height: 50,
         ),
         const SizedBox(height: 20),
         // Botón para cerrar sesión
-        _buildButton(
-          context,
+        Button(
           texto: 'Cerrar seccion',
-          color: ButtonColor.azulOscuro,
+          color: AppColor.azulOscuro,
           onPressed: () async {
             await Injector.of(context).authenticationRepository.signOut();
             // Redirige a la vista de inicio de sesión
-            // ignore: use_build_context_synchronously
             Navigator.pushReplacementNamed(context, Routes.signIn);
           },
+
+          width: 250,
+          height: 50,
         ),
       ],
     );
@@ -144,32 +150,37 @@ class _HomeViewState extends State<HomeView> {
               children: [
                 // Si el usuario es administrador, mostrar el botón para crear una partida
                 if (_isAdmin) ...[
-                  _buildButton(
-                    context,
+                  Button(
                     texto: 'Crear partida',
-                    color: ButtonColor.azulClaro,
+                    color: AppColor.azulClaro,
                     onPressed: () => Navigator.pushReplacementNamed(context, Routes.createGame),
+                    width: 250,
+                    height: 50,
                   ),
                   const SizedBox(height: 20),
                 ],
                 // Botón para unirse a una partida
-                _buildButton(
-                  context,
+                Button(
                   texto: 'Ingresar a una partida',
-                  color: ButtonColor.azul,
+                  color: AppColor.azul,
                   onPressed: () => Navigator.pushReplacementNamed(context, Routes.joinGame),
+
+                  width: 250,
+                  height: 50,
                 ),
                 const SizedBox(height: 20),
                 // Botón para cerrar sesión
-                _buildButton(
-                  context,
+                Button(
                   texto: 'Cerrar seccion',
-                  color: ButtonColor.azulOscuro,
+                  color: AppColor.azulOscuro,
                   onPressed: () async {
                     await Injector.of(context).authenticationRepository.signOut();
                     // Redirige a la vista de inicio de sesión
                     Navigator.pushReplacementNamed(context, Routes.signIn);
                   },
+
+                  width: 250,
+                  height: 50,
                 ),
               ],
             ),
@@ -185,20 +196,6 @@ class _HomeViewState extends State<HomeView> {
           ),
         ],
       ),
-    );
-  }
-
-  /// Método que construye un botón con el diseño y acción proporcionados.
-  Widget _buildButton(
-    BuildContext context, {
-    required String texto,
-    required ButtonColor color,
-    required VoidCallback onPressed,
-  }) {
-    return SizedBox(
-      width: 250,
-      height: 50,
-      child: Button(texto: texto, color: color, onPressed: onPressed),
     );
   }
 }

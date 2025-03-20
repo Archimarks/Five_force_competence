@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../Core/Utils/injector.dart';
+import '../../Global/Color/color.dart';
 import '../../Global/Widgets/button.dart'; // Importa el botón personalizado
 import '../../Routes/routes.dart';
 
@@ -33,10 +34,11 @@ class _SignInViewsState extends State<SignInView> {
                 const SizedBox(height: 40),
                 if (_fetching) const CircularProgressIndicator(),
                 if (!_fetching)
-                  _buildButton(
-                    context,
+                  Button(
                     texto: 'Iniciar sesión con Google',
-                    color: ButtonColor.azulClaro,
+                    color: AppColor.azulClaro,
+                    width: 250,
+                    height: 50,
                     onPressed: _signInWithGoogle,
                   ),
               ],
@@ -59,19 +61,6 @@ class _SignInViewsState extends State<SignInView> {
         context,
       ).showSnackBar(const SnackBar(content: Text('Error al iniciar sesión con Google'))),
       (user) => Navigator.pushReplacementNamed(context, Routes.home),
-    );
-  }
-
-  Widget _buildButton(
-    BuildContext context, {
-    required String texto,
-    required ButtonColor color,
-    required VoidCallback onPressed,
-  }) {
-    return SizedBox(
-      width: 250,
-      height: 50,
-      child: Button(texto: texto, color: color, onPressed: onPressed),
     );
   }
 }

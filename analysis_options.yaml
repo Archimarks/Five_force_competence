@@ -1,0 +1,17 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    
+    # ✅ Buenas prácticas
+    - prefer_relative_imports  # Usa siempre rutas relativas en vez de `package:`
+
+    # 📏 Estilo de código
+    - require_trailing_commas  # Comas finales en listas/argumentos para mejorar `git diff`
+    - prefer_single_quotes  # Usa comillas simples en lugar de dobles
+    - sort_child_properties_last  # Mejora la legibilidad en widgets Flutter
+
+    # 🚀 Optimización
+    - prefer_const_constructors  # Usa `const` siempre que sea posible
+    - prefer_const_literals_to_create_immutables  # Usa `const` en listas/mapas inmutables
+

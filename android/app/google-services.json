@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "731509271698",
+    "project_id": "five-force-competence-eee84",
+    "storage_bucket": "five-force-competence-eee84.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:731509271698:android:56de1a4fa117b65723ca4b",
+        "android_client_info": {
+          "package_name": "com.Megamarine.five_force_competence"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "731509271698-lor333sl25d1bajq7op2gub9tocjj583.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.Megamarine.five_force_competence",
+            "certificate_hash": "e823a90fc9bd955f564c83d53fd5d856114bc2bf"
+          }
+        },
+        {
+          "client_id": "731509271698-b2ja5f24r80kpbmr3ttujnmc5vlsrgio.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_RVigygySV-864F1XvXa1BQB345J41z8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "731509271698-b2ja5f24r80kpbmr3ttujnmc5vlsrgio.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

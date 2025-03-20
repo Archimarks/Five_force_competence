@@ -100,9 +100,6 @@ class _HomeViewState extends State<HomeView> {
             texto: 'Crear partida',
             color: AppColor.azulClaro,
             onPressed: () => Navigator.pushReplacementNamed(context, Routes.createGame),
-
-            width: 250,
-            height: 50,
           ),
           const SizedBox(height: 20),
         ],
@@ -111,9 +108,6 @@ class _HomeViewState extends State<HomeView> {
           texto: 'Ingresar a una partida',
           color: AppColor.azul,
           onPressed: () => Navigator.pushReplacementNamed(context, Routes.joinGame),
-
-          width: 250,
-          height: 50,
         ),
         const SizedBox(height: 20),
         // Botón para cerrar sesión
@@ -123,11 +117,9 @@ class _HomeViewState extends State<HomeView> {
           onPressed: () async {
             await Injector.of(context).authenticationRepository.signOut();
             // Redirige a la vista de inicio de sesión
+            // ignore: use_build_context_synchronously
             Navigator.pushReplacementNamed(context, Routes.signIn);
           },
-
-          width: 250,
-          height: 50,
         ),
       ],
     );
@@ -154,8 +146,6 @@ class _HomeViewState extends State<HomeView> {
                     texto: 'Crear partida',
                     color: AppColor.azulClaro,
                     onPressed: () => Navigator.pushReplacementNamed(context, Routes.createGame),
-                    width: 250,
-                    height: 50,
                   ),
                   const SizedBox(height: 20),
                 ],
@@ -164,9 +154,6 @@ class _HomeViewState extends State<HomeView> {
                   texto: 'Ingresar a una partida',
                   color: AppColor.azul,
                   onPressed: () => Navigator.pushReplacementNamed(context, Routes.joinGame),
-
-                  width: 250,
-                  height: 50,
                 ),
                 const SizedBox(height: 20),
                 // Botón para cerrar sesión
@@ -178,9 +165,6 @@ class _HomeViewState extends State<HomeView> {
                     // Redirige a la vista de inicio de sesión
                     Navigator.pushReplacementNamed(context, Routes.signIn);
                   },
-
-                  width: 250,
-                  height: 50,
                 ),
               ],
             ),

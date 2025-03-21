@@ -1,0 +1,28 @@
+{
+    "EQUIPO 1": {
+        "CODIGO": "",
+        "ESTADO TURNO": "",
+        "NOMBRE": "",
+        "PUESTO": "",
+        "PUNTOS": "",
+        "SECTOR": "",
+        "EMPRESA": "",
+        "FUERZAS": {
+            "PODER DE NEGOCIACION DE COMPRADORES": {
+                "NIVEL": ""
+            },
+            "PODER DE NEGOCIACION DE PROVEEDORES": {
+                "NIVEL": ""
+            },
+            "POTENCIALES COMPETIDORES": {
+                "NIVEL": ""
+            },
+            "PRODUCTOS SUSTITUTOS": {
+                "NIVEL": ""
+            },
+            "RIVALIDAD ENTRE COMPETIDORES": {
+                "NIVEL": ""
+            }
+        }
+    }
+}

@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 
 import '../../Core/Repositories/authentication_repository.dart';
 import '../../Core/Repositories/connectivity_repository.dart';
-import '../../Data/Firebase/admin_repository.dart';
+import '../../Data/Firebase/Admin/admin_repository.dart';
 
 /// Clase `Injector` para la gestión de dependencias en la aplicación.
 ///

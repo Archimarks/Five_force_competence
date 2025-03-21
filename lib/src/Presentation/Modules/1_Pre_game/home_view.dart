@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Importación de las utilidades del proyecto, incluidas las dependencias de inyección de dependencias.
 import '../../../Core/Utils/injector.dart';
+import '../../../Data/Firebase/Partida/crear_partida.dart';
 // Importación del widget de botón personalizado.
 import '../../Global/Color/color.dart';
 import '../../Global/Widgets/button.dart';
@@ -35,6 +36,8 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   // Variable para determinar si el usuario es administrador
   bool _isAdmin = false;
+  // Variable para crear partida
+  final CrearPartida _crearPartida = CrearPartida();
 
   @override
   void initState() {
@@ -128,7 +131,10 @@ class _HomeViewState extends State<HomeView> {
           Button(
             texto: 'Crear partida',
             color: AppColor.azulClaro,
-            onPressed: () => Navigator.pushReplacementNamed(context, Routes.createGame),
+            onPressed: () async {
+              Navigator.pushReplacementNamed(context, Routes.createGame);
+              await _crearPartida.crearNuevaPartida();
+            },
           ),
           const SizedBox(height: 20),
         ],

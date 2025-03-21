@@ -13,7 +13,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'src/Core/Utils/injector.dart';
-import 'src/Data/Firebase/admin_repository.dart';
+import 'src/Data/Firebase/Admin/admin_repository.dart';
 import 'src/Data/Remote/internet_checker.dart';
 import 'src/Data/Services/authentication_repository_impl.dart';
 import 'src/Data/Services/connectivity_repository_impl.dart';

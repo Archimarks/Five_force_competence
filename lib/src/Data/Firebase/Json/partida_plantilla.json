@@ -1,0 +1,16 @@
+{
+    "Five Force Competence": {
+        "PARTIDAS": {
+            "PARTIDA ": {
+                "TURNO": "",
+                "CONFIGURACIONES": {
+                    "SECTOR": "",
+                    "ESTADO": "ACTIVO",
+                    "TIEMPO TURNO": 60,
+                    "CANTIDA COMODINES": 2
+                },
+                "EQUIPOS": {}
+            }
+        }
+    }
+}

@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Importación de las utilidades del proyecto, incluidas las dependencias de inyección de dependencias.
 import '../../../Core/Utils/injector.dart';
@@ -38,8 +39,17 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
-    // Se usa addPostFrameCallback para asegurarse de tener el contexto disponible
-    // después de que la vista ha sido renderizada.
+    _loadAdminStatus();
+  }
+
+  /// Carga el estado de administrador almacenado en `SharedPreferences`
+  Future<void> _loadAdminStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isAdmin = prefs.getBool('isAdmin') ?? false;
+    });
+
+    // Verifica nuevamente con la base de datos si el usuario es administrador
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkIfAdmin();
     });
@@ -47,16 +57,35 @@ class _HomeViewState extends State<HomeView> {
 
   /// Método que verifica si el usuario actual tiene permisos de administrador.
   Future<void> _checkIfAdmin() async {
-    // Se obtiene la información del usuario actual.
-    final user = await Injector.of(context).authenticationRepository.getUserData();
+    final injector = Injector.of(context);
+    final user = await injector.authenticationRepository.getUserData();
     if (user != null) {
       // Verifica si el correo del usuario corresponde a un administrador.
-      // ignore: use_build_context_synchronously
-      final isAdmin = await Injector.of(context).adminRepository.isAdmin(user.email ?? '');
+      final isAdmin = await injector.adminRepository.isAdmin(user.email ?? '');
+      if (!mounted) return;
+
+      // Guarda el estado en `SharedPreferences`
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isAdmin', isAdmin);
+
       setState(() {
         _isAdmin = isAdmin;
       });
     }
+  }
+
+  /// Cierra sesión y limpia el estado almacenado de administrador
+  Future<void> _signOut() async {
+    final injector = Injector.of(context);
+
+    // Elimina el estado de administrador en `SharedPreferences`
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('isAdmin');
+
+    // Cierra sesión en Firebase y redirige a la pantalla de inicio de sesión
+    await injector.authenticationRepository.signOut();
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, Routes.signIn);
   }
 
   @override
@@ -111,16 +140,7 @@ class _HomeViewState extends State<HomeView> {
         ),
         const SizedBox(height: 20),
         // Botón para cerrar sesión
-        Button(
-          texto: 'Cerrar seccion',
-          color: AppColor.azulOscuro,
-          onPressed: () async {
-            await Injector.of(context).authenticationRepository.signOut();
-            // Redirige a la vista de inicio de sesión
-            // ignore: use_build_context_synchronously
-            Navigator.pushReplacementNamed(context, Routes.signIn);
-          },
-        ),
+        Button(texto: 'Cerrar sesión', color: AppColor.azulOscuro, onPressed: _signOut),
       ],
     );
   }
@@ -157,15 +177,7 @@ class _HomeViewState extends State<HomeView> {
                 ),
                 const SizedBox(height: 20),
                 // Botón para cerrar sesión
-                Button(
-                  texto: 'Cerrar seccion',
-                  color: AppColor.azulOscuro,
-                  onPressed: () async {
-                    await Injector.of(context).authenticationRepository.signOut();
-                    // Redirige a la vista de inicio de sesión
-                    Navigator.pushReplacementNamed(context, Routes.signIn);
-                  },
-                ),
+                Button(texto: 'Cerrar sesión', color: AppColor.azulOscuro, onPressed: _signOut),
               ],
             ),
           ),

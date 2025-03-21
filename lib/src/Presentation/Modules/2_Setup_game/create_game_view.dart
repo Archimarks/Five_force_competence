@@ -217,6 +217,7 @@ class _CreateGameViewState extends State<CreateGameView> {
               texto: 'Confirmar',
               color: AppColor.verde,
               onPressed: () {
+                // ignore: avoid_print
                 print('Botón presionado');
               },
             ),
@@ -298,6 +299,7 @@ class _CreateGameViewState extends State<CreateGameView> {
               texto: 'Confirmar',
               color: AppColor.verde,
               onPressed: () {
+                // ignore: avoid_print
                 print('Botón presionado');
               },
             ),

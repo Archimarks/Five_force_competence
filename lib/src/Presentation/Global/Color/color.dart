@@ -31,6 +31,7 @@ class AppPalette {
   };
 
   static Color _applyGlow(Color baseColor) {
+    // ignore: deprecated_member_use
     return baseColor.withOpacity(0.6); // Genera automáticamente el color con brillo
   }
 

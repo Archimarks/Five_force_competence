@@ -12,6 +12,7 @@ class JoinGameView extends StatefulWidget {
   const JoinGameView({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _JoinGameViewState createState() => _JoinGameViewState();
 }
 
@@ -129,6 +130,7 @@ class _JoinGameViewState extends State<JoinGameView> {
       child: ElevatedButton(
         onPressed: () {
           String teamCode = _codeController.text;
+          // ignore: avoid_print
           print('Código ingresado: $teamCode');
         },
         style: ElevatedButton.styleFrom(

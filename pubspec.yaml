@@ -39,7 +39,8 @@ dependencies:
   # Módulos auxiliares
   http: ^1.3.0                    # Cliente HTTP para realizar peticiones REST
   connectivity_plus: ^6.1.3       # Manejo de conectividad (WiFi, datos móviles, etc.)
-  flutter_secure_storage: ^9.2.4  # Almacenamiento seguro en dispositivos
+  flutter_secure_storage: ^9.2.4  # Almacenamiento seguro
+  shared_preferences: ^2.5.2      # Almacenamiento de datos persitentes
   equatable: ^2.0.7
 
 

@@ -171,7 +171,10 @@ class _HomeViewState extends State<HomeView> {
                   Button(
                     texto: 'Crear partida',
                     color: AppColor.azulClaro,
-                    onPressed: () => Navigator.pushReplacementNamed(context, Routes.createGame),
+                    onPressed: () async {
+                      Navigator.pushReplacementNamed(context, Routes.createGame);
+                      await _crearPartida.crearNuevaPartida();
+                    },
                   ),
                   const SizedBox(height: 20),
                 ],

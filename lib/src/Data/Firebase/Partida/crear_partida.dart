@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Clase encargada de la creación de partidas en Firebase Realtime Database.
 class CrearPartida {
@@ -18,12 +19,22 @@ class CrearPartida {
       DataSnapshot snapshot = await partidaRef.get();
       if (!snapshot.exists) {
         await partidaRef.set(_crearPlantillaPartida());
+
+        // Guardar partidaId de forma persistente
+        await _guardarPartidaId(partidaId);
+
         print('Partida creada con éxito: $partidaId');
         return;
       }
     }
 
     print('No se pudo crear la partida. Todos los slots están ocupados.');
+  }
+
+  /// Guarda el ID de la partida en `SharedPreferences`.
+  Future<void> _guardarPartidaId(String partidaId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('partidaId', partidaId);
   }
 
   /// Retorna la estructura base de una partida basada en la plantilla.

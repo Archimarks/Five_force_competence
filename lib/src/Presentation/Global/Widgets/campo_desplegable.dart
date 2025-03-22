@@ -1,22 +1,45 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
+/// Widget reutilizable para un campo desplegable con almacenamiento en Firebase.
 class CampoDesplegable extends StatelessWidget {
   final String titulo;
   final Icon icon;
-  final List<Map<String, dynamic>> opciones;
-  final Function(Map<String, dynamic>)? onChanged;
+  final List<String> opciones;
+  final Function(String?)? onChanged;
   final Function()? onClear;
-  final Map<String, dynamic>? valorSeleccionado;
+  final String? valorSeleccionado;
+  final String partidaId;
+  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
 
-  const CampoDesplegable({
+  /// Constructor del `CampoDesplegable`
+  ///
+  /// - `titulo`: Etiqueta del campo desplegable.
+  /// - `icon`: Ícono que acompaña el título.
+  /// - `opciones`: Lista de opciones disponibles en el desplegable.
+  /// - `partidaId`: ID de la partida actual en Firebase.
+  /// - `onChanged`: Callback cuando se selecciona una opción.
+  /// - `onClear`: Callback cuando se borra la selección.
+  /// - `valorSeleccionado`: Opción preseleccionada.
+  CampoDesplegable({
     super.key,
     required this.titulo,
     required this.icon,
     required this.opciones,
+    required this.partidaId,
     this.onChanged,
     this.onClear,
     this.valorSeleccionado,
   });
+
+  /// Guarda la selección en Firebase para la partida específica.
+  Future<void> _guardarSeleccion(String? seleccion) async {
+    if (partidaId.isNotEmpty) {
+      await _dbRef
+          .child('Five Force Competence/PARTIDAS/$partidaId/CONFIGURACIONES/SECTOR')
+          .set(seleccion);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +71,7 @@ class CampoDesplegable extends StatelessWidget {
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 child: DropdownButtonHideUnderline(
-                  child: DropdownButton<Map<String, dynamic>>(
+                  child: DropdownButton<String>(
                     isExpanded: true,
                     value: valorSeleccionado,
                     dropdownColor: Colors.white,
@@ -57,19 +80,20 @@ class CampoDesplegable extends StatelessWidget {
                       style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                     items:
-                        opciones.map((Map<String, dynamic> opcion) {
-                          return DropdownMenuItem<Map<String, dynamic>>(
+                        opciones.map((String opcion) {
+                          return DropdownMenuItem<String>(
                             value: opcion,
                             child: Text(
-                              opcion['nombre'] ?? '',
+                              opcion,
                               style: const TextStyle(fontSize: 14, color: Colors.black87),
                             ),
                           );
                         }).toList(),
                     onChanged: (newValue) {
-                      if (onChanged != null && newValue != null) {
+                      if (onChanged != null) {
                         onChanged!(newValue);
                       }
+                      _guardarSeleccion(newValue);
                     },
                   ),
                 ),
@@ -103,7 +127,12 @@ class CampoDesplegable extends StatelessWidget {
                   child: Center(
                     child: IconButton(
                       icon: const Icon(Icons.close, color: Colors.red, size: 20),
-                      onPressed: onClear,
+                      onPressed: () {
+                        if (onClear != null) {
+                          onClear!();
+                        }
+                        _guardarSeleccion(null);
+                      },
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),

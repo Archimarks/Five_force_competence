@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Clase encargada de eliminar una partida en Firebase Realtime Database.
@@ -24,9 +25,9 @@ class EliminarPartida {
       // Eliminar la partida de SharedPreferences
       await prefs.remove('partidaId');
 
-      print('Partida eliminada con éxito: $partidaId');
+      debugPrint('Partida eliminada con éxito: $partidaId');
     } else {
-      print('No hay una partida guardada para eliminar.');
+      debugPrint('No hay una partida guardada para eliminar.');
     }
   }
 }

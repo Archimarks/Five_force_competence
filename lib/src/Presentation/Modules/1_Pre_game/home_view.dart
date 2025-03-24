@@ -36,6 +36,8 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   // Variable para determinar si el usuario es administrador
   bool _isAdmin = false;
+
+  bool _isLoading = false;
   // Variable para crear partida
   final CrearPartida _crearPartida = CrearPartida();
 
@@ -132,8 +134,11 @@ class _HomeViewState extends State<HomeView> {
             texto: 'Crear partida',
             color: AppColor.azulClaro,
             onPressed: () async {
-              Navigator.pushReplacementNamed(context, Routes.createGame);
+              setState(() => _isLoading = true);
               await _crearPartida.crearNuevaPartida();
+              setState(() => _isLoading = false);
+              // ignore: use_build_context_synchronously
+              Navigator.pushReplacementNamed(context, Routes.createGame);
             },
           ),
           const SizedBox(height: 20),
@@ -172,8 +177,11 @@ class _HomeViewState extends State<HomeView> {
                     texto: 'Crear partida',
                     color: AppColor.azulClaro,
                     onPressed: () async {
-                      Navigator.pushReplacementNamed(context, Routes.createGame);
+                      setState(() => _isLoading = true);
                       await _crearPartida.crearNuevaPartida();
+                      setState(() => _isLoading = false);
+                      // ignore: use_build_context_synchronously
+                      Navigator.pushReplacementNamed(context, Routes.createGame);
                     },
                   ),
                   const SizedBox(height: 20),

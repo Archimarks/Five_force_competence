@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 enum Direccion { horizontal, vertical }
 
-class CardWidget extends StatefulWidget {
+class CardEquipo extends StatefulWidget {
   final Direccion direccion;
   final List<Map<String, dynamic>> opcionesEmpresa;
   final List<Map<String, dynamic>> opcionesFuerza;
@@ -11,7 +11,7 @@ class CardWidget extends StatefulWidget {
   // Add parameter for initial selections
   final Map<int, Map<String, dynamic>> seleccionesIniciales;
 
-  const CardWidget({
+  const CardEquipo({
     super.key,
     required this.direccion,
     required this.opcionesEmpresa,
@@ -25,7 +25,7 @@ class CardWidget extends StatefulWidget {
   CardWidgetState createState() => CardWidgetState();
 }
 
-class CardWidgetState extends State<CardWidget> {
+class CardWidgetState extends State<CardEquipo> {
   List<int> tarjetas = [1, 2]; // Equipos iniciales
   Map<int, Map<String, dynamic>> seleccionTarjetas = {};
   List<int> tarjetasDisponibles = [];
@@ -38,7 +38,7 @@ class CardWidgetState extends State<CardWidget> {
   }
 
   @override
-  void didUpdateWidget(CardWidget oldWidget) {
+  void didUpdateWidget(CardEquipo oldWidget) {
     super.didUpdateWidget(oldWidget);
     // If direction changed but we have the same selections, preserve state
     if (oldWidget.direccion != widget.direccion && !_initialized) {
@@ -313,7 +313,7 @@ class CardWidgetState extends State<CardWidget> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text('Equipo N° $numeroEquipo', style: const TextStyle(color: Colors.white)),
-                      if (tarjetas.length > 2)
+                      if (tarjetas.isNotEmpty)
                         IconButton(
                           icon: const Icon(Icons.remove, color: Colors.white),
                           onPressed: () => _eliminarTarjeta(index),

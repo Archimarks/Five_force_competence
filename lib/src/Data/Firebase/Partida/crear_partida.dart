@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Clase encargada de la creación de partidas en Firebase Realtime Database.
@@ -23,12 +24,12 @@ class CrearPartida {
         // Guardar partidaId de forma persistente
         await _guardarPartidaId(partidaId);
 
-        print('Partida creada con éxito: $partidaId');
+        debugPrint('Partida creada con éxito: $partidaId');
         return;
       }
     }
 
-    print('No se pudo crear la partida. Todos los slots están ocupados.');
+    debugPrint('No se pudo crear la partida. Todos los slots están ocupados.');
   }
 
   /// Guarda el ID de la partida en `SharedPreferences`.
@@ -44,7 +45,7 @@ class CrearPartida {
       'CONFIGURACIONES': {
         'SECTOR': '',
         'ESTADO': 'ACTIVO',
-        'TIEMPO TURNO': 60,
+        'TIEMPO TURNO': 0,
         'CANTIDAD COMODINES': 2,
       },
       'EQUIPOS': {},

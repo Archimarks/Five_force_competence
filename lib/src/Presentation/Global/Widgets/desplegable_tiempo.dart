@@ -2,7 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 /// Widget reutilizable para un campo desplegable con almacenamiento en Firebase.
-class CampoDesplegable extends StatelessWidget {
+class DesplegableTiempo extends StatelessWidget {
   final String titulo;
   final Icon icon;
   final List<String> opciones;
@@ -12,7 +12,7 @@ class CampoDesplegable extends StatelessWidget {
   final String partidaId;
   final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
 
-  /// Constructor del `CampoDesplegable`
+  /// Constructor del `DesplegableTiempo`
   ///
   /// - `titulo`: Etiqueta del campo desplegable.
   /// - `icon`: Ícono que acompaña el título.
@@ -21,7 +21,7 @@ class CampoDesplegable extends StatelessWidget {
   /// - `onChanged`: Callback cuando se selecciona una opción.
   /// - `onClear`: Callback cuando se borra la selección.
   /// - `valorSeleccionado`: Opción preseleccionada.
-  CampoDesplegable({
+  DesplegableTiempo({
     super.key,
     required this.titulo,
     required this.icon,
@@ -36,7 +36,7 @@ class CampoDesplegable extends StatelessWidget {
   Future<void> _guardarSeleccion(String? seleccion) async {
     if (partidaId.isNotEmpty) {
       await _dbRef
-          .child('Five Force Competence/PARTIDAS/$partidaId/CONFIGURACIONES/SECTOR')
+          .child('Five Force Competence/PARTIDAS/$partidaId/CONFIGURACIONES/TIEMPO TURNO')
           .set(seleccion);
     }
   }

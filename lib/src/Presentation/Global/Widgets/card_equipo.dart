@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 
+import '../../../Data/Firebase/Empresa/traer_todos_empresa.dart';
+import '../Color/color_equipo.dart';
+
 enum Direccion { horizontal, vertical }
 
+late String? partidaActual;
+
 class CardEquipo extends StatefulWidget {
+  final String partidaId;
   final Direccion direccion;
-  final List<Map<String, dynamic>> opcionesEmpresa;
-  final List<Map<String, dynamic>> opcionesFuerza;
-  final List<Map<String, dynamic>> opcionesColores;
   final Function(Map<int, Map<String, dynamic>>) onSeleccion;
-  // Add parameter for initial selections
   final Map<int, Map<String, dynamic>> seleccionesIniciales;
 
   const CardEquipo({
     super.key,
+    required this.partidaId,
     required this.direccion,
-    required this.opcionesEmpresa,
-    required this.opcionesFuerza,
-    required this.opcionesColores,
     required this.onSeleccion,
     this.seleccionesIniciales = const {},
   });
@@ -26,52 +26,27 @@ class CardEquipo extends StatefulWidget {
 }
 
 class CardWidgetState extends State<CardEquipo> {
-  List<int> tarjetas = [1, 2]; // Equipos iniciales
+  List<int> tarjetas = [];
   Map<int, Map<String, dynamic>> seleccionTarjetas = {};
   List<int> tarjetasDisponibles = [];
-  bool _initialized = false;
+
+  final TraerTodasEmpresas traerEmpresas = TraerTodasEmpresas();
+  List<String> opcionesEmpresas = [];
 
   @override
   void initState() {
     super.initState();
-    _initializeFromProps();
+    _cargarEmpresas();
   }
 
-  @override
-  void didUpdateWidget(CardEquipo oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // If direction changed but we have the same selections, preserve state
-    if (oldWidget.direccion != widget.direccion && !_initialized) {
-      _initializeFromProps();
-    }
+  void _cargarEmpresas() async {
+    Map<String, dynamic>? empresas = await traerEmpresas.obtenerEmpresas();
+    setState(() {
+      opcionesEmpresas = empresas.keys.toList();
+    });
   }
 
-  void _initializeFromProps() {
-    if (widget.seleccionesIniciales.isNotEmpty) {
-      setState(() {
-        seleccionTarjetas = Map.from(widget.seleccionesIniciales);
-
-        // Update tarjetas list based on seleccionTarjetas
-        List<int> tarjetasSeleccionadas = seleccionTarjetas.keys.toList();
-        if (tarjetasSeleccionadas.isNotEmpty) {
-          // Keep at least two cards
-          if (tarjetasSeleccionadas.length < 2) {
-            tarjetasSeleccionadas.addAll(
-              [1, 2]
-                  .where((n) => !tarjetasSeleccionadas.contains(n))
-                  .take(2 - tarjetasSeleccionadas.length),
-            );
-          }
-          tarjetas = [...tarjetasSeleccionadas];
-          tarjetas.sort();
-        }
-
-        _initialized = true;
-      });
-    }
-  }
-
-  void _agregarTarjeta() {
+  void agregarTarjeta() {
     if (tarjetas.length < 4) {
       setState(() {
         int nuevoNumero;
@@ -86,8 +61,8 @@ class CardWidgetState extends State<CardEquipo> {
     }
   }
 
-  void _eliminarTarjeta(int index) {
-    if (tarjetas.length > 2) {
+  void eliminarTarjeta(int index) {
+    if (tarjetas.isNotEmpty) {
       setState(() {
         int numeroEliminado = tarjetas.removeAt(index);
         seleccionTarjetas.remove(numeroEliminado);
@@ -98,37 +73,10 @@ class CardWidgetState extends State<CardEquipo> {
     }
   }
 
-  void _mostrarPopup(int equipo) {
+  void mostrarPopup(int equipo) {
     Map<String, dynamic>? empresaSeleccionada = seleccionTarjetas[equipo]?['empresa'];
-    Map<String, dynamic>? fuerzaSeleccionada = seleccionTarjetas[equipo]?['fuerza'];
-    Map<String, dynamic>? colorSeleccionado = seleccionTarjetas[equipo]?['color'];
+    AppColorEquipo? colorSeleccionado = seleccionTarjetas[equipo]?['color'];
 
-    List<Map<String, dynamic>> empresasDisponibles =
-        widget.opcionesEmpresa
-            .where(
-              (e) =>
-                  !seleccionTarjetas.values.any((t) => t['empresa'] == e) ||
-                  e == empresaSeleccionada,
-            )
-            .toList();
-
-    List<Map<String, dynamic>> fuerzasDisponibles =
-        widget.opcionesFuerza
-            .where(
-              (f) =>
-                  !seleccionTarjetas.values.any((t) => t['fuerza'] == f) || f == fuerzaSeleccionada,
-            )
-            .toList();
-
-    List<Map<String, dynamic>> coloresDisponibles =
-        widget.opcionesColores
-            .where(
-              (c) =>
-                  !seleccionTarjetas.values.any((t) => t['color'] == c) || c == colorSeleccionado,
-            )
-            .toList();
-
-    // Get screen width to adjust dialog width
     double screenWidth = MediaQuery.of(context).size.width;
     double dialogWidth = screenWidth > 600 ? 500 : screenWidth * 0.9;
 
@@ -137,7 +85,7 @@ class CardWidgetState extends State<CardEquipo> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStatePopup) {
-            bool esValidoParaColor = empresaSeleccionada != null && fuerzaSeleccionada != null;
+            bool esValidoParaColor = empresaSeleccionada != null;
             bool sePuedeGuardar = esValidoParaColor && colorSeleccionado != null;
 
             return AlertDialog(
@@ -149,52 +97,33 @@ class CardWidgetState extends State<CardEquipo> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      DropdownButtonFormField<Map<String, dynamic>>(
+                      DropdownButtonFormField<String>(
                         isExpanded: true,
                         decoration: const InputDecoration(
                           labelText: 'Empresa',
                           contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                         ),
                         hint: const Text('Selecciona Empresa'),
-                        value: empresaSeleccionada,
+                        value: empresaSeleccionada?['nombre'], // Solo tomamos el nombre como String
                         onChanged: (value) {
                           setStatePopup(() {
-                            empresaSeleccionada = value;
-                            fuerzaSeleccionada = null;
+                            empresaSeleccionada = {
+                              'nombre': value,
+                            }; // Guardamos como un Map para mantener la estructura
                             colorSeleccionado = null;
                           });
                         },
                         items:
-                            empresasDisponibles.map((opcion) {
-                              return DropdownMenuItem(value: opcion, child: Text(opcion['nombre']));
+                            opcionesEmpresas.map((nombreEmpresa) {
+                              return DropdownMenuItem(
+                                value: nombreEmpresa, // Usamos solo el String del nombre
+                                child: Text(nombreEmpresa),
+                              );
                             }).toList(),
                       ),
+
                       const SizedBox(height: 16),
-                      DropdownButtonFormField<Map<String, dynamic>>(
-                        isExpanded: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Fuerza',
-                          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                        ),
-                        hint: const Text('Selecciona Fuerza'),
-                        value: fuerzaSeleccionada,
-                        onChanged:
-                            empresaSeleccionada != null
-                                ? (value) {
-                                  setStatePopup(() {
-                                    fuerzaSeleccionada = value;
-                                    colorSeleccionado = null;
-                                  });
-                                }
-                                : null,
-                        items:
-                            fuerzasDisponibles.map((opcion) {
-                              return DropdownMenuItem(value: opcion, child: Text(opcion['nombre']));
-                            }).toList(),
-                        disabledHint: const Text('Selecciona primero Empresa'),
-                      ),
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<Map<String, dynamic>>(
+                      DropdownButtonFormField<AppColorEquipo>(
                         isExpanded: true,
                         decoration: const InputDecoration(
                           labelText: 'Color',
@@ -211,19 +140,16 @@ class CardWidgetState extends State<CardEquipo> {
                                 }
                                 : null,
                         items:
-                            coloresDisponibles.map((opcion) {
+                            AppColorEquipo.values.map((color) {
                               return DropdownMenuItem(
-                                value: opcion,
+                                value: color,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Container(width: 20, height: 20, color: opcion['color']),
+                                    Container(width: 20, height: 20, color: color.value),
                                     const SizedBox(width: 10),
                                     Flexible(
-                                      child: Text(
-                                        opcion['nombre'],
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                                      child: Text(color.name, overflow: TextOverflow.ellipsis),
                                     ),
                                   ],
                                 ),
@@ -242,8 +168,7 @@ class CardWidgetState extends State<CardEquipo> {
                           ? () {
                             setState(() {
                               seleccionTarjetas[equipo] = {
-                                'empresa': empresaSeleccionada,
-                                'fuerza': fuerzaSeleccionada,
+                                'empresa': empresaSeleccionada, // Ahora solo el nombre
                                 'color': colorSeleccionado,
                               };
                             });
@@ -269,30 +194,30 @@ class CardWidgetState extends State<CardEquipo> {
           widget.direccion == Direccion.horizontal
               ? SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: _buildTarjetas()),
+                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: buildTarjetas()),
               )
               : Column(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: _buildTarjetas(isVertical: true),
+                children: buildTarjetas(isVertical: true),
               ),
     );
   }
 
-  List<Widget> _buildTarjetas({bool isVertical = false}) {
+  List<Widget> buildTarjetas({bool isVertical = false}) {
     List<Widget> cardWidgets =
         tarjetas.asMap().entries.map((entry) {
           int index = entry.key;
           int numeroEquipo = entry.value;
 
           Color colorTarjeta =
-              seleccionTarjetas[numeroEquipo]?['color']?['color'] ??
+              (seleccionTarjetas[numeroEquipo]?['color'] as AppColorEquipo?)?.color ??
               const Color.fromARGB(255, 78, 97, 129);
 
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: GestureDetector(
-              onTap: () => _mostrarPopup(numeroEquipo),
+              onTap: () => mostrarPopup(numeroEquipo),
               child: Container(
                 // Use maximum width when vertical
                 width: isVertical ? double.infinity : 140,
@@ -316,7 +241,7 @@ class CardWidgetState extends State<CardEquipo> {
                       if (tarjetas.isNotEmpty)
                         IconButton(
                           icon: const Icon(Icons.remove, color: Colors.white),
-                          onPressed: () => _eliminarTarjeta(index),
+                          onPressed: () => eliminarTarjeta(index),
                         ),
                     ],
                   ),
@@ -335,7 +260,7 @@ class CardWidgetState extends State<CardEquipo> {
             width: isVertical ? double.infinity : 140,
             height: 50,
             child: ElevatedButton(
-              onPressed: _agregarTarjeta,
+              onPressed: agregarTarjeta,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 51, 97, 134),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

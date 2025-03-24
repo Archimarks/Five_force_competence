@@ -18,31 +18,6 @@ import '../../Routes/routes.dart';
 String titulo = 'Partida N';
 //--------------------------------------------------------
 
-//---------------------------------------------------------
-Map<int, Map<String, dynamic>> seleccionEquipos = {};
-
-final opcionesEmpresa = [
-  {'id': 1, 'nombre': 'Comotor'},
-  {'id': 2, 'nombre': 'Taxis Verdes'},
-  {'id': 3, 'nombre': 'Ultra Huila'},
-  {'id': 3, 'nombre': 'Taxis el Inge'},
-];
-
-final opcionesFuerza = [
-  {'id': 1, 'nombre': 'Producto sustituto'},
-  {'id': 2, 'nombre': 'Elementos fuertes'},
-  {'id': 3, 'nombre': 'Comida de noche'},
-  {'id': 3, 'nombre': 'Ser Inges'},
-];
-
-final opcionesColores = [
-  {'id': 1, 'nombre': 'Naranja', 'color': Colors.orange},
-  {'id': 2, 'nombre': 'Verde', 'color': Colors.green},
-  {'id': 3, 'nombre': 'Amarillo', 'color': Colors.yellow},
-  {'id': 4, 'nombre': 'Cyan', 'color': Colors.cyanAccent},
-];
-//---------------------------------------------------------
-
 //--------------------------------------------------------
 
 /// **Vista para la creación de una partida**
@@ -75,7 +50,6 @@ class _CreateGameViewState extends State<CreateGameView> {
     Future.delayed(Duration.zero, () async {
       await _cargarPartidaActual();
       if (partidaActual != null) {
-        _crearEquiposEnPartida();
         _cargarPartidaGuardaSector();
         _cargarPartidaGuardaTiempo();
         _cargarSectores();
@@ -93,6 +67,7 @@ class _CreateGameViewState extends State<CreateGameView> {
   }
 
   /// **Crea los equipos en la partida actual**
+  // ignore: unused_element
   Future<void> _crearEquiposEnPartida() async {
     if (partidaActual != null) {
       await crearEquipo.crearEquipos(partidaActual!);
@@ -206,7 +181,7 @@ class _CreateGameViewState extends State<CreateGameView> {
                 const SizedBox(height: 24),
                 DesplegableSector(
                   titulo: 'Sector',
-                  icon: const Icon(Icons.star_border),
+                  icon: const Icon(Icons.widgets, color: Colors.lightBlueAccent),
                   opciones: opcionesSectores,
                   valorSeleccionado: opcionSectorSeleccionada,
                   partidaId: partidaActual ?? '',
@@ -225,8 +200,8 @@ class _CreateGameViewState extends State<CreateGameView> {
                 ),
                 const SizedBox(height: 25),
                 DesplegableTiempo(
-                  titulo: 'Tiempo permitido',
-                  icon: const Icon(Icons.star_border),
+                  titulo: 'Tiempo permitido (Segundos)',
+                  icon: const Icon(Icons.timer_outlined, color: Colors.lightBlueAccent),
                   opciones: opcionesTiempos,
                   valorSeleccionado: opcionTiempoSeleccionada,
                   partidaId: partidaActual ?? '',
@@ -246,10 +221,8 @@ class _CreateGameViewState extends State<CreateGameView> {
                 const SizedBox(height: 24),
                 if (opcionSectorSeleccionada != null && opcionTiempoSeleccionada != null)
                   CardEquipo(
+                    partidaId: partidaActual ?? '',
                     direccion: Direccion.vertical,
-                    opcionesEmpresa: opcionesEmpresa,
-                    opcionesFuerza: opcionesFuerza,
-                    opcionesColores: opcionesColores,
                     onSeleccion: (p0) {},
                   ),
               ],
@@ -267,7 +240,7 @@ class _CreateGameViewState extends State<CreateGameView> {
         Expanded(
           child: DesplegableSector(
             titulo: 'Sector',
-            icon: const Icon(Icons.star_border),
+            icon: const Icon(Icons.widgets, color: Colors.lightBlueAccent),
             opciones: opcionesSectores,
             valorSeleccionado: opcionSectorSeleccionada,
             partidaId: partidaActual ?? '',
@@ -288,8 +261,8 @@ class _CreateGameViewState extends State<CreateGameView> {
         const SizedBox(width: 50),
         Expanded(
           child: DesplegableTiempo(
-            titulo: 'Tiempo permitido',
-            icon: const Icon(Icons.star_border),
+            titulo: 'Tiempo permitido (Segundos)',
+            icon: const Icon(Icons.timer_outlined, color: Colors.lightBlueAccent),
             opciones: opcionesTiempos,
             valorSeleccionado: opcionTiempoSeleccionada,
             partidaId: partidaActual ?? '',
@@ -309,10 +282,8 @@ class _CreateGameViewState extends State<CreateGameView> {
         ),
         if (opcionSectorSeleccionada != null && opcionTiempoSeleccionada != null)
           CardEquipo(
+            partidaId: partidaActual ?? '',
             direccion: Direccion.horizontal,
-            opcionesEmpresa: opcionesEmpresa,
-            opcionesFuerza: opcionesFuerza,
-            opcionesColores: opcionesColores,
             onSeleccion: (p0) {},
           ),
       ],

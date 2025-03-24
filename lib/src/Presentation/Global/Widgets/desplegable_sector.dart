@@ -105,7 +105,7 @@ class DesplegableSector extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Row(
                     children: [
-                      Icon(Icons.widgets, color: Colors.blue.shade400),
+                      icon,
                       const SizedBox(width: 8),
                       Text(
                         titulo,

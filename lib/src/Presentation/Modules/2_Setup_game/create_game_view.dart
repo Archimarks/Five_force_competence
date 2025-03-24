@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../Data/Firebase/Equipo/crear_equipo.dart';
 import '../../../Data/Firebase/Partida/cargar_partida.dart';
 import '../../../Data/Firebase/Partida/eliminar_partida.dart';
-import '../../../Data/Firebase/Sector/guardar_sector.dart'; // Nueva clase importada
+import '../../../Data/Firebase/Sector/guardar_sector.dart';
 import '../../../Data/Firebase/Sector/traer_todos_sectores.dart';
 import '../../../Data/Firebase/Tiempo/guardar_tiempo.dart';
 import '../../../Data/Firebase/Tiempo/traer_todos_tiempos.dart';

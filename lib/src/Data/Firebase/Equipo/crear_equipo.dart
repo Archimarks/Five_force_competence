@@ -9,14 +9,22 @@ class CrearEquipo {
   /// Constructor que inicializa la referencia a Firebase Realtime Database.
   CrearEquipo() : _dbRef = FirebaseDatabase.instance.ref();
 
-  /// Método para crear los cuatro equipos dentro de una partida específica.
-  Future<void> crearEquipos(String partidaActual) async {
-    _dbRef.child('Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS');
-
-    for (int i = 1; i <= 4; i++) {
-      String equipoId = 'EQUIPO $i';
-      await crearEquipoEspecifico(partidaActual, equipoId);
+  /// Método para crear un equipo con el siguiente identificador disponible dentro de una partida.
+  Future<void> crearEquipoDisponible(String partidaActual) async {
+    int equipoId = 1;
+    while (await _equipoExiste(partidaActual, 'EQUIPO $equipoId')) {
+      equipoId++;
     }
+    await crearEquipoEspecifico(partidaActual, 'EQUIPO $equipoId');
+  }
+
+  /// Método para verificar si un equipo ya existe en la partida.
+  Future<bool> _equipoExiste(String partidaActual, String equipoId) async {
+    final DatabaseReference equipoRef = _dbRef.child(
+      'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoId',
+    );
+    DataSnapshot snapshot = await equipoRef.get();
+    return snapshot.exists;
   }
 
   /// Método para crear un equipo específico dentro de una partida.
@@ -48,7 +56,7 @@ class CrearEquipo {
   /// Guarda el ID del equipo en SharedPreferences.
   Future<void> _guardarEquipoId(String equipoId) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('equipoId', equipoId);
+    await prefs.setString('EQUIPO', equipoId);
   }
 
   /// Retorna la estructura base de un equipo basada en la plantilla.
@@ -59,7 +67,7 @@ class CrearEquipo {
       'NOMBRE': '',
       'PUESTO': '',
       'PUNTOS': '',
-      'SECTOR': '',
+      'COLOR': '',
       'EMPRESA': '',
       'FUERZAS': {
         'PODER DE NEGOCIACION DE COMPRADORES': {'NIVEL': ''},

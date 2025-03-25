@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../Data/Firebase/Empresa/traer_todos_empresa.dart';
+import '../../../Data/Firebase/Equipo/crear_equipo.dart';
+import '../../../Data/Firebase/Partida/cargar_partida.dart';
 import '../Color/color_equipo.dart';
 
 enum Direccion { horizontal, vertical }
 
-late String? partidaActual;
+enum EstadoEquipo { pendiente, preparado }
 
 class CardEquipo extends StatefulWidget {
   final String partidaId;
@@ -26,17 +28,39 @@ class CardEquipo extends StatefulWidget {
 }
 
 class CardWidgetState extends State<CardEquipo> {
+  String? partidaActual;
+
   List<int> tarjetas = [];
-  Map<int, Map<String, dynamic>> seleccionTarjetas = {};
+
   List<int> tarjetasDisponibles = [];
 
+  Map<int, Map<String, dynamic>> seleccionTarjetas = {};
+
+  Map<String, EstadoEquipo> estadoEquipos = {};
+
   final TraerTodasEmpresas traerEmpresas = TraerTodasEmpresas();
+
+  final CrearEquipo crearEquipo = CrearEquipo();
+
   List<String> opcionesEmpresas = [];
 
   @override
   void initState() {
     super.initState();
-    _cargarEmpresas();
+    Future.delayed(Duration.zero, () async {
+      await _cargarPartidaActual();
+      if (partidaActual != null) {
+        _cargarEmpresas();
+      }
+    });
+  }
+
+  Future<void> _cargarPartidaActual() async {
+    CargarPartida cargarPartida = CargarPartida();
+    await cargarPartida.cargarClavePartida(); // Llamamos al método actualizado
+    if (cargarPartida.partidaId != null) {
+      partidaActual = cargarPartida.partidaId;
+    }
   }
 
   void _cargarEmpresas() async {
@@ -56,20 +80,43 @@ class CardWidgetState extends State<CardEquipo> {
           nuevoNumero = (tarjetas.isEmpty) ? 1 : (tarjetas.last + 1);
         }
         tarjetas.add(nuevoNumero);
+        // Ordenamos las tarjetas
         tarjetas.sort();
+        // Agregamos el equipo al mapa con el nombre de la tarjeta y el estado 'Inactivo'
+        estadoEquipos[nuevoNumero.toString()] = EstadoEquipo.pendiente;
       });
+
+      if (partidaActual != null) {
+        crearEquipo.crearEquipoDisponible(partidaActual!).catchError((e) {
+          debugPrint('Error al crear equipo: $e');
+        });
+      }
     }
   }
 
   void eliminarTarjeta(int index) {
     if (tarjetas.isNotEmpty) {
+      int numeroEliminado = tarjetas[index]; // Obtener el número antes de eliminarlo
+
       setState(() {
-        int numeroEliminado = tarjetas.removeAt(index);
+        tarjetas.removeAt(index);
         seleccionTarjetas.remove(numeroEliminado);
         tarjetasDisponibles.add(numeroEliminado);
         tarjetasDisponibles.sort();
+
+        // Eliminar el equipo de estadoEquipos cuando se elimina la tarjeta
+        estadoEquipos.remove(numeroEliminado.toString());
       });
+
       widget.onSeleccion(seleccionTarjetas);
+
+      // Eliminar el equipo en Firebase usando el número de la tarjeta como equipoId
+      if (partidaActual != null) {
+        String equipoId = 'EQUIPO $numeroEliminado';
+        crearEquipo.eliminarEquipo(partidaActual!, equipoId).catchError((e) {
+          debugPrint('Error al eliminar equipo: $e');
+        });
+      }
     }
   }
 
@@ -167,11 +214,16 @@ class CardWidgetState extends State<CardEquipo> {
                       sePuedeGuardar
                           ? () {
                             setState(() {
+                              // Actualiza la información de la tarjeta seleccionada
                               seleccionTarjetas[equipo] = {
                                 'empresa': empresaSeleccionada, // Ahora solo el nombre
                                 'color': colorSeleccionado,
                               };
+
+                              // Cambia el estado del equipo a 'Preparado'
+                              estadoEquipos[equipo.toString()] = EstadoEquipo.preparado;
                             });
+
                             widget.onSeleccion(seleccionTarjetas);
                             Navigator.pop(context);
                           }

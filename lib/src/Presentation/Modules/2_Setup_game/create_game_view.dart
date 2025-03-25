@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../Data/Firebase/Equipo/crear_equipo.dart';
 import '../../../Data/Firebase/Partida/cargar_partida.dart';
 import '../../../Data/Firebase/Partida/eliminar_partida.dart';
 import '../../../Data/Firebase/Sector/guardar_sector.dart';
@@ -42,7 +41,6 @@ class _CreateGameViewState extends State<CreateGameView> {
 
   final GuardarSector guardarSector = GuardarSector();
   final GuardarTiempo guardarTiempo = GuardarTiempo();
-  final CrearEquipo crearEquipo = CrearEquipo();
 
   @override
   void initState() {
@@ -63,14 +61,6 @@ class _CreateGameViewState extends State<CreateGameView> {
     await cargarPartida.cargarClavePartida(); // Llamamos al método actualizado
     if (cargarPartida.partidaId != null) {
       partidaActual = cargarPartida.partidaId;
-    }
-  }
-
-  /// **Crea los equipos en la partida actual**
-  // ignore: unused_element
-  Future<void> _crearEquiposEnPartida() async {
-    if (partidaActual != null) {
-      await crearEquipo.crearEquipos(partidaActual!);
     }
   }
 

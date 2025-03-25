@@ -13,26 +13,17 @@ class ActualizarEquipo {
   /// Método para actualizar los campos EMPRESA, COLOR y CODIGO de un equipo.
   Future<void> actualizarPreGame(
     String partidaActual,
-    String equipoId,
+    int equipoId,
     String empresa,
     String color,
   ) async {
-    // Verificar si equipoId tiene al menos un espacio
-    if (!equipoId.contains(' ')) {
-      throw const FormatException(
-        'El equipoId no tiene el formato esperado. Se requiere un espacio en el ID.',
-      );
-    }
-
-    // Extrayendo el último número del equipoId
-    int ultimoNumeroEquipo = int.parse(equipoId.split(' ')[1]);
-
-    // Generando un código de 4 dígitos donde el primer número es el último número del equipoId
-    String codigo = '$ultimoNumeroEquipo${_generarCodigoAleatorio(3)}';
+    // Generando un código de 4 dígitos donde el primer número es el último dígito del equipoId
+    String codigo =
+        '${equipoId % 10}${_generarCodigoAleatorio(3)}'; // Usando el último dígito del equipoId
 
     // Refiriéndonos a la ruta del equipo específico
     final DatabaseReference equipoRef = _dbRef.child(
-      'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoId',
+      'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/EQUIPO $equipoId',
     );
 
     // Actualizando los datos en Firebase

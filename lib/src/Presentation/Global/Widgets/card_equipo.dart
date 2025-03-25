@@ -231,7 +231,7 @@ class CardWidgetState extends State<CardEquipo> {
                             // Llamar al método para actualizar los datos del equipo en la base de datos
                             await actualizarEquipo.actualizarPreGame(
                               partidaActual!, // Asumiendo que tienes el valor de la partida actual
-                              '$equipo', // El equipo que estás actualizando, como "EQUIPO 1"
+                              equipo, // El equipo que estás actualizando, como "EQUIPO 1"
                               empresaSeleccionada?['nombre'], // El valor de la empresa seleccionada
                               colorSeleccionado!.name, // El valor del color seleccionado
                             );

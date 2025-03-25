@@ -5,17 +5,19 @@
 /// * Autores: Marcos Alejandro Collazos Marmolejo
 /// * Fecha: 24/03/2025
 /// *************************************************
+// ignore_for_file: constant_identifier_names
+
 library;
 
 import 'package:flutter/material.dart';
 
 /// Enumerador de colores principales de la aplicación.
 enum AppColorEquipo {
-  amarillo,
-  azul,
-  cyan,
-  naranja,
-  verde;
+  AMARILLO,
+  AZUL,
+  CYAN,
+  NARANJA,
+  VERDE;
 
   /// Obtiene el color principal correspondiente.
   /// Si el color no existe en el mapa, devuelve un color de respaldo (negro en este caso).
@@ -29,10 +31,10 @@ enum AppColorEquipo {
 class AppPalette {
   /// Mapeo de colores para cada equipo.
   static const Map<AppColorEquipo, Color> colorMap = {
-    AppColorEquipo.amarillo: Colors.amber, // Amarillo real
-    AppColorEquipo.azul: Colors.blue,
-    AppColorEquipo.cyan: Colors.cyan,
-    AppColorEquipo.naranja: Colors.deepOrange,
-    AppColorEquipo.verde: Colors.greenAccent,
+    AppColorEquipo.AMARILLO: Colors.amber, // Amarillo real
+    AppColorEquipo.AZUL: Colors.blue,
+    AppColorEquipo.CYAN: Colors.cyan,
+    AppColorEquipo.NARANJA: Colors.deepOrange,
+    AppColorEquipo.VERDE: Colors.greenAccent,
   };
 }

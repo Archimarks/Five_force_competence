@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../Data/Firebase/Empresa/traer_todos_empresa.dart';
+import '../../../Data/Firebase/Equipo/actualizar_equipo.dart';
 import '../../../Data/Firebase/Equipo/crear_equipo.dart';
 import '../../../Data/Firebase/Partida/cargar_partida.dart';
 import '../Color/color_equipo.dart';
@@ -212,7 +213,7 @@ class CardWidgetState extends State<CardEquipo> {
                 TextButton(
                   onPressed:
                       sePuedeGuardar
-                          ? () {
+                          ? () async {
                             setState(() {
                               // Actualiza la información de la tarjeta seleccionada
                               seleccionTarjetas[equipo] = {
@@ -224,7 +225,22 @@ class CardWidgetState extends State<CardEquipo> {
                               estadoEquipos[equipo.toString()] = EstadoEquipo.preparado;
                             });
 
+                            // Crear una instancia de ActualizarEquipo
+                            ActualizarEquipo actualizarEquipo = ActualizarEquipo();
+
+                            // Llamar al método para actualizar los datos del equipo en la base de datos
+                            await actualizarEquipo.actualizarPreGame(
+                              partidaActual!, // Asumiendo que tienes el valor de la partida actual
+                              '$equipo', // El equipo que estás actualizando, como "EQUIPO 1"
+                              empresaSeleccionada?['nombre'], // El valor de la empresa seleccionada
+                              colorSeleccionado!.name, // El valor del color seleccionado
+                            );
+
+                            // Luego de actualizar, pasa los datos al callback onSeleccion
                             widget.onSeleccion(seleccionTarjetas);
+
+                            // Cierra el modal o pantalla actual
+                            // ignore: use_build_context_synchronously
                             Navigator.pop(context);
                           }
                           : null,

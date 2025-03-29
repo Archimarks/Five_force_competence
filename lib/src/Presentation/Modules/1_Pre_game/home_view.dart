@@ -133,9 +133,12 @@ class _HomeViewState extends State<HomeView> {
             texto: 'Crear partida',
             color: AppColor.azulClaro,
             onPressed: () async {
+              final ctx = context; // Guardar contexto antes del await
               await _crearPartida.crearNuevaPartida();
-              // ignore: use_build_context_synchronously
-              Navigator.pushReplacementNamed(context, Routes.createGame);
+
+              if (!ctx.mounted) return;
+
+              Navigator.pushReplacementNamed(ctx, Routes.createGame);
             },
           ),
           const SizedBox(height: 20),
@@ -174,9 +177,12 @@ class _HomeViewState extends State<HomeView> {
                     texto: 'Crear partida',
                     color: AppColor.azulClaro,
                     onPressed: () async {
+                      final ctx = context; // Guardar contexto antes del await
                       await _crearPartida.crearNuevaPartida();
-                      // ignore: use_build_context_synchronously
-                      Navigator.pushReplacementNamed(context, Routes.createGame);
+
+                      if (!ctx.mounted) return;
+
+                      Navigator.pushReplacementNamed(ctx, Routes.createGame);
                     },
                   ),
                   const SizedBox(height: 20),

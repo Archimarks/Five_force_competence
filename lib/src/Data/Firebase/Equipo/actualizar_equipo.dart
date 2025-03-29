@@ -17,9 +17,10 @@ class ActualizarEquipo {
     String empresa,
     String color,
   ) async {
-    // Generando un código de 4 dígitos donde el primer número es el último dígito del equipoId
-    String codigo =
-        '${equipoId % 10}${_generarCodigoAleatorio(3)}'; // Usando el último dígito del equipoId
+    // Asegurando que partidaActual solo contenga números
+    String numeroPartida = partidaActual.replaceAll(RegExp(r'\D'), '');
+    // Generando un código donde el primer número es el de la partidaActual, seguido del último dígito del equipoId y dos dígitos aleatorios
+    String codigo = '$numeroPartida${equipoId % 10}${_generarCodigoAleatorio(2)}';
 
     // Refiriéndonos a la ruta del equipo específico
     final DatabaseReference equipoRef = _dbRef.child(
@@ -31,6 +32,15 @@ class ActualizarEquipo {
 
     debugPrint('Equipo actualizado: $equipoId con CODIGO $codigo, EMPRESA $empresa y COLOR $color');
   }
+
+  /// Método para actualizar las fuerzas del sector selecionado  de la empresa selecionada
+
+  Future<void> actualizarfuerzaPregame(
+    String partidaActual,
+    int equipoId,
+    String empresa,
+    String sector,
+  ) async {}
 
   /// Método para generar un número aleatorio con una cantidad específica de dígitos.
   String _generarCodigoAleatorio(int cantidad) {

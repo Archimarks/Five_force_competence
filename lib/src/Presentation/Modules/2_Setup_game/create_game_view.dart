@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../../Data/Firebase/Equipo/eliminar_equipo.dart';
 import '../../../Data/Firebase/Partida/cargar_partida.dart';
 import '../../../Data/Firebase/Partida/eliminar_partida.dart';
 import '../../../Data/Firebase/Sector/guardar_sector.dart';
 import '../../../Data/Firebase/Sector/traer_todos_sectores.dart';
 import '../../../Data/Firebase/Tiempo/guardar_tiempo.dart';
 import '../../../Data/Firebase/Tiempo/traer_todos_tiempos.dart';
+import '../../Global/Color/color.dart';
 import '../../Global/Widgets/app_bar.dart';
+import '../../Global/Widgets/button.dart';
 import '../../Global/Widgets/card_equipo.dart';
 import '../../Global/Widgets/desplegable_sector.dart';
 import '../../Global/Widgets/desplegable_tiempo.dart';
@@ -42,10 +45,21 @@ class _CreateGameViewState extends State<CreateGameView> {
   final GuardarSector guardarSector = GuardarSector();
   final GuardarTiempo guardarTiempo = GuardarTiempo();
 
+  final EliminarEquipo eliminarTodosLosEquipos = EliminarEquipo();
+
+  //Card equipos
+  List<int> tarjetas = [];
+
+  List<int> tarjetasDisponibles = [];
+
+  Map<int, Map<String, dynamic>> seleccionTarjetas = {};
+
+  Map<String, EstadoEquipo> estadoEquipos = {};
+
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero, () async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _cargarPartidaActual();
       if (partidaActual != null) {
         _cargarPartidaGuardaSector();
@@ -107,6 +121,15 @@ class _CreateGameViewState extends State<CreateGameView> {
   /// **Guarda la selección Sector en Firebase**
   void _guardarTiempo(String? seleccion) {
     guardarTiempo.guardarSeleccion(seleccion);
+  }
+
+  /// **Eliminar todos los equipos al seleccionar un sector en Firebase**
+
+  Future<void> _eliminarTodosEquipos(String partidaActual) async {
+    await eliminarTodosLosEquipos.eliminarTodosLosEquipos(partidaActual);
+    setState(() {
+      this.partidaActual = partidaActual;
+    });
   }
 
   @override
@@ -175,13 +198,32 @@ class _CreateGameViewState extends State<CreateGameView> {
                   opciones: opcionesSectores,
                   valorSeleccionado: opcionSectorSeleccionada,
                   partidaId: partidaActual ?? '',
-                  onChanged: (nuevaOpcion) {
+                  onChanged: (nuevaOpcion) async {
+                    if (partidaActual != null) {
+                      await _eliminarTodosEquipos(partidaActual!);
+                      // Limpia las tarjetas y variables relacionadas
+                      setState(() {
+                        tarjetas.clear();
+                        tarjetasDisponibles.clear();
+                        seleccionTarjetas.clear();
+                        estadoEquipos.clear();
+                      });
+                    }
                     setState(() {
                       opcionSectorSeleccionada = nuevaOpcion;
                     });
                     _guardarSector(nuevaOpcion);
                   },
-                  onClear: () {
+                  onClear: () async {
+                    if (partidaActual != null) {
+                      await _eliminarTodosEquipos(partidaActual!);
+                      setState(() {
+                        tarjetas.clear();
+                        tarjetasDisponibles.clear();
+                        seleccionTarjetas.clear();
+                        estadoEquipos.clear();
+                      });
+                    }
                     setState(() {
                       opcionSectorSeleccionada = null;
                     });
@@ -213,68 +255,140 @@ class _CreateGameViewState extends State<CreateGameView> {
                   CardEquipo(
                     partidaId: partidaActual ?? '',
                     direccion: Direccion.vertical,
-                    onSeleccion: (p0) {},
+                    onSeleccion: (nuevaSeleccionTarjetas) {
+                      setState(() {
+                        seleccionTarjetas = nuevaSeleccionTarjetas;
+                      });
+                    },
+                    tarjetas: tarjetas, // Variable mutable definida en CreateGameView
+                    tarjetasDisponibles:
+                        tarjetasDisponibles, // Variable mutable definida en CreateGameView
+                    seleccionTarjetas:
+                        seleccionTarjetas, // Variable mutable definida en CreateGameView
+                    estadoEquipos: estadoEquipos, // Variable mutable definida en CreateGameView
                   ),
               ],
             ),
           ),
         ),
+        if (estadoEquipos.length >= 2 &&
+            estadoEquipos.values.every((estado) => estado == EstadoEquipo.preparado))
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Button(texto: 'Confirmar', color: AppColor.verde, onPressed: () {}),
+            ),
+          ),
       ],
     );
   }
 
   /// **Diseño para orientación horizontal**
   Widget _landscapeHorizontal() {
-    return Row(
+    return Column(
       children: [
+        /// **Fila con los desplegables de Sector y Tiempo**
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Expanded(
+              child: DesplegableSector(
+                titulo: 'Sector',
+                icon: const Icon(Icons.widgets, color: Colors.lightBlueAccent),
+                opciones: opcionesSectores,
+                valorSeleccionado: opcionSectorSeleccionada,
+                partidaId: partidaActual ?? '',
+                onChanged: (nuevaOpcion) async {
+                  if (partidaActual != null) {
+                    await _eliminarTodosEquipos(partidaActual!);
+                    setState(() {
+                      tarjetas.clear();
+                      tarjetasDisponibles.clear();
+                      seleccionTarjetas.clear();
+                      estadoEquipos.clear();
+                    });
+                  }
+                  setState(() {
+                    opcionSectorSeleccionada = nuevaOpcion;
+                  });
+                  _guardarSector(nuevaOpcion);
+                },
+                onClear: () async {
+                  if (partidaActual != null) {
+                    await _eliminarTodosEquipos(partidaActual!);
+                    setState(() {
+                      tarjetas.clear();
+                      tarjetasDisponibles.clear();
+                      seleccionTarjetas.clear();
+                      estadoEquipos.clear();
+                    });
+                  }
+                  setState(() {
+                    opcionSectorSeleccionada = null;
+                  });
+                  _guardarSector(null);
+                },
+              ),
+            ),
+            const SizedBox(width: 50),
+            Expanded(
+              child: DesplegableTiempo(
+                titulo: 'Tiempo permitido (Segundos)',
+                icon: const Icon(Icons.timer_outlined, color: Colors.lightBlueAccent),
+                opciones: opcionesTiempos,
+                valorSeleccionado: opcionTiempoSeleccionada,
+                partidaId: partidaActual ?? '',
+                onChanged: (nuevaOpcion) {
+                  setState(() {
+                    opcionTiempoSeleccionada = nuevaOpcion;
+                  });
+                  _guardarTiempo(nuevaOpcion);
+                },
+                onClear: () {
+                  setState(() {
+                    opcionTiempoSeleccionada = null;
+                  });
+                  _guardarTiempo(null);
+                },
+              ),
+            ),
+          ],
+        ),
+
+        /// **Tarjeta de Equipos (solo si ambos desplegables están seleccionados)**
         Expanded(
-          child: DesplegableSector(
-            titulo: 'Sector',
-            icon: const Icon(Icons.widgets, color: Colors.lightBlueAccent),
-            opciones: opcionesSectores,
-            valorSeleccionado: opcionSectorSeleccionada,
-            partidaId: partidaActual ?? '',
-            onChanged: (nuevaOpcion) {
-              setState(() {
-                opcionSectorSeleccionada = nuevaOpcion;
-              });
-              _guardarSector(nuevaOpcion);
-            },
-            onClear: () {
-              setState(() {
-                opcionSectorSeleccionada = null;
-              });
-              _guardarSector(null);
-            },
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child:
+                (opcionSectorSeleccionada != null && opcionTiempoSeleccionada != null)
+                    ? CardEquipo(
+                      partidaId: partidaActual ?? '',
+                      direccion: Direccion.horizontal,
+                      onSeleccion: (nuevaSeleccionTarjetas) {
+                        setState(() {
+                          seleccionTarjetas = nuevaSeleccionTarjetas;
+                        });
+                      },
+                      tarjetas: tarjetas,
+                      tarjetasDisponibles: tarjetasDisponibles,
+                      seleccionTarjetas: seleccionTarjetas,
+                      estadoEquipos: estadoEquipos,
+                    )
+                    : const SizedBox.shrink(),
           ),
         ),
-        const SizedBox(width: 50),
-        Expanded(
-          child: DesplegableTiempo(
-            titulo: 'Tiempo permitido (Segundos)',
-            icon: const Icon(Icons.timer_outlined, color: Colors.lightBlueAccent),
-            opciones: opcionesTiempos,
-            valorSeleccionado: opcionTiempoSeleccionada,
-            partidaId: partidaActual ?? '',
-            onChanged: (nuevaOpcion) {
-              setState(() {
-                opcionTiempoSeleccionada = nuevaOpcion;
-              });
-              _guardarTiempo(nuevaOpcion);
-            },
-            onClear: () {
-              setState(() {
-                opcionTiempoSeleccionada = null;
-              });
-              _guardarTiempo(null);
-            },
-          ),
-        ),
-        if (opcionSectorSeleccionada != null && opcionTiempoSeleccionada != null)
-          CardEquipo(
-            partidaId: partidaActual ?? '',
-            direccion: Direccion.horizontal,
-            onSeleccion: (p0) {},
+
+        /// **Botón en la parte inferior**
+        /// **Botón en la parte inferior (solo se muestra si todos los equipos están preparados y hay al menos 2)**
+        if (estadoEquipos.length >= 2 &&
+            estadoEquipos.values.every((estado) => estado == EstadoEquipo.preparado))
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: Button(texto: 'Confirmar', color: AppColor.verde, onPressed: () {}),
+            ),
           ),
       ],
     );

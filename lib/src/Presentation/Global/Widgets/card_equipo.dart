@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../Data/Firebase/Empresa/traer_todos_empresa.dart';
-import '../../../Data/Firebase/Equipo/actualizar_equipo.dart';
 import '../../../Data/Firebase/Equipo/crear_equipo.dart';
 import '../../../Data/Firebase/Partida/cargar_partida.dart';
 import '../Color/color_equipo.dart';
+import 'popup_equipo.dart';
 
 enum Direccion { horizontal, vertical }
 
@@ -14,14 +14,21 @@ class CardEquipo extends StatefulWidget {
   final String partidaId;
   final Direccion direccion;
   final Function(Map<int, Map<String, dynamic>>) onSeleccion;
-  final Map<int, Map<String, dynamic>> seleccionesIniciales;
+
+  final List<int> tarjetas;
+  final List<int> tarjetasDisponibles;
+  final Map<int, Map<String, dynamic>> seleccionTarjetas;
+  final Map<String, EstadoEquipo> estadoEquipos;
 
   const CardEquipo({
     super.key,
     required this.partidaId,
     required this.direccion,
     required this.onSeleccion,
-    this.seleccionesIniciales = const {},
+    required this.tarjetas,
+    required this.tarjetasDisponibles,
+    required this.seleccionTarjetas,
+    required this.estadoEquipos,
   });
 
   @override
@@ -30,14 +37,6 @@ class CardEquipo extends StatefulWidget {
 
 class CardWidgetState extends State<CardEquipo> {
   String? partidaActual;
-
-  List<int> tarjetas = [];
-
-  List<int> tarjetasDisponibles = [];
-
-  Map<int, Map<String, dynamic>> seleccionTarjetas = {};
-
-  Map<String, EstadoEquipo> estadoEquipos = {};
 
   final TraerTodasEmpresas traerEmpresas = TraerTodasEmpresas();
 
@@ -72,19 +71,20 @@ class CardWidgetState extends State<CardEquipo> {
   }
 
   void agregarTarjeta() {
-    if (tarjetas.length < 4) {
+    if (widget.tarjetas.length < 4) {
+      _cargarEmpresas();
       setState(() {
         int nuevoNumero;
-        if (tarjetasDisponibles.isNotEmpty) {
-          nuevoNumero = tarjetasDisponibles.removeAt(0);
+        if (widget.tarjetasDisponibles.isNotEmpty) {
+          nuevoNumero = widget.tarjetasDisponibles.removeAt(0);
         } else {
-          nuevoNumero = (tarjetas.isEmpty) ? 1 : (tarjetas.last + 1);
+          nuevoNumero = (widget.tarjetas.isEmpty) ? 1 : (widget.tarjetas.last + 1);
         }
-        tarjetas.add(nuevoNumero);
+        widget.tarjetas.add(nuevoNumero);
         // Ordenamos las tarjetas
-        tarjetas.sort();
+        widget.tarjetas.sort();
         // Agregamos el equipo al mapa con el nombre de la tarjeta y el estado 'Inactivo'
-        estadoEquipos[nuevoNumero.toString()] = EstadoEquipo.pendiente;
+        widget.estadoEquipos[nuevoNumero.toString()] = EstadoEquipo.pendiente;
       });
 
       if (partidaActual != null) {
@@ -96,20 +96,20 @@ class CardWidgetState extends State<CardEquipo> {
   }
 
   void eliminarTarjeta(int index) {
-    if (tarjetas.isNotEmpty) {
-      int numeroEliminado = tarjetas[index]; // Obtener el número antes de eliminarlo
+    if (widget.tarjetas.isNotEmpty) {
+      int numeroEliminado = widget.tarjetas[index]; // Obtener el número antes de eliminarlo
 
       setState(() {
-        tarjetas.removeAt(index);
-        seleccionTarjetas.remove(numeroEliminado);
-        tarjetasDisponibles.add(numeroEliminado);
-        tarjetasDisponibles.sort();
+        widget.tarjetas.removeAt(index);
+        widget.seleccionTarjetas.remove(numeroEliminado);
+        widget.tarjetasDisponibles.add(numeroEliminado);
+        widget.tarjetasDisponibles.sort();
 
         // Eliminar el equipo de estadoEquipos cuando se elimina la tarjeta
-        estadoEquipos.remove(numeroEliminado.toString());
+        widget.estadoEquipos.remove(numeroEliminado.toString());
       });
 
-      widget.onSeleccion(seleccionTarjetas);
+      widget.onSeleccion(widget.seleccionTarjetas);
 
       // Eliminar el equipo en Firebase usando el número de la tarjeta como equipoId
       if (partidaActual != null) {
@@ -121,136 +121,41 @@ class CardWidgetState extends State<CardEquipo> {
     }
   }
 
-  void mostrarPopup(int equipo) {
-    Map<String, dynamic>? empresaSeleccionada = seleccionTarjetas[equipo]?['empresa'];
-    AppColorEquipo? colorSeleccionado = seleccionTarjetas[equipo]?['color'];
+  void eliminarTodasLasTarjetas() {
+    if (widget.tarjetas.isNotEmpty) {
+      setState(() {
+        for (int numeroEliminado in widget.tarjetas) {
+          widget.seleccionTarjetas.remove(numeroEliminado);
+          widget.tarjetasDisponibles.add(numeroEliminado);
+          widget.estadoEquipos.remove(numeroEliminado.toString());
+        }
+        widget.tarjetasDisponibles.sort();
+        widget.tarjetas.clear(); // Vaciar la lista de tarjetas
+      });
 
-    double screenWidth = MediaQuery.of(context).size.width;
-    double dialogWidth = screenWidth > 600 ? 500 : screenWidth * 0.9;
+      widget.onSeleccion(widget.seleccionTarjetas);
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setStatePopup) {
-            bool esValidoParaColor = empresaSeleccionada != null;
-            bool sePuedeGuardar = esValidoParaColor && colorSeleccionado != null;
+      // Eliminar equipos en Firebase
+      if (partidaActual != null) {
+        for (int numeroEliminado in widget.tarjetas) {
+          String equipoId = 'EQUIPO $numeroEliminado';
+          crearEquipo.eliminarEquipo(partidaActual!, equipoId).catchError((e) {
+            debugPrint('Error al eliminar equipo: $e');
+          });
+        }
+      }
+    }
+  }
 
-            return AlertDialog(
-              title: Text('Configurar Equipo N° $equipo'),
-              content: SizedBox(
-                width: dialogWidth,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      DropdownButtonFormField<String>(
-                        isExpanded: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Empresa',
-                          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                        ),
-                        hint: const Text('Selecciona Empresa'),
-                        value: empresaSeleccionada?['nombre'], // Solo tomamos el nombre como String
-                        onChanged: (value) {
-                          setStatePopup(() {
-                            empresaSeleccionada = {
-                              'nombre': value,
-                            }; // Guardamos como un Map para mantener la estructura
-                            colorSeleccionado = null;
-                          });
-                        },
-                        items:
-                            opcionesEmpresas.map((nombreEmpresa) {
-                              return DropdownMenuItem(
-                                value: nombreEmpresa, // Usamos solo el String del nombre
-                                child: Text(nombreEmpresa),
-                              );
-                            }).toList(),
-                      ),
-
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<AppColorEquipo>(
-                        isExpanded: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Color',
-                          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                        ),
-                        hint: const Text('Selecciona Color'),
-                        value: colorSeleccionado,
-                        onChanged:
-                            esValidoParaColor
-                                ? (value) {
-                                  setStatePopup(() {
-                                    colorSeleccionado = value;
-                                  });
-                                }
-                                : null,
-                        items:
-                            AppColorEquipo.values.map((color) {
-                              return DropdownMenuItem(
-                                value: color,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(width: 20, height: 20, color: color.value),
-                                    const SizedBox(width: 10),
-                                    Flexible(
-                                      child: Text(color.name, overflow: TextOverflow.ellipsis),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                        disabledHint: const Text('Selecciona primero Empresa y Fuerza'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed:
-                      sePuedeGuardar
-                          ? () async {
-                            setState(() {
-                              // Actualiza la información de la tarjeta seleccionada
-                              seleccionTarjetas[equipo] = {
-                                'empresa': empresaSeleccionada, // Ahora solo el nombre
-                                'color': colorSeleccionado,
-                              };
-
-                              // Cambia el estado del equipo a 'Preparado'
-                              estadoEquipos[equipo.toString()] = EstadoEquipo.preparado;
-                            });
-
-                            // Crear una instancia de ActualizarEquipo
-                            ActualizarEquipo actualizarEquipo = ActualizarEquipo();
-
-                            // Llamar al método para actualizar los datos del equipo en la base de datos
-                            await actualizarEquipo.actualizarPreGame(
-                              partidaActual!, // Asumiendo que tienes el valor de la partida actual
-                              equipo, // El equipo que estás actualizando, como "EQUIPO 1"
-                              empresaSeleccionada?['nombre'], // El valor de la empresa seleccionada
-                              colorSeleccionado!.name, // El valor del color seleccionado
-                            );
-
-                            // Luego de actualizar, pasa los datos al callback onSeleccion
-                            widget.onSeleccion(seleccionTarjetas);
-
-                            // Cierra el modal o pantalla actual
-                            // ignore: use_build_context_synchronously
-                            Navigator.pop(context);
-                          }
-                          : null,
-                  child: const Text('Guardar'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+  void _mostrarPopup(int equipo) {
+    PopupEquipo.mostrar(
+      context,
+      equipo,
+      widget.seleccionTarjetas,
+      widget.estadoEquipos,
+      opcionesEmpresas,
+      partidaActual!,
+      widget.onSeleccion,
     );
   }
 
@@ -262,30 +167,37 @@ class CardWidgetState extends State<CardEquipo> {
           widget.direccion == Direccion.horizontal
               ? SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: buildTarjetas()),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: buildTarjetas(),
+                ),
               )
-              : Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: buildTarjetas(isVertical: true),
+              : SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: buildTarjetas(isVertical: true),
+                ),
               ),
     );
   }
 
   List<Widget> buildTarjetas({bool isVertical = false}) {
     List<Widget> cardWidgets =
-        tarjetas.asMap().entries.map((entry) {
+        widget.tarjetas.asMap().entries.map((entry) {
           int index = entry.key;
           int numeroEquipo = entry.value;
 
           Color colorTarjeta =
-              (seleccionTarjetas[numeroEquipo]?['color'] as AppColorEquipo?)?.color ??
+              (widget.seleccionTarjetas[numeroEquipo]?['color'] as AppColorEquipo?)?.color ??
               const Color.fromARGB(255, 78, 97, 129);
 
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: GestureDetector(
-              onTap: () => mostrarPopup(numeroEquipo),
+              onTap: () => _mostrarPopup(numeroEquipo),
               child: Container(
                 // Use maximum width when vertical
                 width: isVertical ? double.infinity : 140,
@@ -306,7 +218,7 @@ class CardWidgetState extends State<CardEquipo> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text('Equipo N° $numeroEquipo', style: const TextStyle(color: Colors.white)),
-                      if (tarjetas.isNotEmpty)
+                      if (widget.tarjetas.isNotEmpty)
                         IconButton(
                           icon: const Icon(Icons.remove, color: Colors.white),
                           onPressed: () => eliminarTarjeta(index),
@@ -319,7 +231,7 @@ class CardWidgetState extends State<CardEquipo> {
           );
         }).toList();
 
-    if (tarjetas.length < 4) {
+    if (widget.tarjetas.length < 4) {
       cardWidgets.add(
         Padding(
           padding: const EdgeInsets.all(8.0),

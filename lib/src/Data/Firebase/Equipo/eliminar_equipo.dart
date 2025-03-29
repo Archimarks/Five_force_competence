@@ -25,6 +25,22 @@ class EliminarEquipo {
     }
   }
 
+  /// Método para eliminar todos los equipos de una partida específica.
+  Future<void> eliminarTodosLosEquipos(String partidaActual) async {
+    final DatabaseReference equiposRef = _dbRef.child(
+      'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS',
+    );
+
+    DataSnapshot snapshot = await equiposRef.get();
+    if (snapshot.exists) {
+      await equiposRef.remove();
+      await _eliminarEquipoId();
+      debugPrint('Todos los equipos de la partida $partidaActual han sido eliminados.');
+    } else {
+      debugPrint('No hay equipos para eliminar en la partida $partidaActual.');
+    }
+  }
+
   /// Elimina el ID del equipo almacenado en SharedPreferences.
   Future<void> _eliminarEquipoId() async {
     final prefs = await SharedPreferences.getInstance();

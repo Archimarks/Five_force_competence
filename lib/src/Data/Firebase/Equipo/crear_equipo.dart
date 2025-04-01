@@ -9,11 +9,23 @@ class CrearEquipo {
   /// Constructor que inicializa la referencia a Firebase Realtime Database.
   CrearEquipo() : _dbRef = FirebaseDatabase.instance.ref();
 
-  /// Método para crear un equipo con el siguiente identificador disponible dentro de una partida.
+  /// Método para crear un equipo con el siguiente identificador disponible dentro de una partida,
+  /// con un límite máximo de 4 equipos.
   Future<void> crearEquipoDisponible(String partidaActual) async {
     int equipoId = 1;
+    // Verificar si ya existen 4 equipos
+    if (await _contarEquipos(partidaActual) >= 4) {
+      debugPrint('Límite de equipos alcanzado (máximo 4). No se puede crear más.');
+      return;
+    }
+
     while (await _equipoExiste(partidaActual, 'EQUIPO $equipoId')) {
       equipoId++;
+      // Asegurarse de no intentar crear más de 4 equipos
+      if (equipoId > 4) {
+        debugPrint('No se pudo encontrar un ID disponible dentro del límite de 4 equipos.');
+        return;
+      }
     }
     await crearEquipoEspecifico(partidaActual, 'EQUIPO $equipoId');
   }
@@ -25,6 +37,18 @@ class CrearEquipo {
     );
     DataSnapshot snapshot = await equipoRef.get();
     return snapshot.exists;
+  }
+
+  /// Método para contar la cantidad de equipos existentes en la partida.
+  Future<int> _contarEquipos(String partidaActual) async {
+    final DatabaseReference equiposRef = _dbRef.child(
+      'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS',
+    );
+    DataSnapshot snapshot = await equiposRef.get();
+    if (snapshot.value != null && snapshot.value is Map) {
+      return (snapshot.value as Map).length;
+    }
+    return 0;
   }
 
   /// Método para crear un equipo específico dentro de una partida.

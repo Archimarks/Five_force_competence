@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../Data/Firebase/Equipo/actualizar_equipo.dart';
 import '../Color/color_equipo.dart';
 import 'card_equipo.dart';
@@ -16,6 +17,20 @@ class PopupEquipo {
   ) {
     Map<String, dynamic>? empresaSeleccionada = seleccionTarjetas[equipo]?['empresa'];
     AppColorEquipo? colorSeleccionado = seleccionTarjetas[equipo]?['color'];
+
+    /// Filtrar empresas y colores ya seleccionados por otros equipos,
+    /// pero asegurando que la empresa y color actual del equipo se mantengan en la lista.
+    List<String> empresasDisponibles =
+        opcionesEmpresas.where((empresa) {
+          return empresa == empresaSeleccionada?['nombre'] ||
+              !seleccionTarjetas.values.any((e) => e['empresa']?['nombre'] == empresa);
+        }).toList();
+
+    List<AppColorEquipo> coloresDisponibles =
+        AppColorEquipo.values.where((color) {
+          return color == colorSeleccionado ||
+              !seleccionTarjetas.values.any((e) => e['color'] == color);
+        }).toList();
 
     double screenWidth = MediaQuery.of(context).size.width;
     double dialogWidth = screenWidth > 600 ? 500 : screenWidth * 0.9;
@@ -74,7 +89,7 @@ class PopupEquipo {
                             });
                           },
                           items:
-                              opcionesEmpresas.map((nombreEmpresa) {
+                              empresasDisponibles.map((nombreEmpresa) {
                                 return DropdownMenuItem(
                                   value: nombreEmpresa,
                                   child: Text(nombreEmpresa),
@@ -117,7 +132,7 @@ class PopupEquipo {
                                   }
                                   : null,
                           items:
-                              AppColorEquipo.values.map((color) {
+                              coloresDisponibles.map((color) {
                                 return DropdownMenuItem(
                                   value: color,
                                   child: Row(

@@ -37,6 +37,7 @@ class CardEquipo extends StatefulWidget {
 
 class CardWidgetState extends State<CardEquipo> {
   String? partidaActual;
+  int? _loadingIndex; // Nuevo estado para rastrear la tarjeta que está cargando
 
   final TraerTodasEmpresas traerEmpresas = TraerTodasEmpresas();
 
@@ -70,93 +71,76 @@ class CardWidgetState extends State<CardEquipo> {
     });
   }
 
-  void agregarTarjeta() {
-    if (widget.tarjetas.length < 4) {
-      _cargarEmpresas();
+  Future<void> _agregarTarjeta() async {
+    if (widget.tarjetas.length < 4 && _loadingIndex == null) {
       setState(() {
-        int nuevoNumero;
-        if (widget.tarjetasDisponibles.isNotEmpty) {
-          nuevoNumero = widget.tarjetasDisponibles.removeAt(0);
-        } else {
-          nuevoNumero = (widget.tarjetas.isEmpty) ? 1 : (widget.tarjetas.last + 1);
-        }
+        _loadingIndex = -1; // Usamos -1 para indicar que se está agregando una tarjeta
+      });
+      _cargarEmpresas();
+      int nuevoNumero;
+      if (widget.tarjetasDisponibles.isNotEmpty) {
+        nuevoNumero = widget.tarjetasDisponibles.removeAt(0);
+      } else {
+        nuevoNumero = (widget.tarjetas.isEmpty) ? 1 : (widget.tarjetas.last + 1);
+      }
+      setState(() {
         widget.tarjetas.add(nuevoNumero);
-        // Ordenamos las tarjetas
         widget.tarjetas.sort();
-        // Agregamos el equipo al mapa con el nombre de la tarjeta y el estado 'Inactivo'
         widget.estadoEquipos[nuevoNumero.toString()] = EstadoEquipo.pendiente;
       });
 
       if (partidaActual != null) {
-        crearEquipo.crearEquipoDisponible(partidaActual!).catchError((e) {
+        await crearEquipo.crearEquipoDisponible(partidaActual!).catchError((e) {
           debugPrint('Error al crear equipo: $e');
         });
       }
+      setState(() {
+        _loadingIndex = null;
+      });
     }
   }
 
-  void eliminarTarjeta(int index) {
-    if (widget.tarjetas.isNotEmpty) {
-      int numeroEliminado = widget.tarjetas[index]; // Obtener el número antes de eliminarlo
+  Future<void> _eliminarTarjeta(int index) async {
+    if (widget.tarjetas.isNotEmpty && _loadingIndex == null) {
+      setState(() {
+        _loadingIndex = index;
+      });
+      int numeroEliminado = widget.tarjetas[index];
 
       setState(() {
         widget.tarjetas.removeAt(index);
         widget.seleccionTarjetas.remove(numeroEliminado);
         widget.tarjetasDisponibles.add(numeroEliminado);
         widget.tarjetasDisponibles.sort();
-
-        // Eliminar el equipo de estadoEquipos cuando se elimina la tarjeta
         widget.estadoEquipos.remove(numeroEliminado.toString());
       });
 
       widget.onSeleccion(widget.seleccionTarjetas);
 
-      // Eliminar el equipo en Firebase usando el número de la tarjeta como equipoId
       if (partidaActual != null) {
         String equipoId = 'EQUIPO $numeroEliminado';
-        crearEquipo.eliminarEquipo(partidaActual!, equipoId).catchError((e) {
+        await crearEquipo.eliminarEquipo(partidaActual!, equipoId).catchError((e) {
           debugPrint('Error al eliminar equipo: $e');
         });
       }
-    }
-  }
-
-  void eliminarTodasLasTarjetas() {
-    if (widget.tarjetas.isNotEmpty) {
       setState(() {
-        for (int numeroEliminado in widget.tarjetas) {
-          widget.seleccionTarjetas.remove(numeroEliminado);
-          widget.tarjetasDisponibles.add(numeroEliminado);
-          widget.estadoEquipos.remove(numeroEliminado.toString());
-        }
-        widget.tarjetasDisponibles.sort();
-        widget.tarjetas.clear(); // Vaciar la lista de tarjetas
+        _loadingIndex = null;
       });
-
-      widget.onSeleccion(widget.seleccionTarjetas);
-
-      // Eliminar equipos en Firebase
-      if (partidaActual != null) {
-        for (int numeroEliminado in widget.tarjetas) {
-          String equipoId = 'EQUIPO $numeroEliminado';
-          crearEquipo.eliminarEquipo(partidaActual!, equipoId).catchError((e) {
-            debugPrint('Error al eliminar equipo: $e');
-          });
-        }
-      }
     }
   }
 
   void _mostrarPopup(int equipo) {
-    PopupEquipo.mostrar(
-      context,
-      equipo,
-      widget.seleccionTarjetas,
-      widget.estadoEquipos,
-      opcionesEmpresas,
-      partidaActual!,
-      widget.onSeleccion,
-    );
+    if (_loadingIndex == null) {
+      PopupEquipo.mostrar(
+        context,
+        equipo,
+        widget.seleccionTarjetas,
+        widget.estadoEquipos,
+        opcionesEmpresas,
+        partidaActual!,
+        widget.onSeleccion,
+      );
+    }
   }
 
   @override
@@ -194,16 +178,20 @@ class CardWidgetState extends State<CardEquipo> {
               (widget.seleccionTarjetas[numeroEquipo]?['color'] as AppColorEquipo?)?.color ??
               const Color.fromARGB(255, 78, 97, 129);
 
+          final isCurrentlyLoading = _loadingIndex == index;
+
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: GestureDetector(
-              onTap: () => _mostrarPopup(numeroEquipo),
+              onTap: isCurrentlyLoading ? null : () => _mostrarPopup(numeroEquipo),
               child: Container(
-                // Use maximum width when vertical
                 width: isVertical ? double.infinity : 140,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: colorTarjeta,
+                  color:
+                      isCurrentlyLoading
+                          ? Colors.grey.shade300
+                          : colorTarjeta, // Cambia el color si está cargando
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
@@ -214,17 +202,25 @@ class CardWidgetState extends State<CardEquipo> {
                   ],
                 ),
                 child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Equipo N° $numeroEquipo', style: const TextStyle(color: Colors.white)),
-                      if (widget.tarjetas.isNotEmpty)
-                        IconButton(
-                          icon: const Icon(Icons.remove, color: Colors.white),
-                          onPressed: () => eliminarTarjeta(index),
-                        ),
-                    ],
-                  ),
+                  child:
+                      isCurrentlyLoading
+                          ? const CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          )
+                          : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Equipo N° $numeroEquipo',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              if (widget.tarjetas.isNotEmpty)
+                                IconButton(
+                                  icon: const Icon(Icons.remove, color: Colors.white),
+                                  onPressed: () => _eliminarTarjeta(index),
+                                ),
+                            ],
+                          ),
                 ),
               ),
             ),
@@ -232,20 +228,26 @@ class CardWidgetState extends State<CardEquipo> {
         }).toList();
 
     if (widget.tarjetas.length < 4) {
+      final isAddingLoading = _loadingIndex == -1;
       cardWidgets.add(
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: SizedBox(
-            // Use maximum width when vertical
             width: isVertical ? double.infinity : 140,
             height: 50,
             child: ElevatedButton(
-              onPressed: agregarTarjeta,
+              onPressed: isAddingLoading ? null : _agregarTarjeta,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 51, 97, 134),
+                backgroundColor:
+                    isAddingLoading ? Colors.grey.shade300 : const Color.fromARGB(255, 51, 97, 134),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Icon(Icons.add, color: Colors.white),
+              child:
+                  isAddingLoading
+                      ? const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      )
+                      : const Icon(Icons.add, color: Colors.white),
             ),
           ),
         ),

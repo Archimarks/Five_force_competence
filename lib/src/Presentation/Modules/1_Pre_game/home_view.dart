@@ -131,7 +131,7 @@ class _HomeViewState extends State<HomeView> {
         if (_isAdmin) ...[
           Button(
             texto: 'Crear partida',
-            color: AppColor.azulClaro,
+            color: AppColor.azulGris,
             onPressed: () async {
               final ctx = context; // Guardar contexto antes del await
               await _crearPartida.crearNuevaPartida();
@@ -146,12 +146,12 @@ class _HomeViewState extends State<HomeView> {
         // Botón para unirse a una partida
         Button(
           texto: 'Ingresar a una partida',
-          color: AppColor.azul,
+          color: AppColor.azulReal,
           onPressed: () => Navigator.pushReplacementNamed(context, Routes.joinGame),
         ),
         const SizedBox(height: 20),
         // Botón para cerrar sesión
-        Button(texto: 'Cerrar sesión', color: AppColor.azulOscuro, onPressed: _signOut),
+        Button(texto: 'Cerrar sesión', color: AppColor.azulOxford, onPressed: _signOut),
       ],
     );
   }
@@ -175,7 +175,7 @@ class _HomeViewState extends State<HomeView> {
                 if (_isAdmin) ...[
                   Button(
                     texto: 'Crear partida',
-                    color: AppColor.azulClaro,
+                    color: AppColor.azulGris,
                     onPressed: () async {
                       final ctx = context; // Guardar contexto antes del await
                       await _crearPartida.crearNuevaPartida();
@@ -190,12 +190,12 @@ class _HomeViewState extends State<HomeView> {
                 // Botón para unirse a una partida
                 Button(
                   texto: 'Ingresar a una partida',
-                  color: AppColor.azul,
+                  color: AppColor.azulReal,
                   onPressed: () => Navigator.pushReplacementNamed(context, Routes.joinGame),
                 ),
                 const SizedBox(height: 20),
                 // Botón para cerrar sesión
-                Button(texto: 'Cerrar sesión', color: AppColor.azulOscuro, onPressed: _signOut),
+                Button(texto: 'Cerrar sesión', color: AppColor.azulOxford, onPressed: _signOut),
               ],
             ),
           ),

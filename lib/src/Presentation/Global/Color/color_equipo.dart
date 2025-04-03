@@ -13,11 +13,10 @@ import 'package:flutter/material.dart';
 
 /// Enumerador de colores principales de la aplicación.
 enum AppColorEquipo {
+  VERDE,
   AMARILLO,
-  AZUL,
-  CYAN,
-  NARANJA,
-  VERDE;
+  ROJO,
+  LILA;
 
   /// Obtiene el color principal correspondiente.
   /// Si el color no existe en el mapa, devuelve un color de respaldo (negro en este caso).
@@ -31,10 +30,9 @@ enum AppColorEquipo {
 class AppPalette {
   /// Mapeo de colores para cada equipo.
   static const Map<AppColorEquipo, Color> colorMap = {
-    AppColorEquipo.AMARILLO: Colors.amber, // Amarillo real
-    AppColorEquipo.AZUL: Colors.blue,
-    AppColorEquipo.CYAN: Colors.cyan,
-    AppColorEquipo.NARANJA: Colors.deepOrange,
-    AppColorEquipo.VERDE: Colors.greenAccent,
+    AppColorEquipo.VERDE: Color.fromARGB(255, 5, 146, 35),
+    AppColorEquipo.AMARILLO: Color.fromARGB(255, 219, 153, 0),
+    AppColorEquipo.ROJO: Color.fromARGB(255, 254, 74, 73),
+    AppColorEquipo.LILA: Color.fromARGB(255, 202, 103, 255),
   };
 }

@@ -36,7 +36,7 @@ class _SignInViewsState extends State<SignInView> {
                 if (!_fetching)
                   Button(
                     texto: 'Iniciar sesión con Google',
-                    color: AppColor.azulClaro,
+                    color: AppColor.azulAcero,
                     width: 250,
                     height: 50,
                     onPressed: _signInWithGoogle,

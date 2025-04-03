@@ -10,10 +10,14 @@ import 'package:flutter/material.dart';
 
 /// Enumerador de colores principales de la aplicación.
 enum AppColor {
-  azulClaro,
-  azul,
-  azulOscuro,
-  verde;
+  azulGris,
+  azulReal,
+  gris,
+  platino,
+  azulIntenso,
+  azulOxford,
+  verdeBosque,
+  azulAcero;
 
   /// Obtiene el color principal correspondiente.
   Color get value => AppPalette._colorMap[this]!;
@@ -24,10 +28,14 @@ enum AppColor {
 
 class AppPalette {
   static const Map<AppColor, Color> _colorMap = {
-    AppColor.azulClaro: Color(0xFF305575),
-    AppColor.azul: Color(0xFF032B68),
-    AppColor.azulOscuro: Color(0xFF1B2636),
-    AppColor.verde: Color(0xFF1B362C),
+    AppColor.azulGris: Color.fromARGB(255, 48, 85, 117),
+    AppColor.azulReal: Color.fromARGB(255, 3, 42, 103),
+    AppColor.gris: Color.fromARGB(255, 129, 132, 121),
+    AppColor.platino: Color.fromARGB(255, 217, 217, 217),
+    AppColor.azulIntenso: Color.fromARGB(255, 14, 26, 38),
+    AppColor.azulOxford: Color.fromARGB(255, 18, 33, 63),
+    AppColor.verdeBosque: Color.fromARGB(255, 5, 96, 17),
+    AppColor.azulAcero: Color.fromARGB(255, 61, 105, 130),
   };
 
   static Color _applyGlow(Color baseColor) {

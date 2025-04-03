@@ -145,14 +145,6 @@ class _CreateGameViewState extends State<CreateGameView> {
           final eliminarPartida = EliminarPartida();
           await eliminarPartida.eliminarPartidaGuardada();
         },
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const Placeholder()));
-            },
-          ),
-        ],
       ),
       body: Stack(
         children: [
@@ -194,7 +186,7 @@ class _CreateGameViewState extends State<CreateGameView> {
                 const SizedBox(height: 24),
                 DesplegableSector(
                   titulo: 'Sector',
-                  icon: const Icon(Icons.widgets, color: Colors.lightBlueAccent),
+                  icon: Icon(Icons.widgets, color: Colors.blueGrey[100]),
                   opciones: opcionesSectores,
                   valorSeleccionado: opcionSectorSeleccionada,
                   partidaId: partidaActual ?? '',
@@ -233,7 +225,7 @@ class _CreateGameViewState extends State<CreateGameView> {
                 const SizedBox(height: 25),
                 DesplegableTiempo(
                   titulo: 'Tiempo permitido (Segundos)',
-                  icon: const Icon(Icons.timer_outlined, color: Colors.lightBlueAccent),
+                  icon: Icon(Icons.timer_outlined, color: Colors.blueGrey[100]),
                   opciones: opcionesTiempos,
                   valorSeleccionado: opcionTiempoSeleccionada,
                   partidaId: partidaActual ?? '',
@@ -277,7 +269,7 @@ class _CreateGameViewState extends State<CreateGameView> {
             padding: const EdgeInsets.all(16.0),
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: Button(texto: 'Confirmar', color: AppColor.verde, onPressed: () {}),
+              child: Button(texto: 'Confirmar', color: AppColor.verdeBosque, onPressed: () {}),
             ),
           ),
       ],
@@ -387,7 +379,7 @@ class _CreateGameViewState extends State<CreateGameView> {
             alignment: Alignment.bottomCenter,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
-              child: Button(texto: 'Confirmar', color: AppColor.verde, onPressed: () {}),
+              child: Button(texto: 'Confirmar', color: AppColor.verdeBosque, onPressed: () {}),
             ),
           ),
       ],

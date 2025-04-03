@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../Data/Firebase/Empresa/traer_todos_empresa.dart';
 import '../../../Data/Firebase/Equipo/crear_equipo.dart';
 import '../../../Data/Firebase/Partida/cargar_partida.dart';
+import '../Color/color.dart';
 import '../Color/color_equipo.dart';
 import 'popup_equipo.dart';
 
@@ -88,6 +89,8 @@ class CardWidgetState extends State<CardEquipo> {
         widget.tarjetas.sort();
         widget.estadoEquipos[nuevoNumero.toString()] = EstadoEquipo.pendiente;
       });
+
+      widget.onSeleccion(widget.seleccionTarjetas);
 
       if (partidaActual != null) {
         await crearEquipo.crearEquipoDisponible(partidaActual!).catchError((e) {
@@ -176,7 +179,7 @@ class CardWidgetState extends State<CardEquipo> {
 
           Color colorTarjeta =
               (widget.seleccionTarjetas[numeroEquipo]?['color'] as AppColorEquipo?)?.color ??
-              const Color.fromARGB(255, 78, 97, 129);
+              AppColor.azulGris.value;
 
           final isCurrentlyLoading = _loadingIndex == index;
 
@@ -193,13 +196,6 @@ class CardWidgetState extends State<CardEquipo> {
                           ? Colors.grey.shade300
                           : colorTarjeta, // Cambia el color si está cargando
                   borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color.fromARGB(255, 78, 97, 129).withAlpha((0.6 * 255).toInt()),
-                      blurRadius: 15,
-                      spreadRadius: 3,
-                    ),
-                  ],
                 ),
                 child: Center(
                   child:
@@ -238,8 +234,7 @@ class CardWidgetState extends State<CardEquipo> {
             child: ElevatedButton(
               onPressed: isAddingLoading ? null : _agregarTarjeta,
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    isAddingLoading ? Colors.grey.shade300 : const Color.fromARGB(255, 51, 97, 134),
+                backgroundColor: isAddingLoading ? Colors.grey.shade100 : AppColor.azulAcero.value,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               child:

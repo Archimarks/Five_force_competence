@@ -13,6 +13,7 @@ import '../../Global/Widgets/button.dart';
 import '../../Global/Widgets/card_equipo.dart';
 import '../../Global/Widgets/desplegable_sector.dart';
 import '../../Global/Widgets/desplegable_tiempo.dart';
+import '../../Global/Widgets/popup_resumen.dart';
 import '../../Routes/routes.dart';
 
 //--------------------------------------------------------
@@ -269,7 +270,21 @@ class _CreateGameViewState extends State<CreateGameView> {
             padding: const EdgeInsets.all(16.0),
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: Button(texto: 'Confirmar', color: AppColor.verdeBosque, onPressed: () {}),
+              child: Button(
+                texto: 'Confirmar',
+                color: AppColor.verdeBosque,
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return PopupResumen(
+                        partidaId: partidaActual ?? '',
+                        direccion: DireccionR.vertical,
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
       ],
@@ -379,7 +394,21 @@ class _CreateGameViewState extends State<CreateGameView> {
             alignment: Alignment.bottomCenter,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
-              child: Button(texto: 'Confirmar', color: AppColor.verdeBosque, onPressed: () {}),
+              child: Button(
+                texto: 'Confirmar',
+                color: AppColor.verdeBosque,
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return PopupResumen(
+                        partidaId: partidaActual ?? '',
+                        direccion: DireccionR.horizontal,
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
       ],

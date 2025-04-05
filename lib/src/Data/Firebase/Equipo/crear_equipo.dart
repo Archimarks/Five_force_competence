@@ -88,7 +88,6 @@ class CrearEquipo {
     return {
       'CODIGO': '',
       'ESTADO TURNO': '',
-      'NOMBRE': '',
       'PUESTO': '',
       'PUNTOS': '',
       'COLOR': '',

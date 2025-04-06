@@ -15,6 +15,7 @@ import '../Modules/1_Pre_game/home_view.dart';
 import '../Modules/1_Pre_game/sign_in_view.dart';
 import '../Modules/1_Pre_game/splash_view.dart';
 import '../Modules/2_Setup_game/create_game_view.dart';
+import '../Modules/2_Setup_game/defined_team_view.dart';
 import '../Modules/2_Setup_game/join_game_view.dart';
 import 'routes.dart';
 
@@ -28,5 +29,6 @@ Map<String, Widget Function(BuildContext)> get appRoutes {
     Routes.home: (context) => const HomeView(),
     Routes.createGame: (context) => const CreateGameView(),
     Routes.joinGame: (context) => const JoinGameView(),
+    Routes.definedTeam: (context) => const DefinedTeamView(),
   };
 }

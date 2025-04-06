@@ -48,9 +48,10 @@ class PopupResumenState extends State<PopupResumen> {
             final data = Map<String, dynamic>.from(entry.value);
             final estadoTurno = data['ESTADO TURNO'] ?? '';
             final color =
-                estadoTurno == ''
-                    ? const Color.fromARGB(255, 48, 85, 117)
-                    : _getColorFromString(data['COLOR'] ?? '');
+                estadoTurno == 'INACTIVO'
+                    ? _getColorFromString(data['COLOR'] ?? '')
+                    : const Color.fromARGB(255, 48, 85, 117); // color neutro mientras está activo
+
             return {
               'empresa': data['EMPRESA'] ?? '',
               'codigo': data['CODIGO'] ?? '',
@@ -78,8 +79,7 @@ class PopupResumenState extends State<PopupResumen> {
   @override
   Widget build(BuildContext context) {
     final todosListos =
-        _equipos.isNotEmpty &&
-        _equipos.every((equipo) => equipo['estado_turno'].toString().isNotEmpty);
+        _equipos.isNotEmpty && _equipos.every((equipo) => equipo['estado_turno'] == 'INACTIVO');
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),

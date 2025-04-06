@@ -14,6 +14,7 @@ class PopupEquipo {
     List<String> opcionesEmpresas,
     String partidaActual,
     Function(Map<int, Map<String, dynamic>>) onSeleccion,
+    String? opcionSectorSeleccionada,
   ) {
     Map<String, dynamic>? empresaSeleccionada = seleccionTarjetas[equipo]?['empresa'];
     AppColorEquipo? colorSeleccionado = seleccionTarjetas[equipo]?['color'];
@@ -173,6 +174,7 @@ class PopupEquipo {
                               equipo,
                               empresaSeleccionada?['nombre'],
                               colorSeleccionado!.name,
+                              opcionSectorSeleccionada!,
                             );
 
                             if (context.mounted) {

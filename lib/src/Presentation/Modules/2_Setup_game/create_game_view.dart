@@ -258,7 +258,9 @@ class _CreateGameViewState extends State<CreateGameView> {
                         tarjetasDisponibles, // Variable mutable definida en CreateGameView
                     seleccionTarjetas:
                         seleccionTarjetas, // Variable mutable definida en CreateGameView
-                    estadoEquipos: estadoEquipos, // Variable mutable definida en CreateGameView
+                    estadoEquipos: estadoEquipos,
+                    opcionSectorSeleccionada:
+                        opcionSectorSeleccionada, // Variable mutable definida en CreateGameView
                   ),
               ],
             ),
@@ -381,6 +383,7 @@ class _CreateGameViewState extends State<CreateGameView> {
                       tarjetasDisponibles: tarjetasDisponibles,
                       seleccionTarjetas: seleccionTarjetas,
                       estadoEquipos: estadoEquipos,
+                      opcionSectorSeleccionada: opcionSectorSeleccionada,
                     )
                     : const SizedBox.shrink(),
           ),

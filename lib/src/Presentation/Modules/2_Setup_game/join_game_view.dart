@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Core/Utils/injector.dart';
+import '../../../Data/Firebase/Equipo/equipo_codigo.dart';
 import '../../Global/Widgets/app_bar.dart';
 import '../../Routes/routes.dart';
 
@@ -128,10 +130,40 @@ class _JoinGameViewState extends State<JoinGameView> {
       width: 220,
       height: 50,
       child: ElevatedButton(
-        onPressed: () {
-          String teamCode = _codeController.text;
-          // ignore: avoid_print
-          print('Código ingresado: $teamCode');
+        onPressed: () async {
+          String teamCode = _codeController.text.trim();
+          if (teamCode.isEmpty) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Por favor ingresa un código.')));
+            return;
+          }
+
+          final equipoCodigo = EquipoCodigo();
+
+          // Mostrar un loader mientras busca en Firebase
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => const Center(child: CircularProgressIndicator()),
+          );
+
+          await equipoCodigo.buscarYGuardarDatosPorCodigo(teamCode);
+
+          // Verificamos si realmente se guardó el código
+          final prefs = await SharedPreferences.getInstance();
+          String? codigoGuardado = prefs.getString('CODIGO');
+
+          // Cierra el loader
+          if (mounted) Navigator.pop(context);
+
+          if (codigoGuardado == teamCode) {
+            Navigator.pushReplacementNamed(context, Routes.definedTeam);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Código no encontrado. Intenta nuevamente.')),
+            );
+          }
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.black,

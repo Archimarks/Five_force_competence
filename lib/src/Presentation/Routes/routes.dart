@@ -30,4 +30,7 @@ class Routes {
 
   /// Ruta para la pantalla de unirse a un juego.
   static const joinGame = '/Join-Game';
+
+  /// Ruta para la pantalla de unirse a un juego.
+  static const definedTeam = '/Defined-Team';
 }

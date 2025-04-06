@@ -10,12 +10,14 @@ class ActualizarEquipo {
   /// Constructor que inicializa la referencia a Firebase Realtime Database.
   ActualizarEquipo() : _dbRef = FirebaseDatabase.instance.ref();
 
-  /// Método para actualizar los campos EMPRESA, COLOR y CODIGO de un equipo.
+  /// Método para actualizar los campos EMPRESA, COLOR y CODIGO de un equipo,
+  /// y copiar las fuerzas de la empresa seleccionada al equipo.
   Future<void> actualizarPreGame(
     String partidaActual,
     int equipoId,
     String empresa,
     String color,
+    String sector,
   ) async {
     // Asegurando que partidaActual solo contenga números
     String numeroPartida = partidaActual.replaceAll(RegExp(r'\D'), '');
@@ -30,17 +32,27 @@ class ActualizarEquipo {
     // Actualizando los datos en Firebase
     await equipoRef.update({'EMPRESA': empresa, 'COLOR': color, 'CODIGO': codigo});
 
+    // Ruta de las fuerzas de la empresa seleccionada
+    final DatabaseReference fuerzasEmpresaRef = _dbRef.child(
+      'Five Force Competence/DATOS PERSISTENTES/SECTORES/$sector/EMPRESAS/$empresa/FUERZAS',
+    );
+
+    final DatabaseReference fuerzasEquipoRef = equipoRef.child('FUERZAS');
+
+    try {
+      final fuerzasSnapshot = await fuerzasEmpresaRef.get();
+      if (fuerzasSnapshot.exists) {
+        await fuerzasEquipoRef.set(fuerzasSnapshot.value);
+        debugPrint('Fuerzas copiadas exitosamente de $empresa a EQUIPO $equipoId');
+      } else {
+        debugPrint('No se encontraron fuerzas para la empresa $empresa');
+      }
+    } catch (e) {
+      debugPrint('Error al copiar las fuerzas: $e');
+    }
+
     debugPrint('Equipo actualizado: $equipoId con CODIGO $codigo, EMPRESA $empresa y COLOR $color');
   }
-
-  /// Método para actualizar las fuerzas del sector selecionado  de la empresa selecionada
-
-  Future<void> actualizarfuerzaPregame(
-    String partidaActual,
-    int equipoId,
-    String empresa,
-    String sector,
-  ) async {}
 
   /// Método para generar un número aleatorio con una cantidad específica de dígitos.
   String _generarCodigoAleatorio(int cantidad) {

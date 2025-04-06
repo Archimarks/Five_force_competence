@@ -5,18 +5,15 @@ AppBar customAppBar({
   required String title,
   List<Widget>? actions,
   bool showLeading = true,
-  VoidCallback?
-  onLeadingPressed, // Nuevo parámetro para definir la acción personalizada del botón leading
+  VoidCallback? onLeadingPressed,
+  Color? backgroundColor, // Agregado
 }) {
   return AppBar(
     leading:
         showLeading
             ? IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed:
-                  onLeadingPressed ??
-                  () =>
-                      Navigator.of(context).pop(), // Usa la acción personalizada si se proporciona
+              onPressed: onLeadingPressed ?? () => Navigator.of(context).pop(),
             )
             : const SizedBox(width: 56.0),
     title: Text(
@@ -24,15 +21,20 @@ AppBar customAppBar({
       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),
     ),
     centerTitle: true,
-    flexibleSpace: Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF405A63), Color(0xFF52727D)],
-        ),
-      ),
-    ),
+    backgroundColor: backgroundColor ?? Colors.transparent, // Aplica si se pasa
+    flexibleSpace:
+        backgroundColor == null
+            ? Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF405A63), Color(0xFF52727D)],
+                ),
+              ),
+            )
+            : null, // No usa gradiente si hay color personalizado
     actions: actions,
+    elevation: 0,
   );
 }

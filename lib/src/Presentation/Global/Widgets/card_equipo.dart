@@ -14,6 +14,9 @@ enum EstadoEquipo { pendiente, preparado }
 class CardEquipo extends StatefulWidget {
   final String partidaId;
   final Direccion direccion;
+
+  final String? opcionSectorSeleccionada;
+
   final Function(Map<int, Map<String, dynamic>>) onSeleccion;
 
   final List<int> tarjetas;
@@ -25,6 +28,7 @@ class CardEquipo extends StatefulWidget {
     super.key,
     required this.partidaId,
     required this.direccion,
+    required this.opcionSectorSeleccionada,
     required this.onSeleccion,
     required this.tarjetas,
     required this.tarjetasDisponibles,
@@ -142,6 +146,7 @@ class CardWidgetState extends State<CardEquipo> {
         opcionesEmpresas,
         partidaActual!,
         widget.onSeleccion,
+        widget.opcionSectorSeleccionada,
       );
     }
   }

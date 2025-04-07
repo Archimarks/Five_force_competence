@@ -4,8 +4,23 @@ import '../../../Data/Firebase/Equipo/actualizar_equipo.dart';
 import '../Color/color_equipo.dart';
 import 'card_equipo.dart';
 
-/// PopupEquipo: Muestra un cuadro de diálogo para configurar un equipo
+///
+/// * Clase: `PopupEquipo`
+/// * Descripción: Muestra un cuadro de diálogo personalizado para configurar la empresa y el color asignado a un equipo en la vista previa del juego.
+///
 class PopupEquipo {
+  ///
+  /// Muestra un `AlertDialog` para configurar un equipo específico dentro del juego.
+  ///
+  /// * `context`: Contexto de la aplicación.
+  /// * `equipo`: Número del equipo a configurar.
+  /// * `seleccionTarjetas`: Mapa con las configuraciones de todos los equipos (empresa y color).
+  /// * `estadoEquipos`: Mapa con el estado actual de cada equipo.
+  /// * `opcionesEmpresas`: Lista de nombres de empresas disponibles.
+  /// * `partidaActual`: ID de la partida activa.
+  /// * `onSeleccion`: Callback que se ejecuta tras guardar la configuración.
+  /// * `opcionSectorSeleccionada`: Sector seleccionado por el equipo.
+  ///
   static void mostrar(
     BuildContext context,
     int equipo,
@@ -16,17 +31,24 @@ class PopupEquipo {
     Function(Map<int, Map<String, dynamic>>) onSeleccion,
     String? opcionSectorSeleccionada,
   ) {
+    // Obtener empresa y color actualmente seleccionados por el equipo
     Map<String, dynamic>? empresaSeleccionada = seleccionTarjetas[equipo]?['empresa'];
     AppColorEquipo? colorSeleccionado = seleccionTarjetas[equipo]?['color'];
 
-    /// Filtrar empresas y colores ya seleccionados por otros equipos,
-    /// pero asegurando que la empresa y color actual del equipo se mantengan en la lista.
+    ///
+    /// Filtrar empresas ya seleccionadas por otros equipos,
+    /// pero mantener la opción actual del equipo disponible.
+    ///
     List<String> empresasDisponibles =
         opcionesEmpresas.where((empresa) {
           return empresa == empresaSeleccionada?['nombre'] ||
               !seleccionTarjetas.values.any((e) => e['empresa']?['nombre'] == empresa);
         }).toList();
 
+    ///
+    /// Filtrar colores ya seleccionados por otros equipos,
+    /// excepto el del equipo actual para permitir su edición.
+    ///
     List<AppColorEquipo> coloresDisponibles =
         AppColorEquipo.values.where((color) {
           return color == colorSeleccionado ||
@@ -41,6 +63,7 @@ class PopupEquipo {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStatePopup) {
+            // Validaciones para habilitar el botón de guardar
             bool esValidoParaColor = empresaSeleccionada != null;
             bool sePuedeGuardar = esValidoParaColor && colorSeleccionado != null;
 
@@ -60,7 +83,9 @@ class PopupEquipo {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      /// Dropdown para seleccionar la empresa
+                      ///
+                      /// * Dropdown de selección de empresa *
+                      ///
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -86,7 +111,7 @@ class PopupEquipo {
                           onChanged: (value) {
                             setStatePopup(() {
                               empresaSeleccionada = {'nombre': value};
-                              colorSeleccionado = null;
+                              colorSeleccionado = null; // Reiniciar color al cambiar empresa
                             });
                           },
                           items:
@@ -101,7 +126,9 @@ class PopupEquipo {
                       ),
                       const SizedBox(height: 16),
 
-                      /// Dropdown para seleccionar el color
+                      ///
+                      /// * Dropdown de selección de color *
+                      ///
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -155,6 +182,10 @@ class PopupEquipo {
                   ),
                 ),
               ),
+
+              ///
+              /// Botones de acción: Cancelar y Guardar
+              ///
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
@@ -164,11 +195,16 @@ class PopupEquipo {
                   onPressed:
                       sePuedeGuardar
                           ? () async {
+                            // Guardar selección del equipo
                             seleccionTarjetas[equipo] = {
                               'empresa': empresaSeleccionada,
                               'color': colorSeleccionado,
                             };
+
+                            // Marcar equipo como preparado
                             estadoEquipos[equipo.toString()] = EstadoEquipo.preparado;
+
+                            // Actualizar datos en Firebase
                             await ActualizarEquipo().actualizarPreGame(
                               partidaActual,
                               equipo,
@@ -177,6 +213,7 @@ class PopupEquipo {
                               opcionSectorSeleccionada!,
                             );
 
+                            // Cerrar el popup y devolver las selecciones actualizadas
                             if (context.mounted) {
                               onSeleccion(seleccionTarjetas);
                               Navigator.pop(context);

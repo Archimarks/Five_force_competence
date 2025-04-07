@@ -4,19 +4,49 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Clase encargada de buscar un equipo por su código en todas las partidas y guardar sus datos localmente.
+/// ---------------------------------------------------------------------------
+/// # EquipoCodigo
+///
+/// **Clase responsable de buscar un equipo por su código único en todas
+/// las partidas registradas en Firebase Realtime Database.**
+///
+/// Si se encuentra el equipo con el código buscado, guarda sus datos clave
+/// localmente usando `SharedPreferences` para su posterior uso dentro de la app.
+///
+/// ### Autor:
+/// *Marcos Alejandro Collazos Marmolejo*
+///
+/// ### Fecha:
+/// *2025*
+/// ---------------------------------------------------------------------------
 class EquipoCodigo {
+  /// Referencia principal a Firebase Realtime Database.
   final DatabaseReference _dbRef;
 
-  /// Constructor que inicializa la referencia a Firebase Realtime Database.
+  /// -------------------------------------------------------------------------
+  /// Constructor de la clase `EquipoCodigo`.
+  ///
+  /// Inicializa la referencia a la raíz de la base de datos.
+  /// -------------------------------------------------------------------------
   EquipoCodigo() : _dbRef = FirebaseDatabase.instance.ref();
 
-  /// Busca en todas las partidas un equipo que tenga el código proporcionado.
-  /// Si lo encuentra, guarda los datos especificados en SharedPreferences.
+  /// -------------------------------------------------------------------------
+  /// Busca un equipo por su código único en todas las partidas registradas.
+  ///
+  /// Si encuentra un equipo con el `codigoBuscado`, guarda sus datos y
+  /// los niveles de sus fuerzas en `SharedPreferences`.
+  ///
+  /// ### Parámetro:
+  /// - `codigoBuscado`: Código único del equipo que se desea encontrar.
+  ///
+  /// ### Acciones:
+  /// - Recorre todas las partidas y sus equipos.
+  /// - Compara el valor del campo `'CODIGO'` con el código buscado.
+  /// - Si lo encuentra, guarda los datos relevantes localmente.
+  /// -------------------------------------------------------------------------
   Future<void> buscarYGuardarDatosPorCodigo(String codigoBuscado) async {
     try {
-      final DataSnapshot partidasSnapshot =
-          await _dbRef.child('Five Force Competence/PARTIDAS').get();
+      final partidasSnapshot = await _dbRef.child('Five Force Competence/PARTIDAS').get();
 
       if (partidasSnapshot.exists) {
         final Map partidas = partidasSnapshot.value as Map;
@@ -35,7 +65,7 @@ class EquipoCodigo {
                   equipoKey: equipoKey,
                   partidaKey: partidaKey,
                 );
-                debugPrint('Datos del equipo guardados exitosamente.');
+                debugPrint('✅ Datos del equipo guardados exitosamente.');
                 return;
               }
             }
@@ -43,13 +73,24 @@ class EquipoCodigo {
         }
       }
 
-      debugPrint('No se encontró ningún equipo con el código $codigoBuscado');
+      debugPrint('❌ No se encontró ningún equipo con el código $codigoBuscado');
     } catch (e) {
-      debugPrint('Error al buscar y guardar datos del equipo: $e');
+      debugPrint('❗ Error al buscar y guardar datos del equipo: $e');
     }
   }
 
-  /// Guarda los datos del equipo en SharedPreferences.
+  /// -------------------------------------------------------------------------
+  /// Guarda en `SharedPreferences` los datos del equipo encontrado.
+  ///
+  /// Incluye campos como:
+  /// - Código, estado del turno, puesto, puntos, color, empresa.
+  /// - Nivel de cada una de las cinco fuerzas.
+  ///
+  /// ### Parámetros:
+  /// - `equipo`: Mapa con la información del equipo.
+  /// - `equipoKey`: ID del equipo dentro de Firebase.
+  /// - `partidaKey`: ID de la partida donde fue encontrado.
+  /// -------------------------------------------------------------------------
   Future<void> _guardarEnSharedPreferences({
     required Map equipo,
     required String equipoKey,
@@ -67,6 +108,7 @@ class EquipoCodigo {
     await prefs.setString('EMPRESA', equipo['EMPRESA'] ?? '');
 
     final fuerzas = equipo['FUERZAS'] as Map? ?? {};
+
     await prefs.setString(
       'PODER DE NEGOCIACION DE COMPRADORES',
       fuerzas['PODER DE NEGOCIACION DE COMPRADORES']?['NIVEL'] ?? '',

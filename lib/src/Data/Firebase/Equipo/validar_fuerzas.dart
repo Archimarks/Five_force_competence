@@ -1,16 +1,58 @@
+// validar_fuerzas.dart
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
-/// Clase encargada de validar las fuerzas seleccionadas por el equipo
-/// contra las fuerzas correctas almacenadas en Firebase.
+/// ---------------------------------------------------------------------------
+/// # ValidarFuerzas
+///
+/// **Clase encargada de validar las fuerzas seleccionadas por un equipo
+/// en la interfaz contra las fuerzas correctas definidas en Firebase.**
+///
+/// Además, guarda los resultados de la comparación en la base de datos
+/// bajo el nodo `RESPUESTA FUERZAS`, e inactiva el estado del turno del equipo.
+///
+/// ### Autor:
+/// *Marcos Alejandro Collazos Marmolejo*
+///
+/// ### Fecha:
+/// *2025*
+/// ---------------------------------------------------------------------------
 class ValidarFuerzas {
+  /// Referencia principal a Firebase Realtime Database.
   final DatabaseReference _dbRef;
 
-  /// Constructor que inicializa la referencia a Firebase Realtime Database.
+  /// -------------------------------------------------------------------------
+  /// Constructor de la clase `ValidarFuerzas`.
+  ///
+  /// Inicializa la conexión con la base de datos.
+  /// -------------------------------------------------------------------------
   ValidarFuerzas() : _dbRef = FirebaseDatabase.instance.ref();
 
-  /// Método para validar las respuestas de un equipo con respecto a las fuerzas reales
-  /// y guardar el resultado en Firebase como 'ACERTÓ' o 'NO ACERTÓ'.
+  /// -------------------------------------------------------------------------
+  /// Valida las respuestas seleccionadas por un equipo comparándolas con
+  /// las respuestas correctas almacenadas en Firebase.
+  ///
+  /// ### Parámetros:
+  /// - `partidaActual`: ID de la partida actual.
+  /// - `equipo`: ID del equipo que responde.
+  /// - `respuestasUsuario`: Lista de respuestas seleccionadas por el usuario,
+  ///   en el mismo orden que las claves definidas.
+  ///
+  /// ### Flujo:
+  /// - Compara cada fuerza seleccionada por el usuario con la respuesta correcta.
+  /// - Guarda en Firebase si el usuario 'ACERTÓ' o 'NO ACERTÓ' en cada fuerza.
+  /// - Cambia el estado del turno del equipo a 'INACTIVO'.
+  ///
+  /// ### Ejemplo de uso:
+  /// ```dart
+  /// await validarFuerzas.validarSeleccionUsuario(
+  ///   partidaActual: 'partida_123',
+  ///   equipo: 'equipo_abc',
+  ///   respuestasUsuario: ['ALTO', 'BAJO', 'MEDIO', 'BAJO', 'ALTO'],
+  /// );
+  /// ```
+  /// -------------------------------------------------------------------------
   Future<void> validarSeleccionUsuario({
     required String partidaActual,
     required String equipo,
@@ -23,6 +65,7 @@ class ValidarFuerzas {
     final DatabaseReference estadoTurnoRef = _dbRef.child('$basePath/ESTADO TURNO');
 
     try {
+      // Obtener fuerzas correctas desde Firebase
       final DataSnapshot snapshot = await fuerzasRef.get();
 
       if (!snapshot.exists) {
@@ -34,6 +77,7 @@ class ValidarFuerzas {
         snapshot.value as Map,
       );
 
+      // Claves a validar
       final List<String> claves = [
         'PODER DE NEGOCIACION DE COMPRADORES',
         'PODER DE NEGOCIACION DE PROVEEDORES',
@@ -57,6 +101,7 @@ class ValidarFuerzas {
         );
       }
 
+      // Guardar resultado en Firebase y desactivar turno
       await respuestaRef.set(resultado);
       await estadoTurnoRef.set('INACTIVO');
 

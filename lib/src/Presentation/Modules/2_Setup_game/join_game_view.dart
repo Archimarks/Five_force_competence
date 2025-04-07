@@ -6,10 +6,14 @@ import '../../../Data/Firebase/Equipo/equipo_codigo.dart';
 import '../../Global/Widgets/app_bar.dart';
 import '../../Routes/routes.dart';
 
-//--------------------------------------------------------
+/// ------------------------------------------------------------
+/// Título que se muestra en el `AppBar` de la vista de ingreso
+/// del código de equipo.
+/// ------------------------------------------------------------
 String titulo = 'Ingresa el código de tu equipo';
-//--------------------------------------------------------
 
+/// Vista encargada de permitir que un usuario ingrese
+/// el código de su equipo para unirse a la partida.
 class JoinGameView extends StatefulWidget {
   const JoinGameView({super.key});
 
@@ -19,14 +23,17 @@ class JoinGameView extends StatefulWidget {
 }
 
 class _JoinGameViewState extends State<JoinGameView> {
+  /// Controlador del campo de texto donde se escribe el código del equipo.
   final TextEditingController _codeController = TextEditingController();
 
+  /// Liberamos el controlador al destruir la vista.
   @override
   void dispose() {
     _codeController.dispose();
     super.dispose();
   }
 
+  /// Construcción principal de la vista `JoinGameView`.
   @override
   Widget build(BuildContext context) {
     var orientation = MediaQuery.of(context).orientation;
@@ -36,12 +43,14 @@ class _JoinGameViewState extends State<JoinGameView> {
         context: context,
         title: titulo,
         onLeadingPressed: () async {
+          // Cierra sesión y vuelve a la pantalla de inicio.
           Injector.of(context).authenticationRepository.signOut();
           Navigator.pushReplacementNamed(context, Routes.home);
         },
       ),
       body: Stack(
         children: [
+          /// Fondo de imagen personalizado
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
@@ -52,11 +61,15 @@ class _JoinGameViewState extends State<JoinGameView> {
               ),
             ),
           ),
+
+          /// Capa semitransparente encima del fondo
           Positioned.fill(
             child: Container(
               color: const Color.fromARGB(255, 70, 70, 70).withAlpha((0.6 * 255).toInt()),
             ),
           ),
+
+          /// Contenido central con diseño responsive
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
@@ -68,6 +81,7 @@ class _JoinGameViewState extends State<JoinGameView> {
     );
   }
 
+  /// Layout mostrado cuando el dispositivo está en orientación vertical.
   Widget _portraitLayout() {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -83,6 +97,7 @@ class _JoinGameViewState extends State<JoinGameView> {
     );
   }
 
+  /// Layout mostrado cuando el dispositivo está en orientación horizontal.
   Widget _landscapeLayout() {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -105,6 +120,7 @@ class _JoinGameViewState extends State<JoinGameView> {
     );
   }
 
+  /// Construye el campo de texto para ingresar el código del equipo.
   Widget _buildTextField() {
     return Container(
       width: 280,
@@ -125,6 +141,10 @@ class _JoinGameViewState extends State<JoinGameView> {
     );
   }
 
+  /// Botón que valida el código ingresado y redirige a la vista del equipo.
+  ///
+  /// * Si el código es correcto, guarda la información del equipo y navega.
+  /// * Si es incorrecto, muestra un `SnackBar` de error.
   Widget _buildButton() {
     return SizedBox(
       width: 220,
@@ -132,6 +152,8 @@ class _JoinGameViewState extends State<JoinGameView> {
       child: ElevatedButton(
         onPressed: () async {
           String teamCode = _codeController.text.trim();
+
+          // Validación de campo vacío
           if (teamCode.isEmpty) {
             ScaffoldMessenger.of(
               context,
@@ -141,22 +163,24 @@ class _JoinGameViewState extends State<JoinGameView> {
 
           final equipoCodigo = EquipoCodigo();
 
-          // Mostrar un loader mientras busca en Firebase
+          // Mostrar un loader mientras se busca el código en Firebase
           showDialog(
             context: context,
             barrierDismissible: false,
             builder: (_) => const Center(child: CircularProgressIndicator()),
           );
 
+          // Buscar y guardar los datos del equipo
           await equipoCodigo.buscarYGuardarDatosPorCodigo(teamCode);
 
-          // Verificamos si realmente se guardó el código
+          // Verificar si el código fue guardado correctamente
           final prefs = await SharedPreferences.getInstance();
           String? codigoGuardado = prefs.getString('CODIGO');
 
-          // Cierra el loader
+          // Cerrar el loader
           if (mounted) Navigator.pop(context);
 
+          // Redirigir si el código es válido
           if (codigoGuardado == teamCode) {
             Navigator.pushReplacementNamed(context, Routes.definedTeam);
           } else {

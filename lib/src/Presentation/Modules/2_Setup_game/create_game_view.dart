@@ -16,14 +16,17 @@ import '../../Global/Widgets/desplegable_tiempo.dart';
 import '../../Global/Widgets/popup_resumen.dart';
 import '../../Routes/routes.dart';
 
-//--------------------------------------------------------
-/// **Título de la pantalla**
-String titulo = 'Partida N';
-//--------------------------------------------------------
+/// ------------------------------------------------------------
+/// * Título mostrado en la pantalla de creación de partida.
+/// * Se actualizará con el ID de la partida actual.
+/// ------------------------------------------------------------
+String titulo = '';
 
-//--------------------------------------------------------
-
-/// **Vista para la creación de una partida**
+/// ------------------------------------------------------------
+/// * Vista principal para la creación de partidas.
+/// * El usuario puede seleccionar un sector, un tiempo límite
+///   y configurar los equipos participantes antes de iniciar.
+/// ------------------------------------------------------------
 class CreateGameView extends StatefulWidget {
   const CreateGameView({super.key});
 
@@ -32,29 +35,32 @@ class CreateGameView extends StatefulWidget {
 }
 
 class _CreateGameViewState extends State<CreateGameView> {
+  /// ID de la partida actual obtenida desde Firebase o persistencia local.
   String? partidaActual;
 
+  /// Opciones seleccionadas por el usuario.
   String? opcionSectorSeleccionada;
   String? opcionTiempoSeleccionada;
 
+  /// Listas de opciones disponibles.
   List<String> opcionesSectores = [];
   List<String> opcionesTiempos = [];
 
+  /// Instancias para consultar datos en Firebase.
   final TraerTodosTiempos traerTodosTiempos = TraerTodosTiempos();
   final TraerTodosSectores traerTodosSectores = TraerTodosSectores();
-
   final GuardarSector guardarSector = GuardarSector();
   final GuardarTiempo guardarTiempo = GuardarTiempo();
-
   final EliminarEquipo eliminarTodosLosEquipos = EliminarEquipo();
 
-  //Card equipos
+  /// Tarjetas asignadas y disponibles para los equipos.
   List<int> tarjetas = [];
-
   List<int> tarjetasDisponibles = [];
 
+  /// Mapa de tarjetas seleccionadas por cada equipo.
   Map<int, Map<String, dynamic>> seleccionTarjetas = {};
 
+  /// Estados de los equipos: esperando o preparados.
   Map<String, EstadoEquipo> estadoEquipos = {};
 
   @override
@@ -68,18 +74,25 @@ class _CreateGameViewState extends State<CreateGameView> {
         _cargarSectores();
         _cargarTiempos();
       }
+      titulo = partidaActual!;
     });
   }
 
+  /// ------------------------------------------------------------
+  /// * Carga el ID de la partida actual desde persistencia local.
+  /// ------------------------------------------------------------
   Future<void> _cargarPartidaActual() async {
     CargarPartida cargarPartida = CargarPartida();
-    await cargarPartida.cargarClavePartida(); // Llamamos al método actualizado
+    await cargarPartida.cargarClavePartida();
     if (cargarPartida.partidaId != null) {
       partidaActual = cargarPartida.partidaId;
     }
   }
 
-  /// **Carga los sectores desde Firebase y los almacena en la lista de opciones**
+  /// ------------------------------------------------------------
+  /// * Carga las opciones de sectores desde Firebase.
+  /// * Actualiza la lista `opcionesSectores`.
+  /// ------------------------------------------------------------
   Future<void> _cargarSectores() async {
     Map<String, dynamic>? sectores = await traerTodosSectores.obtenerSectores();
     if (sectores != null) {
@@ -89,7 +102,10 @@ class _CreateGameViewState extends State<CreateGameView> {
     }
   }
 
-  /// **Carga los tiempo desde Firebase y los almacena en la lista de opciones**
+  /// ------------------------------------------------------------
+  /// * Carga las opciones de tiempos desde Firebase.
+  /// * Actualiza la lista `opcionesTiempos`.
+  /// ------------------------------------------------------------
   Future<void> _cargarTiempos() async {
     Map<String, dynamic>? tiempos = await traerTodosTiempos.obtenerSectores();
     if (tiempos != null) {
@@ -99,7 +115,7 @@ class _CreateGameViewState extends State<CreateGameView> {
     }
   }
 
-  /// **Obtiene la partida guardada en persistencia local**
+  /// Carga la partida guardada en la selección de sector.
   Future<void> _cargarPartidaGuardaSector() async {
     String? partida = await guardarSector.obtenerPartidaGuardada();
     setState(() {
@@ -107,6 +123,7 @@ class _CreateGameViewState extends State<CreateGameView> {
     });
   }
 
+  /// Carga la partida guardada en la selección de tiempo.
   Future<void> _cargarPartidaGuardaTiempo() async {
     String? partida = await guardarTiempo.obtenerPartidaGuardada();
     setState(() {
@@ -114,18 +131,20 @@ class _CreateGameViewState extends State<CreateGameView> {
     });
   }
 
-  /// **Guarda la selección Sector en Firebase**
+  /// Guarda el sector seleccionado en Firebase.
   void _guardarSector(String? seleccion) {
     guardarSector.guardarSeleccion(seleccion);
   }
 
-  /// **Guarda la selección Sector en Firebase**
+  /// Guarda el tiempo seleccionado en Firebase.
   void _guardarTiempo(String? seleccion) {
     guardarTiempo.guardarSeleccion(seleccion);
   }
 
-  /// **Eliminar todos los equipos al seleccionar un sector en Firebase**
-
+  /// ------------------------------------------------------------
+  /// * Elimina todos los equipos creados en la partida actual.
+  /// * Se invoca cuando se cambia de sector.
+  /// ------------------------------------------------------------
   Future<void> _eliminarTodosEquipos(String partidaActual) async {
     await eliminarTodosLosEquipos.eliminarTodosLosEquipos(partidaActual);
     setState(() {
@@ -149,6 +168,7 @@ class _CreateGameViewState extends State<CreateGameView> {
       ),
       body: Stack(
         children: [
+          /// Fondo con imagen y transparencia oscura
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
@@ -174,7 +194,10 @@ class _CreateGameViewState extends State<CreateGameView> {
     );
   }
 
-  /// **Diseño para orientación vertical**
+  /// ------------------------------------------------------------
+  /// * Layout para orientación **vertical (portrait)**.
+  /// * Muestra los desplegables, tarjetas de equipos y botón.
+  /// ------------------------------------------------------------
   Widget _portraitVertical() {
     return Column(
       children: [
@@ -185,6 +208,8 @@ class _CreateGameViewState extends State<CreateGameView> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 24),
+
+                /// Selector de sector
                 DesplegableSector(
                   titulo: 'Sector',
                   icon: Icon(Icons.widgets, color: Colors.blueGrey[100]),
@@ -194,7 +219,6 @@ class _CreateGameViewState extends State<CreateGameView> {
                   onChanged: (nuevaOpcion) async {
                     if (partidaActual != null) {
                       await _eliminarTodosEquipos(partidaActual!);
-                      // Limpia las tarjetas y variables relacionadas
                       setState(() {
                         tarjetas.clear();
                         tarjetasDisponibles.clear();
@@ -223,7 +247,10 @@ class _CreateGameViewState extends State<CreateGameView> {
                     _guardarSector(null);
                   },
                 ),
+
                 const SizedBox(height: 25),
+
+                /// Selector de tiempo
                 DesplegableTiempo(
                   titulo: 'Tiempo permitido (Segundos)',
                   icon: Icon(Icons.timer_outlined, color: Colors.blueGrey[100]),
@@ -243,7 +270,10 @@ class _CreateGameViewState extends State<CreateGameView> {
                     _guardarTiempo(null);
                   },
                 ),
+
                 const SizedBox(height: 24),
+
+                /// Tarjeta de equipos (si hay sector y tiempo seleccionados)
                 if (opcionSectorSeleccionada != null && opcionTiempoSeleccionada != null)
                   CardEquipo(
                     partidaId: partidaActual ?? '',
@@ -253,19 +283,18 @@ class _CreateGameViewState extends State<CreateGameView> {
                         seleccionTarjetas = nuevaSeleccionTarjetas;
                       });
                     },
-                    tarjetas: tarjetas, // Variable mutable definida en CreateGameView
-                    tarjetasDisponibles:
-                        tarjetasDisponibles, // Variable mutable definida en CreateGameView
-                    seleccionTarjetas:
-                        seleccionTarjetas, // Variable mutable definida en CreateGameView
+                    tarjetas: tarjetas,
+                    tarjetasDisponibles: tarjetasDisponibles,
+                    seleccionTarjetas: seleccionTarjetas,
                     estadoEquipos: estadoEquipos,
-                    opcionSectorSeleccionada:
-                        opcionSectorSeleccionada, // Variable mutable definida en CreateGameView
+                    opcionSectorSeleccionada: opcionSectorSeleccionada,
                   ),
               ],
             ),
           ),
         ),
+
+        /// Botón de confirmar (solo si hay al menos 2 equipos preparados)
         if (estadoEquipos.length >= 2 &&
             estadoEquipos.values.every((estado) => estado == EstadoEquipo.preparado))
           Padding(
@@ -293,11 +322,14 @@ class _CreateGameViewState extends State<CreateGameView> {
     );
   }
 
-  /// **Diseño para orientación horizontal**
+  /// ------------------------------------------------------------
+  /// * Layout para orientación **horizontal (landscape)**.
+  /// * Muestra los desplegables en fila y las tarjetas debajo.
+  /// ------------------------------------------------------------
   Widget _landscapeHorizontal() {
     return Column(
       children: [
-        /// **Fila con los desplegables de Sector y Tiempo**
+        /// Desplegables en fila
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -365,7 +397,7 @@ class _CreateGameViewState extends State<CreateGameView> {
           ],
         ),
 
-        /// **Tarjeta de Equipos (solo si ambos desplegables están seleccionados)**
+        /// Tarjetas de equipos (condicional)
         Expanded(
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
@@ -389,8 +421,7 @@ class _CreateGameViewState extends State<CreateGameView> {
           ),
         ),
 
-        /// **Botón en la parte inferior**
-        /// **Botón en la parte inferior (solo se muestra si todos los equipos están preparados y hay al menos 2)**
+        /// Botón en la parte inferior
         if (estadoEquipos.length >= 2 &&
             estadoEquipos.values.every((estado) => estado == EstadoEquipo.preparado))
           Align(

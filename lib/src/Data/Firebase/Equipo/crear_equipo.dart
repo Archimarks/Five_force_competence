@@ -2,88 +2,163 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Clase encargada de la gestión de equipos en Firebase Realtime Database.
+/// ---------------------------------------------------------------------------
+/// # CrearEquipo
+///
+/// **Clase responsable de gestionar la creación y eliminación de equipos**
+/// **en Firebase Realtime Database dentro de una partida**.
+///
+/// Permite crear equipos hasta un máximo de 4 por partida, asegurando que
+/// cada uno tenga una estructura base predefinida y se registre en
+/// `SharedPreferences`.
+///
+/// ### Autor:
+/// *Marcos Alejandro Collazos Marmolejo*
+///
+/// ### Fecha:
+/// *2025*
+/// ---------------------------------------------------------------------------
 class CrearEquipo {
+  /// Referencia principal a Firebase Realtime Database.
   final DatabaseReference _dbRef;
 
-  /// Constructor que inicializa la referencia a Firebase Realtime Database.
+  /// -------------------------------------------------------------------------
+  /// Constructor de la clase `CrearEquipo`.
+  ///
+  /// Inicializa la referencia a Firebase Realtime Database.
+  /// -------------------------------------------------------------------------
   CrearEquipo() : _dbRef = FirebaseDatabase.instance.ref();
 
-  /// Método para crear un equipo con el siguiente identificador disponible dentro de una partida,
-  /// con un límite máximo de 4 equipos.
+  /// -------------------------------------------------------------------------
+  /// Crea un equipo con el siguiente ID disponible (máximo 4 equipos por partida).
+  ///
+  /// Si ya existen 4 equipos, no se creará ninguno adicional.
+  ///
+  /// ### Parámetro:
+  /// - `partidaActual`: ID de la partida donde se desea crear el equipo.
+  /// -------------------------------------------------------------------------
   Future<void> crearEquipoDisponible(String partidaActual) async {
     int equipoId = 1;
-    // Verificar si ya existen 4 equipos
+
     if (await _contarEquipos(partidaActual) >= 4) {
-      debugPrint('Límite de equipos alcanzado (máximo 4). No se puede crear más.');
+      debugPrint('❌ Límite de equipos alcanzado (máximo 4).');
       return;
     }
 
     while (await _equipoExiste(partidaActual, 'EQUIPO $equipoId')) {
       equipoId++;
-      // Asegurarse de no intentar crear más de 4 equipos
       if (equipoId > 4) {
-        debugPrint('No se pudo encontrar un ID disponible dentro del límite de 4 equipos.');
+        debugPrint('⚠️ No se pudo encontrar un ID disponible dentro del límite de 4 equipos.');
         return;
       }
     }
+
     await crearEquipoEspecifico(partidaActual, 'EQUIPO $equipoId');
   }
 
-  /// Método para verificar si un equipo ya existe en la partida.
+  /// -------------------------------------------------------------------------
+  /// Verifica si un equipo ya existe en la partida.
+  ///
+  /// ### Parámetros:
+  /// - `partidaActual`: ID de la partida.
+  /// - `equipoId`: Identificador del equipo (`EQUIPO 1`, `EQUIPO 2`, etc).
+  ///
+  /// ### Retorna:
+  /// - `true` si el equipo ya existe, `false` en caso contrario.
+  /// -------------------------------------------------------------------------
   Future<bool> _equipoExiste(String partidaActual, String equipoId) async {
-    final DatabaseReference equipoRef = _dbRef.child(
+    final equipoRef = _dbRef.child(
       'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoId',
     );
-    DataSnapshot snapshot = await equipoRef.get();
+    final snapshot = await equipoRef.get();
     return snapshot.exists;
   }
 
-  /// Método para contar la cantidad de equipos existentes en la partida.
+  /// -------------------------------------------------------------------------
+  /// Cuenta cuántos equipos existen actualmente en una partida.
+  ///
+  /// ### Parámetro:
+  /// - `partidaActual`: ID de la partida.
+  ///
+  /// ### Retorna:
+  /// - Cantidad de equipos creados (int).
+  /// -------------------------------------------------------------------------
   Future<int> _contarEquipos(String partidaActual) async {
-    final DatabaseReference equiposRef = _dbRef.child(
-      'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS',
-    );
-    DataSnapshot snapshot = await equiposRef.get();
+    final equiposRef = _dbRef.child('Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS');
+    final snapshot = await equiposRef.get();
     if (snapshot.value != null && snapshot.value is Map) {
       return (snapshot.value as Map).length;
     }
     return 0;
   }
 
-  /// Método para crear un equipo específico dentro de una partida.
+  /// -------------------------------------------------------------------------
+  /// Crea un equipo con un identificador específico si no existe previamente.
+  ///
+  /// También guarda el ID del equipo creado en `SharedPreferences`.
+  ///
+  /// ### Parámetros:
+  /// - `partidaActual`: ID de la partida.
+  /// - `equipoId`: Identificador del equipo (`EQUIPO 1`, `EQUIPO 2`, etc).
+  /// -------------------------------------------------------------------------
   Future<void> crearEquipoEspecifico(String partidaActual, String equipoId) async {
-    final DatabaseReference equipoRef = _dbRef.child(
+    final equipoRef = _dbRef.child(
       'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoId',
     );
 
-    DataSnapshot snapshot = await equipoRef.get();
+    final snapshot = await equipoRef.get();
     if (!snapshot.exists) {
       await equipoRef.set(_crearPlantillaEquipo());
       await _guardarEquipoId(equipoId);
-      debugPrint('Equipo creado con éxito: $equipoId');
+      debugPrint('✅ Equipo creado con éxito: $equipoId');
     } else {
-      debugPrint('El equipo $equipoId ya existe.');
+      debugPrint('⚠️ El equipo $equipoId ya existe.');
     }
   }
 
-  /// Método para eliminar un equipo de una partida específica.
+  /// -------------------------------------------------------------------------
+  /// Elimina un equipo de una partida específica.
+  ///
+  /// ### Parámetros:
+  /// - `partidaActual`: ID de la partida.
+  /// - `equipoId`: Identificador del equipo a eliminar.
+  /// -------------------------------------------------------------------------
   Future<void> eliminarEquipo(String partidaActual, String equipoId) async {
-    final DatabaseReference equipoRef = _dbRef.child(
+    final equipoRef = _dbRef.child(
       'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoId',
     );
 
     await equipoRef.remove();
-    debugPrint('Equipo eliminado: $equipoId');
+    debugPrint('🗑️ Equipo eliminado: $equipoId');
   }
 
-  /// Guarda el ID del equipo en SharedPreferences.
+  /// -------------------------------------------------------------------------
+  /// Guarda el ID del equipo en `SharedPreferences` localmente.
+  ///
+  /// ### Parámetro:
+  /// - `equipoId`: Identificador del equipo (por ejemplo, `EQUIPO 2`).
+  /// -------------------------------------------------------------------------
   Future<void> _guardarEquipoId(String equipoId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('EQUIPO', equipoId);
   }
 
-  /// Retorna la estructura base de un equipo basada en la plantilla.
+  /// -------------------------------------------------------------------------
+  /// Retorna una plantilla base vacía para un equipo.
+  ///
+  /// Esta estructura se utiliza al crear nuevos equipos por primera vez.
+  ///
+  /// ### Estructura:
+  /// - CODIGO
+  /// - ESTADO TURNO
+  /// - PUESTO
+  /// - PUNTOS
+  /// - COLOR
+  /// - EMPRESA
+  /// - FUERZAS: 5 atributos vacíos correspondientes a las 5 fuerzas de Porter.
+  /// - RESPUESTA FUERZAS
+  /// - TABLERO
+  /// -------------------------------------------------------------------------
   Map<String, dynamic> _crearPlantillaEquipo() {
     return {
       'CODIGO': '',

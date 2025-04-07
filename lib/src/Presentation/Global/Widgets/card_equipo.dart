@@ -7,21 +7,51 @@ import '../Color/color.dart';
 import '../Color/color_equipo.dart';
 import 'popup_equipo.dart';
 
+/// ### Enum: `Direccion`
+///
+/// Define la orientación en la que se deben mostrar las tarjetas del equipo.
+///
+/// - `horizontal` → Tarjetas en fila horizontal.
+/// - `vertical` → Tarjetas apiladas verticalmente.
 enum Direccion { horizontal, vertical }
 
+/// ### Enum: `EstadoEquipo`
+///
+/// Define el estado actual de un equipo:
+///
+/// - `pendiente` → El equipo no ha sido configurado.
+/// - `preparado` → El equipo está listo para jugar.
 enum EstadoEquipo { pendiente, preparado }
 
+/// ### Widget: `CardEquipo`
+///
+/// Widget personalizado para mostrar y administrar tarjetas de equipos dentro
+/// de una partida. Permite crear, editar o eliminar hasta **4 equipos**.
+///
+/// ---
 class CardEquipo extends StatefulWidget {
+  /// **ID** de la partida actual.
   final String partidaId;
+
+  /// Dirección en la que se visualizan las tarjetas (`horizontal` o `vertical`).
   final Direccion direccion;
 
+  /// Sector que fue seleccionado (puede ser `null`).
   final String? opcionSectorSeleccionada;
 
+  /// Callback que se llama cuando se actualiza una tarjeta.
   final Function(Map<int, Map<String, dynamic>>) onSeleccion;
 
+  /// Lista de tarjetas ya visibles.
   final List<int> tarjetas;
+
+  /// Tarjetas que aún no se han utilizado.
   final List<int> tarjetasDisponibles;
+
+  /// Datos detallados de selección de cada tarjeta.
   final Map<int, Map<String, dynamic>> seleccionTarjetas;
+
+  /// Mapa que contiene el estado actual de cada equipo.
   final Map<String, EstadoEquipo> estadoEquipos;
 
   const CardEquipo({
@@ -40,14 +70,25 @@ class CardEquipo extends StatefulWidget {
   CardWidgetState createState() => CardWidgetState();
 }
 
+/// ### Estado: `CardWidgetState`
+///
+/// Controla la lógica de creación, eliminación y configuración de los equipos.
+///
+/// También interactúa con Firebase para almacenar la información relevante.
 class CardWidgetState extends State<CardEquipo> {
+  /// ID de partida cargada desde memoria local.
   String? partidaActual;
-  int? _loadingIndex; // Nuevo estado para rastrear la tarjeta que está cargando
 
+  /// Índice de tarjeta que se está cargando actualmente (para mostrar loading).
+  int? _loadingIndex;
+
+  /// Servicio para traer empresas desde Firebase.
   final TraerTodasEmpresas traerEmpresas = TraerTodasEmpresas();
 
+  /// Servicio para crear/eliminar equipos en Firebase.
   final CrearEquipo crearEquipo = CrearEquipo();
 
+  /// Lista de nombres de empresas disponibles para asociar a equipos.
   List<String> opcionesEmpresas = [];
 
   @override
@@ -61,14 +102,20 @@ class CardWidgetState extends State<CardEquipo> {
     });
   }
 
+  /// ### Función: `_cargarPartidaActual`
+  ///
+  /// Carga el ID de la partida actual desde almacenamiento local (SharedPreferences).
   Future<void> _cargarPartidaActual() async {
     CargarPartida cargarPartida = CargarPartida();
-    await cargarPartida.cargarClavePartida(); // Llamamos al método actualizado
+    await cargarPartida.cargarClavePartida();
     if (cargarPartida.partidaId != null) {
       partidaActual = cargarPartida.partidaId;
     }
   }
 
+  /// ### Función: `_cargarEmpresas`
+  ///
+  /// Consulta en Firebase todas las empresas disponibles y actualiza el estado.
   void _cargarEmpresas() async {
     Map<String, dynamic>? empresas = await traerEmpresas.obtenerEmpresas();
     setState(() {
@@ -76,18 +123,26 @@ class CardWidgetState extends State<CardEquipo> {
     });
   }
 
+  /// ### Función: `_agregarTarjeta`
+  ///
+  /// Agrega una nueva tarjeta al listado actual, respetando el límite de 4.
+  ///
+  /// También actualiza Firebase creando una entrada vacía del equipo.
   Future<void> _agregarTarjeta() async {
     if (widget.tarjetas.length < 4 && _loadingIndex == null) {
       setState(() {
-        _loadingIndex = -1; // Usamos -1 para indicar que se está agregando una tarjeta
+        _loadingIndex = -1; // Mostramos indicador de carga
       });
+
       _cargarEmpresas();
+
       int nuevoNumero;
       if (widget.tarjetasDisponibles.isNotEmpty) {
         nuevoNumero = widget.tarjetasDisponibles.removeAt(0);
       } else {
         nuevoNumero = (widget.tarjetas.isEmpty) ? 1 : (widget.tarjetas.last + 1);
       }
+
       setState(() {
         widget.tarjetas.add(nuevoNumero);
         widget.tarjetas.sort();
@@ -98,20 +153,27 @@ class CardWidgetState extends State<CardEquipo> {
 
       if (partidaActual != null) {
         await crearEquipo.crearEquipoDisponible(partidaActual!).catchError((e) {
-          debugPrint('Error al crear equipo: $e');
+          debugPrint('❌ Error al crear equipo: $e');
         });
       }
+
       setState(() {
         _loadingIndex = null;
       });
     }
   }
 
+  /// ### Función: `_eliminarTarjeta`
+  ///
+  /// Elimina una tarjeta del listado y borra su información de Firebase.
+  ///
+  /// - También libera el número para reutilizarlo luego.
   Future<void> _eliminarTarjeta(int index) async {
     if (widget.tarjetas.isNotEmpty && _loadingIndex == null) {
       setState(() {
         _loadingIndex = index;
       });
+
       int numeroEliminado = widget.tarjetas[index];
 
       setState(() {
@@ -127,15 +189,19 @@ class CardWidgetState extends State<CardEquipo> {
       if (partidaActual != null) {
         String equipoId = 'EQUIPO $numeroEliminado';
         await crearEquipo.eliminarEquipo(partidaActual!, equipoId).catchError((e) {
-          debugPrint('Error al eliminar equipo: $e');
+          debugPrint('❌ Error al eliminar equipo: $e');
         });
       }
+
       setState(() {
         _loadingIndex = null;
       });
     }
   }
 
+  /// ### Función: `_mostrarPopup`
+  ///
+  /// Abre el popup de configuración del equipo.
   void _mostrarPopup(int equipo) {
     if (_loadingIndex == null) {
       PopupEquipo.mostrar(
@@ -176,6 +242,12 @@ class CardWidgetState extends State<CardEquipo> {
     );
   }
 
+  /// ### Función: `buildTarjetas`
+  ///
+  /// Construye la interfaz visual para cada tarjeta, incluyendo botón de agregar.
+  ///
+  /// - Si la tarjeta está cargando, se muestra un `CircularProgressIndicator`.
+  /// - Si hay menos de 4 tarjetas, se muestra un botón para agregar más.
   List<Widget> buildTarjetas({bool isVertical = false}) {
     List<Widget> cardWidgets =
         widget.tarjetas.asMap().entries.map((entry) {
@@ -196,10 +268,7 @@ class CardWidgetState extends State<CardEquipo> {
                 width: isVertical ? double.infinity : 140,
                 height: 50,
                 decoration: BoxDecoration(
-                  color:
-                      isCurrentlyLoading
-                          ? Colors.grey.shade300
-                          : colorTarjeta, // Cambia el color si está cargando
+                  color: isCurrentlyLoading ? Colors.grey.shade300 : colorTarjeta,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Center(

@@ -81,6 +81,7 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
   /// Muestra un `SnackBar` con el resultado de la operación.
   Future<void> _confirmarSeleccion() async {
     if (partidaId == null || equipo == null) {
+      if (!mounted) return; // Verifica si el widget sigue en el árbol
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error: no se encontraron los datos del equipo o partida.')),
       );
@@ -93,6 +94,8 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
       equipo: equipo!,
       respuestasUsuario: seleccionadas,
     );
+
+    if (!mounted) return; // Verifica después del await
 
     ScaffoldMessenger.of(
       context,

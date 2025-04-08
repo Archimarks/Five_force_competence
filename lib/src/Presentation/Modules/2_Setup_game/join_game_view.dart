@@ -180,6 +180,8 @@ class _JoinGameViewState extends State<JoinGameView> {
           // Cerrar el loader
           if (mounted) Navigator.pop(context);
 
+          if (!mounted) return;
+
           // Redirigir si el código es válido
           if (codigoGuardado == teamCode) {
             Navigator.pushReplacementNamed(context, Routes.definedTeam);

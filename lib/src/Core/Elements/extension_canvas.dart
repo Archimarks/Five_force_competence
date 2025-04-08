@@ -1,12 +1,25 @@
 // extension_canvas.dart
 //
 // Extensiones para facilitar el dibujo de texto en el lienzo y conversión entre tipos de coordenadas.
+
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
-/// Extensión sobre Canvas para permitir el dibujo fácil de texto.
+/// ------------------------------------------------------------
+/// Extensión sobre la clase `Canvas` para facilitar el dibujo
+/// de texto personalizado directamente sobre el lienzo.
+/// ------------------------------------------------------------
 extension DibujoTextoEnLienzo on Canvas {
-  /// Dibuja texto en una posición específica del lienzo con estilo y alineación.
+  /// Dibuja texto en una posición específica del lienzo con un estilo determinado.
+  ///
+  /// ### Parámetros:
+  /// * `texto` - Texto que se desea dibujar.
+  /// * `posicion` - Coordenadas en las que se posiciona el texto dentro del lienzo.
+  /// * `estilo` - Estilo visual del texto (`TextStyle`).
+  ///
+  /// ### Parámetros opcionales:
+  /// * `alineacion` - Alineación horizontal del texto (por defecto: `TextAlign.center`).
+  /// * `direccionTexto` - Dirección del texto (por defecto: `TextDirection.ltr`).
   void drawText(
     String texto,
     Offset posicion,
@@ -24,7 +37,11 @@ extension DibujoTextoEnLienzo on Canvas {
   }
 }
 
-/// Extensión para convertir un [Offset] de Flutter a un [Vector2] de Flame.
+/// ------------------------------------------------------------
+/// Extensión para facilitar la conversión de un objeto `Offset`
+/// de Flutter a un `Vector2` utilizado en Flame.
+/// ------------------------------------------------------------
 extension ConversorVector2 on Offset {
+  /// Convierte el objeto `Offset` actual en un `Vector2`.
   Vector2 aVector2() => Vector2(dx, dy);
 }

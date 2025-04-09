@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 ///
 /// Define los posibles estados que puede tener una celda en el tablero.
 ///
-/// - vacia:        La celda no contiene ningún objeto.
-/// - barco:        La celda contiene una parte de un barco.
-/// - atacada:      La celda fue atacada, pero no había barco.
-/// - impactada:    La celda fue atacada y contenía parte de un barco.
+/// - vacia:         La celda no contiene ningún objeto.
+/// - barco:         La celda contiene una parte de un barco.
+/// - atacada:       La celda fue atacada, pero no había barco.
+/// - impactada:     La celda fue atacada y contenía parte de un barco.
 /// ---------------------------------------------------------------------------
 enum EstadoCelda { vacia, barco, atacada, impactada }
 
@@ -17,11 +17,11 @@ enum EstadoCelda { vacia, barco, atacada, impactada }
 /// COMPONENTE: Celda
 ///
 /// Representa una celda individual dentro del tablero de juego. Cada celda
-/// conoce su posición lógica (fila y columna), su estado actual, y los
+/// conoce su posición lógica (fila y columna), su estado actual y los
 /// cuadrantes a los que pertenece.
 ///
-/// También se encarga de su renderizado visual utilizando colores distintos
-/// según el estado en el que se encuentre.
+/// Se encarga de su renderizado visual utilizando colores distintos según
+/// su estado.
 /// ---------------------------------------------------------------------------
 class Celda extends PositionComponent {
   /// Fila de la celda en el tablero (0 a 11).
@@ -33,19 +33,20 @@ class Celda extends PositionComponent {
   /// Estado actual de la celda.
   EstadoCelda estado;
 
-  /// Conjunto de nombres de cuadrantes a los que esta celda pertenece.
+  /// Conjunto de identificadores de los cuadrantes a los que pertenece esta celda.
   final Set<String> cuadrantes = {};
 
-  /// Constructor base.
-  Celda({required this.fila, required this.columna, this.estado = EstadoCelda.vacia});
+  /// Constructor base para crear una [Celda].
+  ///
+  /// Requiere la [fila] y la [columna] de la celda. El [estado] inicial es [EstadoCelda.vacia] por defecto.
+  Celda({required this.fila, required this.columna, this.estado = EstadoCelda.vacia})
+    : super(size: Vector2.all(50.0)); // Tamaño fijo de cada celda
 
   /// Retorna `true` si la celda contiene una parte de un barco.
   bool get tieneBarco => estado == EstadoCelda.barco;
 
-  /// Marca la celda como atacada.
-  ///
-  /// - Si tenía un barco, cambia a `impactada`.
-  /// - Si no, cambia a `atacada`.
+  /// Marca la celda como atacada, actualizando su estado a [EstadoCelda.impactada]
+  /// si contenía un barco, o a [EstadoCelda.atacada] si estaba vacía.
   void atacar() {
     if (estado == EstadoCelda.barco) {
       estado = EstadoCelda.impactada;
@@ -54,19 +55,20 @@ class Celda extends PositionComponent {
     }
   }
 
-  /// Asocia esta celda a un cuadrante por su nombre (por ejemplo: "A", "B", etc.).
+  /// Asocia esta celda a un cuadrante específico mediante su [nombreCuadrante].
   void agregarACuadrante(String nombreCuadrante) {
     cuadrantes.add(nombreCuadrante);
   }
 
   /// Método de renderizado de la celda.
   ///
-  /// Dibuja un rectángulo coloreado según el estado y un borde negro.
+  /// Dibuja un rectángulo con un color de fondo dependiente del [estado] de la celda
+  /// y un borde negro para delimitarla.
   @override
   void render(Canvas canvas) {
     super.render(canvas);
 
-    // Pintado del fondo según estado
+    // Pintar el fondo según el estado de la celda
     final paint =
         Paint()
           ..color = _obtenerColorPorEstado()
@@ -74,7 +76,7 @@ class Celda extends PositionComponent {
 
     canvas.drawRect(size.toRect(), paint);
 
-    // Borde negro de la celda
+    // Dibujar el borde de la celda
     final borde =
         Paint()
           ..color = Colors.black

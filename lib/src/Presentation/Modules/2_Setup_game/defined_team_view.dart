@@ -100,6 +100,9 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Fuerzas validadas correctamente.')));
+
+    // Redirige a la vista de ingreso de código de equipo
+    Navigator.pushNamed(context, Routes.setupGame);
   }
 
   /// Construye un Dropdown para seleccionar una fuerza.

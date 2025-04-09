@@ -45,3 +45,12 @@ extension ConversorVector2 on Offset {
   /// Convierte el objeto `Offset` actual en un `Vector2`.
   Vector2 aVector2() => Vector2(dx, dy);
 }
+
+/// ------------------------------------------------------------
+/// Extensión para facilitar la conversión de un `Vector2`
+/// de Flame a un `Offset` utilizado en Flutter.
+/// ------------------------------------------------------------
+extension ConversorOffset on Vector2 {
+  /// Convierte el objeto `Vector2` actual en un `Offset`.
+  Offset aOffset() => Offset(x, y);
+}

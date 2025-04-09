@@ -33,4 +33,7 @@ class Routes {
 
   /// Ruta para la pantalla de unirse a un juego.
   static const definedTeam = '/Defined-Team';
+
+  /// Ruta para la pantalla de colocar un barco.
+  static const setupGame = '/Setup-Game';
 }

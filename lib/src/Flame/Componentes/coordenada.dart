@@ -6,8 +6,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
-import 'extension_canvas.dart';
-
 /// ---------------------------------------------------------------------------
 /// `Coordenada` es un componente visual personalizado que representa una letra
 /// (A–L) o un número (1–12) en los bordes del tablero. Se utiliza en el diseño
@@ -16,32 +14,37 @@ import 'extension_canvas.dart';
 /// Este componente hace uso de una extensión (`drawText`) sobre el lienzo para
 /// renderizar el texto de manera sencilla.
 /// ---------------------------------------------------------------------------
-class Coordenada extends Component {
-  /// Posición en pantalla donde se desea renderizar el texto.
-  final Vector2 posicion;
-
-  /// Texto que se mostrará como coordenada (ejemplo: "A", "1", "L", "12").
-  final String texto;
-
-  /// Estilo del texto, como color, tamaño de fuente y peso.
-  final TextStyle estilo;
-
+class Coordenada extends TextComponent {
   /// Constructor de `Coordenada`.
   ///
-  /// * [posicion] Define la ubicación en el lienzo.
   /// * [texto] Es el contenido que se desea mostrar.
+  /// * [posicion] Define la ubicación en el lienzo.
   /// * [estilo] Es opcional; por defecto muestra texto blanco en negrita tamaño 14.
   Coordenada({
-    required this.posicion,
-    required this.texto,
-    this.estilo = const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-  });
+    required String texto,
+    required Vector2 posicion,
+    TextStyle estilo = const TextStyle(
+      color: Colors.white,
+      fontSize: 14,
+      fontWeight: FontWeight.bold,
+    ),
+  }) : super(
+         text: texto,
+         position: posicion,
+         anchor: Anchor.center, // Centrar el texto para una mejor alineación
+         textRenderer: TextPaint(style: estilo),
+       );
 
-  /// Método de renderizado del componente.
-  ///
-  /// Utiliza la extensión personalizada `drawText` para pintar el texto sobre el lienzo.
-  @override
-  void render(Canvas canvas) {
-    canvas.drawText(texto, posicion.toOffset(), estilo);
+  /// No es necesario el método render si se extiende de TextComponent.
+  /// El TextComponent se encarga de renderizar el texto.
+}
+
+extension CanvasExtension on Canvas {
+  void drawText(String text, Offset position, TextStyle style) {
+    final textPainter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    textPainter.paint(this, position);
   }
 }

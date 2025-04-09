@@ -1,28 +1,68 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Flame/Componentes/setup_game.dart';
+import '../../Global/Color/color_equipo.dart';
 import '../../Global/Widgets/app_bar.dart';
 
-/// Nombre del equipo, cargado desde SharedPreferences.
-String nombreEquipo = '';
-
-/// Color del equipo, cargado desde SharedPreferences y convertido desde enum.
-Color colorEquipo = Colors.black;
-
-/// ID de la partida actual.
-String? partidaId;
-
-/// Nombre del equipo actual (clave en Firebase).
-String? equipo;
-
 /// Vista que permite organizar las edificaciones antes de la batalla.
+///
 /// Contiene el juego con Flame, encabezado personalizado, instrucciones,
-/// y botón para iniciar la batalla.
-class SetupGameView extends StatelessWidget {
+/// y botón para iniciar la batalla. Carga automáticamente los datos del
+/// equipo desde `SharedPreferences`.
+class SetupGameView extends StatefulWidget {
+  const SetupGameView({super.key});
+
+  @override
+  State<SetupGameView> createState() => _SetupGameViewState();
+}
+
+class _SetupGameViewState extends State<SetupGameView> {
+  /// Instancia del juego con Flame
   final SetupGame game = SetupGame();
 
-  SetupGameView({super.key});
+  /// Nombre del equipo, cargado desde SharedPreferences.
+  String nombreEquipo = '';
+
+  /// Color del equipo, cargado desde SharedPreferences y convertido desde enum.
+  Color colorEquipo = Colors.black;
+
+  /// ID de la partida actual.
+  String? partidaId;
+
+  /// Nombre del equipo actual (clave en Firebase).
+  String? equipo;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarDatosEquipo();
+  }
+
+  /// Carga los datos persistidos del equipo y partida desde SharedPreferences.
+  Future<void> _cargarDatosEquipo() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Obtener nombre del equipo
+    nombreEquipo = prefs.getString('EMPRESA') ?? '';
+
+    // Obtener y convertir color del equipo desde el enum
+    final colorName = prefs.getString('COLOR');
+    if (colorName != null) {
+      final colorEnum = AppColorEquipo.values.firstWhere((e) => e.name == colorName);
+      colorEquipo = colorEnum.color;
+    }
+
+    // Obtener identificadores adicionales
+    partidaId = prefs.getString('PARTIDA');
+    equipo = prefs.getString('EQUIPO');
+
+    // Refrescar la vista una vez cargados los datos
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,24 +93,27 @@ class SetupGameView extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: GameWidget(game: game),
+                  child:
+                      nombreEquipo.isEmpty
+                          ? const Center(child: CircularProgressIndicator())
+                          : GameWidget(game: game),
                 ),
               ),
 
               // Botón "¡A la batalla!"
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0C1B1E),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
                     onPressed: () {
-                      // TODO: Acción al presionar el botón
+                      // Aquí puedes implementar la navegación a la vista de batalla
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                     child: const Text('¡A la batalla!', style: TextStyle(fontSize: 18)),
                   ),
                 ),

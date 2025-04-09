@@ -31,6 +31,6 @@ Map<String, Widget Function(BuildContext)> get appRoutes {
     Routes.createGame: (context) => const CreateGameView(),
     Routes.joinGame: (context) => const JoinGameView(),
     Routes.definedTeam: (context) => const DefinedTeamView(),
-    Routes.setupGame: (context) => SetupGameView(),
+    Routes.setupGame: (context) => const SetupGameView(),
   };
 }

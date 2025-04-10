@@ -1,3 +1,4 @@
+// setup_game.dart
 /// ---------------------------------------------------------------------------
 /// `SetupGame` - Vista de configuración del juego basada en FlameGame.
 /// ---------------------------------------------------------------------------
@@ -9,11 +10,10 @@
 
 library;
 
-import 'package:flame/components.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/material.dart';
 
 import 'barco.dart';
-import 'barco_almacen.dart';
 import 'image_paths.dart';
 import 'tablero.dart';
 
@@ -23,7 +23,6 @@ class SetupGame extends FlameGame {
   // ---------------------------------------------------------------------------
 
   late final Tablero tablero;
-  final List<BarcoAlmacen> barcosAlmacen = [];
   final List<Barco> barcosEnTablero = [];
 
   // ---------------------------------------------------------------------------
@@ -31,11 +30,23 @@ class SetupGame extends FlameGame {
   // ---------------------------------------------------------------------------
 
   static const double _margen = 20;
+  static const double _espacioExtra = 50;
+
+  static const double _escalaBarco = 0.8;
   static const double _separacionBarcos = 10;
-  static const double _escalaBarco = 10;
-  static const double _espacioExtra = 30;
+
+  static const double _tamanioCelda = 25.0;
+  static const int _filas = 12;
+  static const int _columnas = 12;
 
   late final bool esVertical;
+
+  // ---------------------------------------------------------------------------
+  // Color de fondo transparente
+  // ---------------------------------------------------------------------------
+
+  @override
+  Color backgroundColor() => const Color(0x00000000);
 
   // ---------------------------------------------------------------------------
   // Ciclo de carga
@@ -50,11 +61,11 @@ class SetupGame extends FlameGame {
     // Precarga de imágenes necesarias
     await _cargarImagenesBarcos();
 
-    final Vector2 sizeTablero = Vector2.all(20.0 * 12);
+    final Vector2 sizeTablero = Vector2.all(_tamanioCelda * 12);
     final Vector2 posicionTablero =
         esVertical
-            ? Vector2((size.x - sizeTablero.x) / 2, _margen)
-            : Vector2(_margen + 130, (size.y - sizeTablero.y) / 2);
+            ? Vector2((size.x - sizeTablero.x) / 3, _margen)
+            : Vector2(_margen + 150, (size.y - sizeTablero.y) / 2 + 50);
 
     _agregarTablero(posicionTablero, sizeTablero);
     _agregarBarcos(posicionTablero, sizeTablero);
@@ -73,20 +84,27 @@ class SetupGame extends FlameGame {
   // ---------------------------------------------------------------------------
 
   void _agregarTablero(Vector2 posicion, Vector2 size) {
-    tablero = Tablero(position: posicion, size: size);
+    tablero = Tablero(
+      position: posicion,
+      size: size,
+      tamanioCelda: _tamanioCelda,
+      filas: _filas,
+      columnas: _columnas,
+    );
     add(tablero);
   }
 
   // ---------------------------------------------------------------------------
-  // Barcos (usando imágenes individuales por barco)
+  // Barcos (usando un solo componente visual por barco)
   // ---------------------------------------------------------------------------
 
   void _agregarBarcos(Vector2 posicionTablero, Vector2 sizeTablero) {
-    final double qSize = sizeTablero.x / 12;
-    final double offsetBase =
-        esVertical ? posicionTablero.y + sizeTablero.y + _espacioExtra : _margen;
+    final double offsetBaseVertical = posicionTablero.y + sizeTablero.y + _espacioExtra;
+    final double offsetBaseHorizontal = _margen;
+    final double separacionVertical = _tamanioCelda * 1 + _separacionBarcos;
+    final double separacionHorizontal = _tamanioCelda * 2 + _separacionBarcos * 2;
 
-    final List<(String, String, int)> barcos = [
+    final List<(String, String, int)> barcosData = [
       ('1', ImagePaths.barco1, 1),
       ('2', ImagePaths.barco2, 2),
       ('3', ImagePaths.barco3, 3),
@@ -94,60 +112,43 @@ class SetupGame extends FlameGame {
       ('5', ImagePaths.barco5, 5),
     ];
 
-    for (int i = 0; i < barcos.length; i++) {
-      final (id, imageUrl, sizeEnCeldas) = barcos[i];
+    for (int i = 0; i < barcosData.length; i++) {
+      final (id, imageUrl, sizeEnCeldas) = barcosData[i];
 
-      final Vector2 posicion =
+      final Vector2 posicionBarcoAlmacen =
           esVertical
-              ? Vector2(_margen + i * (qSize * 2), offsetBase)
-              : Vector2(_margen, offsetBase + i * (qSize * sizeEnCeldas + _separacionBarcos));
+              ? Vector2(_margen + i * separacionHorizontal, offsetBaseVertical)
+              : Vector2(offsetBaseHorizontal, _margen + i * separacionVertical + 100);
 
-      _crearBarco(
+      final Barco barcoAlmacen = Barco(
         id: id,
-        imageUrl: imageUrl,
-        sizeEnCeldas: sizeEnCeldas,
-        posicion: posicion,
-        qSize: qSize,
+        longitud: sizeEnCeldas,
+        imageUrl: imageUrl, // Pasa la URL de la imagen al Barco
+        posicionInicial: posicionBarcoAlmacen,
+        escala: _escalaBarco,
+        onPosicionCambiada: (nuevaPosicion) {
+          // Opcional: Retroalimentación visual durante el arrastre
+        },
+        onBarcoColocadoEnTablero: (barco) {
+          final gridPosition = tablero.worldToGrid(barco.position);
+          if (tablero.esPosicionValida(gridPosition, barco.longitud, barco.esVertical)) {
+            tablero.agregarBarco(barco, gridPosition, barco.esVertical);
+            barcosEnTablero.add(barco);
+            barco.onBarcoColocadoEnTablero = null;
+            barco.validarColocacion = null;
+          } else {
+            barco.removeFromParent();
+            barcosEnTablero.remove(barco);
+          }
+        },
+        validarColocacion: (barco) {
+          final gridPosition = tablero.worldToGrid(barco.position);
+          return tablero.esPosicionValida(gridPosition, barco.longitud, barco.esVertical);
+        },
+        seccionSprite: posicionBarcoAlmacen,
       );
-    }
-  }
 
-  void _crearBarco({
-    required String id,
-    required String imageUrl,
-    required int sizeEnCeldas,
-    required Vector2 posicion,
-    required double qSize,
-  }) {
-    final sprite = Sprite(images.fromCache(imageUrl));
-
-    final barco = BarcoAlmacen(
-      id: id,
-      longitud: sizeEnCeldas,
-      spriteHorizontal: sprite,
-      spriteVertical: sprite,
-      posicionInicial: posicion,
-      escala: _escalaBarco,
-      onBarcoArrastradoAlTablero: _onBarcoArrastradoAlTablero,
-    );
-
-    barcosAlmacen.add(barco);
-    add(barco);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Lógica de colocación de barcos
-  // ---------------------------------------------------------------------------
-
-  void _onBarcoArrastradoAlTablero(Barco barco) {
-    final Vector2 gridPosition = tablero.worldToGrid(barco.position);
-
-    if (tablero.esPosicionValida(gridPosition, barco.longitud, barco.esVertical)) {
-      barco.position = tablero.gridToWorld(gridPosition);
-      tablero.add(barco);
-      barcosEnTablero.add(barco);
-    } else {
-      barco.removeFromParent(); // Elimina el barco si se soltó en una celda inválida
+      add(barcoAlmacen..priority = 1);
     }
   }
 }

@@ -1,4 +1,5 @@
 // coordenada.dart
+// coordenada.dart
 //
 // Componente visual que representa una coordenada (letra o número)
 // para los bordes del tablero 12x12 en el juego.

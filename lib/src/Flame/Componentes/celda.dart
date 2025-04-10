@@ -1,3 +1,4 @@
+// celda.dart
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
@@ -5,19 +6,21 @@ import 'package:flutter/material.dart';
 /// ENUM: EstadoCelda
 ///
 /// Define los posibles estados que puede tener una celda en el tablero.
-/// - vacia:      La celda no contiene ningún objeto.
-/// - barco:      La celda contiene una parte de un barco.
-/// - atacada:    La celda fue atacada, pero no había barco.
-/// - impactada:  La celda fue atacada y contenía parte de un barco.
+/// - vacia:     La celda no contiene ningún objeto.
+/// - barco:     La celda contiene una parte de un barco.
+/// - atacada:   La celda fue atacada, pero no había barco.
+/// - impactada: La celda fue atacada y contenía parte de un barco.
+/// - resaltada: La celda está resaltada visualmente para colocación.
+/// - rechazada: La celda está marcada visualmente como inválida para colocación.
 /// ---------------------------------------------------------------------------
-enum EstadoCelda { vacia, barco, atacada, impactada }
+enum EstadoCelda { vacia, barco, atacada, impactada, resaltada, rechazada }
 
 /// ---------------------------------------------------------------------------
 /// COMPONENTE: Celda
 ///
 /// Representa una celda individual dentro del tablero de juego.
-/// Cada celda conoce su posición lógica, su estado actual, y los cuadrantes
-/// a los que pertenece. Gestiona su apariencia visual según su estado.
+/// Cada celda conoce su posición lógica y su estado actual.
+/// Gestiona su apariencia visual según su estado.
 /// ---------------------------------------------------------------------------
 class Celda extends PositionComponent {
   /// Posición lógica en el tablero.
@@ -26,9 +29,6 @@ class Celda extends PositionComponent {
 
   /// Estado actual de la celda.
   EstadoCelda _estado;
-
-  /// Cuadrantes asociados a esta celda.
-  final Set<String> _cuadrantes = {};
 
   /// Color de fondo temporal (por ejemplo para interacciones visuales).
   Color _colorTemporal = Colors.transparent;
@@ -40,10 +40,11 @@ class Celda extends PositionComponent {
 
   /// Getters y lógica
   EstadoCelda get estado => _estado;
+  set estado(EstadoCelda nuevoEstado) {
+    _estado = nuevoEstado;
+  }
 
   bool get tieneBarco => _estado == EstadoCelda.barco;
-
-  Set<String> get cuadrantes => _cuadrantes;
 
   /// Ataca la celda según su estado actual.
   void atacar() {
@@ -54,24 +55,29 @@ class Celda extends PositionComponent {
     }
   }
 
-  /// Asocia esta celda a un cuadrante.
-  void agregarACuadrante(String nombreCuadrante) {
-    _cuadrantes.add(nombreCuadrante);
-  }
-
   /// Define la celda como válida para colocar un barco (indicador visual).
-  void permitirBarco() {
-    _colorTemporal = Colors.green;
+  void resaltar() {
+    _colorTemporal = Colors.green.withOpacity(0.5);
+    _estado = EstadoCelda.resaltada;
   }
 
   /// Indica que no se puede colocar un barco en esta celda (indicador visual).
-  void rechazarBarco() {
-    _colorTemporal = Colors.red;
+  void rechazar() {
+    _colorTemporal = Colors.red.withOpacity(0.5);
+    _estado = EstadoCelda.rechazada;
   }
 
-  /// Restablece el color temporal a transparente.
+  /// Restablece el color temporal a transparente y el estado a vacío (si no tiene barco).
   void resetearColor() {
     _colorTemporal = Colors.transparent;
+    if (_estado == EstadoCelda.resaltada || _estado == EstadoCelda.rechazada) {
+      _estado = EstadoCelda.vacia;
+    }
+  }
+
+  /// Marca la celda como que contiene parte de un barco.
+  void colocarBarco() {
+    _estado = EstadoCelda.barco;
   }
 
   /// Renderizado visual de la celda.
@@ -106,6 +112,10 @@ class Celda extends PositionComponent {
         return Colors.orange;
       case EstadoCelda.impactada:
         return Colors.red;
+      case EstadoCelda.resaltada:
+        return Colors.green.withOpacity(0.5);
+      case EstadoCelda.rechazada:
+        return Colors.red.withOpacity(0.5);
     }
   }
 

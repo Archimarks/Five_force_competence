@@ -67,13 +67,24 @@ class _SetupGameViewState extends State<SetupGameView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFB2D7E7),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: customAppBar(context: context, title: nombreEquipo, backgroundColor: colorEquipo),
       ),
       body: Stack(
         children: [
+          /// Fondo de imagen personalizado
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/Icon/FONDO GENERAL.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+
           Column(
             children: [
               // Título principal

@@ -1,4 +1,5 @@
 // extension_canvas.dart
+// extension_canvas.dart
 //
 // Extensiones para facilitar el dibujo de texto en el lienzo y conversión entre tipos de coordenadas.
 

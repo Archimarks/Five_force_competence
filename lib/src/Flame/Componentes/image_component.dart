@@ -34,11 +34,20 @@ class ImagenComponente extends PositionComponent with HasGameRef<SetupGame> {
   /// Posición de recorte dentro del sprite (en píxeles).
   Vector2 srcPosition = Vector2.zero();
 
+  /// Define el tamaño de la imagen de origen.
+  /// Esto también define cuántos píxeles se tomarán de la imagen de origen.
+  /// Si el tamaño real de la imagen es 500 x 500, y srcPosition es [Vector2.zero()] y srcSize es [Vector2.all(200)]
+  /// Entonces, esta clase considerará 200 x 200 píxeles a partir del píxel 0.
+  /// Si cambia srcPosition a [Vector2(10,20)] y deja el mismo tamaño, esta clase tomará 200 x 200 píxeles a partir del píxel 10 a la izquierda y 20 píxeles arriba.
+  ///
+
   /// Tamaño del recorte dentro del sprite (en píxeles).
   Vector2 srcSize = Vector2.zero();
 
   /// Relación de aspecto calculada a partir del sprite recortado.
   double _aspectRatio = 0;
+
+  /// returns aspect ratio of actual image.
   double get aspectRatio => _aspectRatio;
 
   ImagenComponente({

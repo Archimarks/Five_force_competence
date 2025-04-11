@@ -70,11 +70,7 @@ flutter:
     - assets/Icon/FONDO GENERAL.png
     - assets/Icon/FONDO FINAL.jpg
 
-    - assets/images/ship_1.png
-    - assets/images/ship_2.png
-    - assets/images/ship_3.png
-    - assets/images/ship_4.png
-    - assets/images/ship_5.png
+    - assets/images/
 
 # -----------------------------------------------------------
 # Configuración de los íconos de la aplicación

@@ -23,30 +23,24 @@ enum EstadoCelda { vacia, barco, atacada, impactada, resaltada, rechazada }
 /// Gestiona su apariencia visual según su estado.
 /// ---------------------------------------------------------------------------
 class Celda extends PositionComponent {
-  /// Posición lógica en el tablero.
   final int fila;
   final int columna;
 
-  /// Estado actual de la celda.
   EstadoCelda _estado;
-
-  /// Color de fondo temporal (por ejemplo para interacciones visuales).
   Color _colorTemporal = Colors.transparent;
 
-  /// Constructor
   Celda({required this.fila, required this.columna, EstadoCelda estadoInicial = EstadoCelda.vacia})
     : _estado = estadoInicial,
       super(size: Vector2.all(50.0));
 
-  /// Getters y lógica
   EstadoCelda get estado => _estado;
+
   set estado(EstadoCelda nuevoEstado) {
     _estado = nuevoEstado;
   }
 
   bool get tieneBarco => _estado == EstadoCelda.barco;
 
-  /// Ataca la celda según su estado actual.
   void atacar() {
     if (_estado == EstadoCelda.barco) {
       _estado = EstadoCelda.impactada;
@@ -55,19 +49,23 @@ class Celda extends PositionComponent {
     }
   }
 
-  /// Define la celda como válida para colocar un barco (indicador visual).
+  /// Solo resalta si la celda está vacía
   void resaltar() {
-    _colorTemporal = Colors.green.withOpacity(0.5);
-    _estado = EstadoCelda.resaltada;
+    if (_estado == EstadoCelda.vacia) {
+      _colorTemporal = Colors.green.withOpacity(0.5);
+      _estado = EstadoCelda.resaltada;
+    }
   }
 
-  /// Indica que no se puede colocar un barco en esta celda (indicador visual).
+  /// Solo rechaza si la celda está vacía
   void rechazar() {
-    _colorTemporal = Colors.red.withOpacity(0.5);
-    _estado = EstadoCelda.rechazada;
+    if (_estado == EstadoCelda.vacia) {
+      _colorTemporal = Colors.red.withOpacity(0.5);
+      _estado = EstadoCelda.rechazada;
+    }
   }
 
-  /// Restablece el color temporal a transparente y el estado a vacío (si no tiene barco).
+  /// No limpia estados si hay un barco
   void resetearColor() {
     _colorTemporal = Colors.transparent;
     if (_estado == EstadoCelda.resaltada || _estado == EstadoCelda.rechazada) {
@@ -75,12 +73,18 @@ class Celda extends PositionComponent {
     }
   }
 
-  /// Marca la celda como que contiene parte de un barco.
+  /// Coloca un barco forzadamente sin validar estado
   void colocarBarco() {
     _estado = EstadoCelda.barco;
+    _colorTemporal = Colors.transparent;
   }
 
-  /// Renderizado visual de la celda.
+  /// Libera una celda, sin importar el estado anterior
+  void liberar() {
+    _estado = EstadoCelda.vacia;
+    _colorTemporal = Colors.transparent;
+  }
+
   @override
   void render(Canvas canvas) {
     super.render(canvas);
@@ -101,7 +105,6 @@ class Celda extends PositionComponent {
     canvas.drawRect(size.toRect(), borde);
   }
 
-  /// Devuelve el color correspondiente al estado de la celda.
   Color _obtenerColorPorEstado() {
     switch (_estado) {
       case EstadoCelda.vacia:
@@ -119,7 +122,6 @@ class Celda extends PositionComponent {
     }
   }
 
-  /// Comparación entre celdas por fila y columna.
   @override
   bool operator ==(Object other) =>
       other is Celda && other.fila == fila && other.columna == columna;

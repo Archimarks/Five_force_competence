@@ -96,10 +96,42 @@ class Tablero extends PositionComponent with HasGameRef {
     return filaValida && columnaValida ? grilla[fila][columna] : null;
   }
 
+  /// Retorna una lista de celdas que ocuparía un barco en una posición dada.
+  List<Vector2> calcularCeldasOcupadas(Vector2 gridPos, int longitud, bool esVertical) {
+    final celdas = <Vector2>[];
+    final filaInicio = gridPos.y.floor();
+    final columnaInicio = gridPos.x.floor();
+
+    for (int i = 0; i < longitud; i++) {
+      final fila = esVertical ? filaInicio + i : filaInicio;
+      final columna = esVertical ? columnaInicio : columnaInicio + i;
+      celdas.add(Vector2(columna.toDouble(), fila.toDouble()));
+    }
+
+    return celdas;
+  }
+
+  /// Marca como ocupadas las celdas en la lista dada.
+  void ocuparCeldas(List<Vector2> celdas) {
+    for (final pos in celdas) {
+      final celda = obtenerCelda(pos.y.toInt(), pos.x.toInt());
+      celda?.colocarBarco();
+    }
+  }
+
+  /// Libera las celdas en la lista dada.
+  void liberarCeldas(List<Vector2> celdas) {
+    for (final pos in celdas) {
+      final celda = obtenerCelda(pos.y.toInt(), pos.x.toInt());
+      celda?.liberar();
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Coordenadas visuales (bordes)
   // ---------------------------------------------------------------------------
 
+  /// Agrega etiquetas visuales a los bordes del tablero (letras y números).
   void _agregarCoordenadasVisuales() {
     const letras = 'ABCDEFGHIJKL';
 
@@ -128,20 +160,14 @@ class Tablero extends PositionComponent with HasGameRef {
   // Lógica de colocación de barcos
   // ---------------------------------------------------------------------------
 
-  /// Intenta agregar un barco al tablero y marca las celdas ocupadas.
-  void agregarBarco(Barco barco, Vector2 posicionInicial, bool esVertical) {
+  /// Intenta agregar un barco al tablero y marca sus celdas como ocupadas.
+  void agregarBarco(Barco barco, Vector2 gridPos, bool esVertical) {
+    if (!esPosicionValida(gridPos, barco.longitud, esVertical)) return;
+
+    final celdas = calcularCeldasOcupadas(gridPos, barco.longitud, esVertical);
+    ocuparCeldas(celdas);
+
     barcos.add(barco);
-
-    final int filaInicio = posicionInicial.y.floor();
-    final int columnaInicio = posicionInicial.x.floor();
-
-    for (int i = 0; i < barco.longitud; i++) {
-      final int fila = esVertical ? filaInicio + i : filaInicio;
-      final int columna = esVertical ? columnaInicio : columnaInicio + i;
-      final celda = obtenerCelda(fila, columna);
-      celda?.colocarBarco();
-    }
-
     add(barco);
   }
 
@@ -154,9 +180,36 @@ class Tablero extends PositionComponent with HasGameRef {
       final int fila = esVertical ? startY + i : startY;
       final int columna = esVertical ? startX : startX + i;
 
+      if (fila < 0 || fila >= filas || columna < 0 || columna >= columnas) {
+        return false;
+      }
+
       final celda = obtenerCelda(fila, columna);
       if (celda == null || celda.tieneBarco) return false;
     }
+
+    return true;
+  }
+
+  /// Actualiza la posición del barco si es válida y actualiza las celdas.
+  bool actualizarBarco(Barco barco, Vector2 nuevaPos, bool esVertical) {
+    final nuevaGrid = worldToGrid(nuevaPos);
+
+    if (!esPosicionValida(nuevaGrid, barco.longitud, esVertical)) return false;
+
+    final celdasAntiguas = calcularCeldasOcupadas(
+      worldToGrid(barco.position),
+      barco.longitud,
+      barco.esVertical,
+    );
+
+    final celdasNuevas = calcularCeldasOcupadas(nuevaGrid, barco.longitud, esVertical);
+
+    liberarCeldas(celdasAntiguas);
+    ocuparCeldas(celdasNuevas);
+
+    barco.position = gridToWorld(nuevaGrid);
+    barco.esVertical = esVertical;
 
     return true;
   }
@@ -165,19 +218,48 @@ class Tablero extends PositionComponent with HasGameRef {
   // Resaltado de celdas (feedback visual)
   // ---------------------------------------------------------------------------
 
-  /// Resalta las celdas donde se intenta colocar un barco.
-  void resaltarPosicion(Vector2 gridPosition, int longitud, bool esVertical) {
-    resetearResaltado(); // Limpiar antes de resaltar nuevo intento
+  /// Resalta visualmente las celdas para mostrar si la posición es válida.
+  void resaltarPosicion(
+    Vector2 gridPosition,
+    int longitud,
+    bool esVertical, [
+    List<Vector2> celdasPropias = const [],
+  ]) {
+    resetearResaltado();
+
+    final List<Vector2> celdas = [];
 
     for (int i = 0; i < longitud; i++) {
-      final int fila = esVertical ? gridPosition.y.floor() + i : gridPosition.y.floor();
-      final int columna = esVertical ? gridPosition.x.floor() : gridPosition.x.floor() + i;
+      final dx = esVertical ? 0 : i.toDouble();
+      final dy = esVertical ? i.toDouble() : 0;
 
-      final celda = obtenerCelda(fila, columna);
-      if (celda != null) {
-        final esValida = esPosicionValida(Vector2(columna.toDouble(), fila.toDouble()), 1, false);
-        esValida ? celda.resaltar() : celda.rechazar();
+      final x = gridPosition.x + dx;
+      final y = gridPosition.y + dy;
+
+      if (x >= columnas || y >= filas) {
+        _resaltarComoRechazado(celdas);
+        return;
       }
+
+      final celda = obtenerCelda(x.toInt(), y.toInt());
+      if (celda == null || (celda.tieneBarco && !celdasPropias.contains(Vector2(x, y)))) {
+        _resaltarComoRechazado(celdas);
+        return;
+      }
+
+      celdas.add(Vector2(x, y));
+    }
+
+    for (final coord in celdas) {
+      final celda = obtenerCelda(coord.y.toInt(), coord.x.toInt()); // fila = y, columna = x
+      celda?.resaltar();
+    }
+  }
+
+  void _resaltarComoRechazado(List<Vector2> celdasParciales) {
+    for (final coord in celdasParciales) {
+      final celda = obtenerCelda(coord.x.toInt(), coord.y.toInt());
+      celda?.rechazar();
     }
   }
 

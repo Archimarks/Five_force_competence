@@ -1,81 +1,51 @@
 /// ------------------------------------------------------------------------
 /// Archivo: barco.dart
 /// Proyecto: Five Force Competence
-/// Desarrollado por: [Tu Nombre]
+/// Desarrollado por: Geraldine Perilla Valderrama
 /// Fecha: 2025
 ///
 /// Descripción:
 /// Este componente representa un barco dentro del tablero de batalla.
-/// Utiliza una imagen tipo sprite sheet con múltiples rotaciones horizontales.
-/// Soporta arrastre para colocación y toque para cambiar la orientación.
-///
-/// Cada barco está compuesto por:
-/// - Un identificador único.
-/// - Una imagen visual que representa el sprite.
-/// - Lógica de rotación mediante cambio de sección de sprite.
-/// - Validación de colisión y posicionamiento dentro del tablero.
+/// Utiliza imágenes separadas por dirección en lugar de un sprite sheet.
+/// Soporta arrastre para colocación, toque para rotación, y validación
+/// para evitar superposiciones y salidas del tablero.
 /// ------------------------------------------------------------------------
+
 library;
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 
-import 'image_component.dart';
+import 'direccion.dart';
 import 'setup_game.dart';
+import 'sprites_barco.dart';
 import 'tablero.dart';
 
-/// ------------------------------------------------------------------------
-/// COMPONENTE: Barco
-///
-/// Representa un barco que puede ser arrastrado y rotado dentro del tablero.
-/// Permite validar la colocación del barco en el tablero y manejar las
-/// interacciones visuales y de colisión.
-/// ------------------------------------------------------------------------
 class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameRef<SetupGame> {
-  /// Identificador único del barco
   late final String id;
-
-  /// Imagen del sprite visual (con múltiples rotaciones)
-  late final ImagenComponente barcoVisual;
-
-  /// Longitud del barco en celdas
   final int longitud;
-
-  /// URL de la imagen completa del sprite
-  final String imageUrl;
-
-  /// Tamaño de cada sección del sprite (una por rotación)
-  final Vector2 seccionSprite;
-
-  /// Orientación del barco (true = vertical, false = horizontal)
-  bool esVertical = false;
-
-  /// Índice de rotación actual (0 a 3)
+  late final SpritesBarco barcoVisual;
+  bool esVertical = true;
   int indiceRotacion = 0;
-
-  /// Bandera para saber si se está arrastrando
   bool estaSiendoArrastrado = false;
-
-  /// Posición anterior antes de mover el barco
   late Vector2 _posicionAnterior;
 
-  /// Prioridad de renderizado
+  /// Celdas actualmente ocupadas por este barco
+  List<Vector2> _celdasOcupadas = [];
+
   final int prioridadNormal = 0;
   final int prioridadArrastrando = 1;
 
-  /// Callbacks
   void Function(Vector2 nuevaPosicion)? onPosicionCambiada;
   void Function(Barco barco)? onBarcoColocadoEnTablero;
   bool Function(Barco barco)? validarColocacion;
 
-  /// Constructor del barco
   Barco({
     required this.longitud,
-    required this.imageUrl,
-    required this.seccionSprite,
+    required Map<String, String> rutasSprites,
     Vector2? posicionInicial,
-    double escala = 1.0,
+    required double escala,
     this.onPosicionCambiada,
     this.onBarcoColocadoEnTablero,
     this.validarColocacion,
@@ -86,63 +56,70 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
          scale: Vector2.all(escala),
          anchor: Anchor.topLeft,
        ) {
-    this.id = id ?? UniqueKey().toString(); // Asigna un id único
+    this.id = id ?? UniqueKey().toString();
 
-    // Inicializa el componente de la imagen visual
-    barcoVisual = ImagenComponente(
-      imagePath: imageUrl,
-      imageSize: size.clone(),
-      srcSize: seccionSprite,
-      srcPosition: Vector2.zero(), // Empieza en la rotación 0
+    barcoVisual = SpritesBarco(
+      rutasSprites: rutasSprites,
+      direccionActual: Direccion.arriba,
+      tamano: size.clone(),
     );
 
-    add(barcoVisual); // Añadir la imagen al componente
+    add(barcoVisual);
   }
 
-  /// Cambia la orientación del barco (cambia el sprite mostrado)
   void rotar() {
     final oldRotation = indiceRotacion;
     final oldSize = size.clone();
     final oldPosition = position.clone();
+    final celdasAntes = _celdasOcupadas.toList();
 
     indiceRotacion = (indiceRotacion + 1) % 4;
-    esVertical = indiceRotacion % 2 == 1;
+    esVertical = (indiceRotacion == 0 || indiceRotacion == 2);
 
-    // Ajustar tamaño del barco según orientación
     size.setValues(50.0 * (esVertical ? 1 : longitud), 50.0 * (esVertical ? longitud : 1));
     barcoVisual.size.setFrom(size);
+    barcoVisual.cambiarDireccion(_obtenerDireccionDesdeIndice(indiceRotacion));
 
-    // Cambiar la sección del sprite visible
-    barcoVisual.srcPosition = Vector2(seccionSprite.x * indiceRotacion, 0);
-
-    // Validar si la nueva orientación es válida
     final gridPosition = gameRef.tablero.worldToGrid(position);
     final esValida =
         validarColocacion?.call(this) ??
         gameRef.tablero.esPosicionValida(gridPosition, longitud, esVertical);
 
     if (!esValida) {
-      // Revertir si no se puede colocar en nueva orientación
       indiceRotacion = oldRotation;
+      esVertical = (oldRotation == 0 || oldRotation == 2);
       size.setFrom(oldSize);
       position.setFrom(oldPosition);
       barcoVisual.size.setFrom(oldSize);
-      barcoVisual.srcPosition = Vector2(seccionSprite.x * oldRotation, 0);
-      esVertical = oldRotation % 2 == 1;
+      barcoVisual.cambiarDireccion(_obtenerDireccionDesdeIndice(oldRotation));
     } else {
-      // Reajustar a la grilla
-      position = gameRef.tablero.gridToWorld(gridPosition);
+      gameRef.tablero.liberarCeldas(celdasAntes);
+      position = _calcularPosicionCentrada(gridPosition);
+      _celdasOcupadas = _calcularCeldasOcupadas(gridPosition);
+      gameRef.tablero.ocuparCeldas(_celdasOcupadas);
     }
   }
 
-  /// Evento de toque para cambiar la orientación del barco
+  Direccion _obtenerDireccionDesdeIndice(int indice) {
+    switch (indice % 4) {
+      case 0:
+        return Direccion.arriba;
+      case 1:
+        return Direccion.derecha;
+      case 2:
+        return Direccion.abajo;
+      case 3:
+      default:
+        return Direccion.izquierda;
+    }
+  }
+
   @override
   void onTapUp(TapUpEvent event) {
     super.onTapUp(event);
     rotar();
   }
 
-  /// Evento de arrastre al comenzar
   @override
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
@@ -151,7 +128,6 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
     _posicionAnterior = position.clone();
   }
 
-  /// Evento de arrastre mientras se mueve el barco
   @override
   void onDragUpdate(DragUpdateEvent event) {
     super.onDragUpdate(event);
@@ -160,7 +136,6 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
     _actualizarVisualizacionTablero();
   }
 
-  /// Evento de arrastre al finalizar el movimiento
   @override
   void onDragEnd(DragEndEvent event) {
     super.onDragEnd(event);
@@ -173,7 +148,10 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
         gameRef.tablero.esPosicionValida(gridPosition, longitud, esVertical);
 
     if (esValida) {
-      position = gameRef.tablero.gridToWorld(gridPosition);
+      gameRef.tablero.liberarCeldas(_celdasOcupadas);
+      position = _calcularPosicionCentrada(gridPosition);
+      _celdasOcupadas = _calcularCeldasOcupadas(gridPosition);
+      gameRef.tablero.ocuparCeldas(_celdasOcupadas);
       onBarcoColocadoEnTablero?.call(this);
     } else {
       position = _posicionAnterior;
@@ -182,43 +160,43 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
     _resetearVisualizacionTablero();
   }
 
-  /// Verifica si colisiona con otro barco
-  bool colisionaCon(Barco otroBarco) {
-    return toRect().overlaps(otroBarco.toRect());
-  }
+  bool colisionaCon(Barco otroBarco) => toRect().overlaps(otroBarco.toRect());
 
-  /// Celdas que ocupa este barco dentro del tablero
-  List<Vector2> getCeldasOcupadas(double tamanoCelda) {
+  List<Vector2> getCeldasOcupadas(double tamanoCelda) => _celdasOcupadas;
+
+  List<Vector2> _calcularCeldasOcupadas(Vector2 gridPosition) {
     final celdas = <Vector2>[];
     for (int i = 0; i < longitud; i++) {
-      final dx = esVertical ? 0 : i * tamanoCelda;
-      final dy = esVertical ? i * tamanoCelda : 0;
-      celdas.add(Vector2((position.x + dx) / tamanoCelda, (position.y + dy) / tamanoCelda));
+      final dx = esVertical ? 0 : i.toDouble();
+      final dy = esVertical ? i.toDouble() : 0;
+      celdas.add(Vector2(gridPosition.x + dx, gridPosition.y + dy));
     }
     return celdas;
   }
 
-  /// Muestra visualmente las celdas que el barco está tocando
   void _actualizarVisualizacionTablero() {
     final gridPosition = gameRef.tablero.worldToGrid(position);
-    gameRef.tablero.resaltarPosicion(gridPosition, longitud, esVertical);
+    gameRef.tablero.resaltarPosicion(gridPosition, longitud, esVertical, _celdasOcupadas);
   }
 
-  /// Elimina resaltado visual del tablero
   void _resetearVisualizacionTablero() {
     gameRef.tablero.resetearResaltado();
   }
 
-  /// Comparación de barcos por ID
   @override
   bool operator ==(Object other) => other is Barco && id == other.id;
 
   @override
   int get hashCode => id.hashCode;
 
-  /// Rectángulo usado para detección de colisiones
   @override
-  Rect toRect() {
-    return Rect.fromLTWH(position.x, position.y, size.x, size.y);
+  Rect toRect() => Rect.fromLTWH(position.x, position.y, size.x, size.y);
+
+  Vector2 _calcularPosicionCentrada(Vector2 gridPosition) {
+    final double tamanoCelda = gameRef.tablero.tamanioCelda;
+    final Vector2 base = gameRef.tablero.gridToWorld(gridPosition);
+    final double offsetX = esVertical ? 0.0 : ((longitud - 1) * tamanoCelda / 2);
+    final double offsetY = esVertical ? ((longitud - 1) * tamanoCelda / 2) : 0.0;
+    return base - Vector2(offsetX, offsetY);
   }
 }

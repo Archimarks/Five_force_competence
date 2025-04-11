@@ -1,16 +1,50 @@
+// image_paths.dart
 /// ---------------------------------------------------------------------------
-/// `image_paths.dart`
-/// Archivo centralizado para las rutas de imágenes usadas en el juego.
+/// Este archivo contiene todas las rutas de imágenes utilizadas en el juego.
+/// En particular, define las rutas de sprites por cada dirección para cada barco.
+/// Cada barco tiene 4 imágenes diferentes, una por orientación.
 /// ---------------------------------------------------------------------------
-
 library;
 
 class ImagePaths {
-  static const String barco1 = 'ship_1.png';
-  static const String barco2 = 'ship_2.png';
-  static const String barco3 = 'ship_3.png';
-  static const String barco4 = 'ship_4.png';
-  static const String barco5 = 'ship_5.png';
+  /// Rutas organizadas por ID de barco y dirección:
+  /// Ejemplo: todosLosSpritesPorDireccion['1']?['arriba'] → "barcos/barco1_arriba.png"
+  static final Map<String, Map<String, String>> todosLosSpritesPorDireccion = {
+    '1': {
+      'arriba': 'barco1_arriba.png',
+      'abajo': 'barco1_abajo.png',
+      'izquierda': 'barco1_izquierda.png',
+      'derecha': 'barco1_derecha.png',
+    },
+    '2': {
+      'arriba': 'barco2_arriba.png',
+      'abajo': 'barco2_abajo.png',
+      'izquierda': 'barco2_izquierda.png',
+      'derecha': 'barco2_derecha.png',
+    },
+    '3': {
+      'arriba': 'barco3_arriba.png',
+      'abajo': 'barco3_abajo.png',
+      'izquierda': 'barco3_izquierda.png',
+      'derecha': 'barco3_derecha.png',
+    },
+    '4': {
+      'arriba': 'barco4_arriba.png',
+      'abajo': 'barco4_abajo.png',
+      'izquierda': 'barco4_izquierda.png',
+      'derecha': 'barco4_derecha.png',
+    },
+    '5': {
+      'arriba': 'barco5_arriba.png',
+      'abajo': 'barco5_abajo.png',
+      'izquierda': 'barco5_izquierda.png',
+      'derecha': 'barco5_derecha.png',
+    },
+  };
 
-  static const List<String> todosLosBarcos = [barco1, barco2, barco3, barco4, barco5];
+  /// Lista plana de todas las rutas de imágenes (para precarga masiva).
+  static List<String> get todasLasImagenes =>
+      todosLosSpritesPorDireccion.values
+          .expand((mapaDirecciones) => mapaDirecciones.values)
+          .toList();
 }

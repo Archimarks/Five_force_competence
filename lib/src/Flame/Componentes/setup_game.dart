@@ -58,7 +58,6 @@ class SetupGame extends FlameGame {
 
     esVertical = size.y >= size.x;
 
-    // Precarga de imágenes necesarias
     await _cargarImagenesBarcos();
 
     final Vector2 sizeTablero = Vector2.all(_tamanioCelda * 12);
@@ -70,15 +69,16 @@ class SetupGame extends FlameGame {
     _agregarTablero(posicionTablero, sizeTablero);
     _agregarBarcos(posicionTablero, sizeTablero);
   }
-
   // ---------------------------------------------------------------------------
   // Precarga de imágenes
   // ---------------------------------------------------------------------------
 
   Future<void> _cargarImagenesBarcos() async {
-    await Future.wait(ImagePaths.todosLosBarcos.map((ruta) => images.load(ruta)));
+    final todasLasRutas = ImagePaths.todosLosSpritesPorDireccion.values.expand(
+      (mapa) => mapa.values,
+    );
+    await Future.wait(todasLasRutas.map((ruta) => images.load(ruta)));
   }
-
   // ---------------------------------------------------------------------------
   // Tablero de juego
   // ---------------------------------------------------------------------------
@@ -97,38 +97,46 @@ class SetupGame extends FlameGame {
   // ---------------------------------------------------------------------------
   // Barcos (usando un solo componente visual por barco)
   // ---------------------------------------------------------------------------
-
   void _agregarBarcos(Vector2 posicionTablero, Vector2 sizeTablero) {
-    final double offsetBaseVertical = posicionTablero.y + sizeTablero.y + _espacioExtra;
-    final double offsetBaseHorizontal = _margen;
-    final double separacionVertical = _tamanioCelda * 1 + _separacionBarcos;
-    final double separacionHorizontal = _tamanioCelda * 2 + _separacionBarcos * 2;
+    final double anchoDisponible = size.x - _margen * 2;
 
-    final List<(String, String, int)> barcosData = [
-      ('1', ImagePaths.barco1, 1),
-      ('2', ImagePaths.barco2, 2),
-      ('3', ImagePaths.barco3, 3),
-      ('4', ImagePaths.barco4, 4),
-      ('5', ImagePaths.barco5, 5),
+    final double anchoBarcoAprox = _tamanioCelda * 2.5;
+    final double altoBarcoAprox = _tamanioCelda * 2.5;
+
+    final int barcosPorFila = (anchoDisponible ~/ (anchoBarcoAprox + _separacionBarcos)).clamp(
+      1,
+      5,
+    );
+
+    final double offsetBaseX = _margen;
+    final double offsetBaseY = posicionTablero.y + sizeTablero.y + _espacioExtra;
+
+    final List<(String id, int longitud)> barcosData = [
+      ('1', 1),
+      ('2', 2),
+      ('3', 3),
+      ('4', 4),
+      ('5', 5),
     ];
 
     for (int i = 0; i < barcosData.length; i++) {
-      final (id, imageUrl, sizeEnCeldas) = barcosData[i];
+      final (id, longitud) = barcosData[i];
 
-      final Vector2 posicionBarcoAlmacen =
-          esVertical
-              ? Vector2(_margen + i * separacionHorizontal, offsetBaseVertical)
-              : Vector2(offsetBaseHorizontal, _margen + i * separacionVertical + 100);
+      final int fila = i ~/ barcosPorFila;
+      final int columna = i % barcosPorFila;
+
+      final double posX = offsetBaseX + columna * (anchoBarcoAprox + _separacionBarcos);
+      final double posY = offsetBaseY + fila * (altoBarcoAprox + _separacionBarcos + 10);
+
+      final Vector2 posicionBarcoAlmacen = Vector2(posX, posY);
 
       final Barco barcoAlmacen = Barco(
         id: id,
-        longitud: sizeEnCeldas,
-        imageUrl: imageUrl, // Pasa la URL de la imagen al Barco
+        longitud: longitud,
+        rutasSprites: ImagePaths.todosLosSpritesPorDireccion[id]!,
         posicionInicial: posicionBarcoAlmacen,
         escala: _escalaBarco,
-        onPosicionCambiada: (nuevaPosicion) {
-          // Opcional: Retroalimentación visual durante el arrastre
-        },
+        onPosicionCambiada: (nuevaPosicion) {},
         onBarcoColocadoEnTablero: (barco) {
           final gridPosition = tablero.worldToGrid(barco.position);
           if (tablero.esPosicionValida(gridPosition, barco.longitud, barco.esVertical)) {
@@ -145,7 +153,6 @@ class SetupGame extends FlameGame {
           final gridPosition = tablero.worldToGrid(barco.position);
           return tablero.esPosicionValida(gridPosition, barco.longitud, barco.esVertical);
         },
-        seccionSprite: posicionBarcoAlmacen,
       );
 
       add(barcoAlmacen..priority = 1);

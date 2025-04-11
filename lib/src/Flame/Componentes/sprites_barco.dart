@@ -19,14 +19,16 @@ class SpritesBarco extends SpriteComponent {
     _cargarSprites(rutasSprites);
   }
 
-  /// Carga los sprites desde las rutas proporcionadas
   Future<void> _cargarSprites(Map<String, String> rutas) async {
     _sprites[Direccion.arriba] = await Sprite.load(rutas['arriba']!);
     _sprites[Direccion.derecha] = await Sprite.load(rutas['derecha']!);
     _sprites[Direccion.abajo] = await Sprite.load(rutas['abajo']!);
     _sprites[Direccion.izquierda] = await Sprite.load(rutas['izquierda']!);
 
-    sprite = _sprites[direccionActual]; // Muestra la dirección inicial
+    sprite = _sprites[direccionActual];
+
+    // Ajusta el tamaño al sprite original
+    size = sprite!.originalSize;
   }
 
   /// Cambia el sprite actual según la nueva dirección

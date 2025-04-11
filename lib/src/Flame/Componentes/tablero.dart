@@ -6,8 +6,6 @@
 
 library;
 
-import 'dart:ui';
-
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
@@ -15,38 +13,29 @@ import 'barco.dart';
 import 'celda.dart';
 import 'coordenada.dart';
 
-/// Componente Flame que representa un tablero de juego dinámico y visual.
+/// `Tablero` hereda de `PositionComponent`, lo que le permite tener una posición
+/// y tamaño dentro del juego. También utiliza el mixin `HasGameRef` para acceder
+/// a referencias del juego Flame.
 class Tablero extends PositionComponent with HasGameRef {
-  // ---------------------------------------------------------------------------
-  // Propiedades configurables
-  // ---------------------------------------------------------------------------
-
-  /// Número de filas del tablero.
+  /// Número de filas de la grilla
   final int filas;
 
-  /// Número de columnas del tablero.
+  /// Número de columnas de la grilla
   final int columnas;
 
-  /// Tamaño visual de cada celda en píxeles.
+  /// Tamaño (ancho y alto) de cada celda en píxeles
   final double tamanioCelda;
 
-  // ---------------------------------------------------------------------------
-  // Estructuras internas
-  // ---------------------------------------------------------------------------
-
-  /// Grilla 2D que contiene todas las celdas.
+  /// Grilla 2D de celdas que conforman el tablero
   late final List<List<Celda>> grilla;
 
-  /// Lista de coordenadas visuales (letras y números).
+  /// Coordenadas visuales (letras/índices) que se dibujan fuera del tablero
   final List<Coordenada> coordenadas = [];
 
-  /// Lista de barcos actualmente colocados en el tablero.
+  /// Lista de barcos actualmente colocados en el tablero
   final List<Barco> barcos = [];
 
-  // ---------------------------------------------------------------------------
-  // Constructor
-  // ---------------------------------------------------------------------------
-
+  /// Constructor del tablero, inicializa dimensiones y genera la grilla de celdas
   Tablero({
     required this.filas,
     required this.columnas,
@@ -54,26 +43,23 @@ class Tablero extends PositionComponent with HasGameRef {
     super.position,
     super.size,
   }) {
+    // Se genera la matriz de celdas usando List.generate
     grilla = List.generate(
       filas,
       (fila) => List.generate(columnas, (col) => Celda(fila: fila, columna: col)),
     );
   }
 
-  /// Retorna el área del tablero como `Rect`, útil para detección de colisiones.
+  /// Calcula el área rectangular del tablero en coordenadas del mundo
   Rect get area => position.toOffset() & size.toSize();
 
   @override
   Future<void> onLoad() async {
-    await _crearCeldas();
-    _agregarCoordenadasVisuales();
+    await _crearCeldas(); // Posiciona las celdas dentro del tablero
+    _agregarCoordenadasVisuales(); // Añade letras/números de referencia visual
   }
 
-  // ---------------------------------------------------------------------------
-  // Celdas
-  // ---------------------------------------------------------------------------
-
-  /// Crea y posiciona visualmente todas las celdas del tablero.
+  /// Posiciona y agrega cada celda a la escena del juego
   Future<void> _crearCeldas() async {
     for (int fila = 0; fila < filas; fila++) {
       for (int columna = 0; columna < columnas; columna++) {
@@ -82,21 +68,21 @@ class Tablero extends PositionComponent with HasGameRef {
               ..position = Vector2(
                 columna * tamanioCelda + tamanioCelda,
                 fila * tamanioCelda + tamanioCelda,
-              )
-              ..size = Vector2.all(tamanioCelda);
-        add(celda);
+              ) // Ajusta posición de celda
+              ..size = Vector2.all(tamanioCelda); // Define el tamaño cuadrado
+        add(celda); // Añade la celda a la escena
       }
     }
   }
 
-  /// Devuelve la celda en la posición indicada, o null si está fuera de rango.
+  /// Devuelve una celda en coordenadas fila/columna si está dentro de los límites
   Celda? obtenerCelda(int fila, int columna) {
     final filaValida = fila >= 0 && fila < filas;
     final columnaValida = columna >= 0 && columna < columnas;
     return filaValida && columnaValida ? grilla[fila][columna] : null;
   }
 
-  /// Retorna una lista de celdas que ocuparía un barco en una posición dada.
+  /// Calcula las celdas que ocuparía un barco desde cierta posición en la grilla
   List<Vector2> calcularCeldasOcupadas(Vector2 gridPos, int longitud, bool esVertical) {
     final celdas = <Vector2>[];
     final filaInicio = gridPos.y.floor();
@@ -111,7 +97,7 @@ class Tablero extends PositionComponent with HasGameRef {
     return celdas;
   }
 
-  /// Marca como ocupadas las celdas en la lista dada.
+  /// Marca las celdas como ocupadas por un barco
   void ocuparCeldas(List<Vector2> celdas) {
     for (final pos in celdas) {
       final celda = obtenerCelda(pos.y.toInt(), pos.x.toInt());
@@ -119,7 +105,7 @@ class Tablero extends PositionComponent with HasGameRef {
     }
   }
 
-  /// Libera las celdas en la lista dada.
+  /// Libera las celdas previamente ocupadas
   void liberarCeldas(List<Vector2> celdas) {
     for (final pos in celdas) {
       final celda = obtenerCelda(pos.y.toInt(), pos.x.toInt());
@@ -127,11 +113,7 @@ class Tablero extends PositionComponent with HasGameRef {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Coordenadas visuales (bordes)
-  // ---------------------------------------------------------------------------
-
-  /// Agrega etiquetas visuales a los bordes del tablero (letras y números).
+  /// Agrega letras (A, B, C, ...) y números (1, 2, 3, ...) como referencias visuales
   void _agregarCoordenadasVisuales() {
     const letras = 'ABCDEFGHIJKL';
 
@@ -156,11 +138,7 @@ class Tablero extends PositionComponent with HasGameRef {
     addAll(coordenadas);
   }
 
-  // ---------------------------------------------------------------------------
-  // Lógica de colocación de barcos
-  // ---------------------------------------------------------------------------
-
-  /// Intenta agregar un barco al tablero y marca sus celdas como ocupadas.
+  /// Coloca un barco en el tablero si la posición es válida
   void agregarBarco(Barco barco, Vector2 gridPos, bool esVertical) {
     if (!esPosicionValida(gridPos, barco.longitud, esVertical)) return;
 
@@ -168,10 +146,10 @@ class Tablero extends PositionComponent with HasGameRef {
     ocuparCeldas(celdas);
 
     barcos.add(barco);
-    add(barco);
+    add(barco); // Añade el barco a la escena
   }
 
-  /// Verifica si un barco se puede colocar en la posición deseada.
+  /// Valida si un barco cabe en cierta posición y no hay superposición
   bool esPosicionValida(Vector2 gridPosition, int longitud, bool esVertical) {
     final int startX = gridPosition.x.floor();
     final int startY = gridPosition.y.floor();
@@ -181,17 +159,17 @@ class Tablero extends PositionComponent with HasGameRef {
       final int columna = esVertical ? startX : startX + i;
 
       if (fila < 0 || fila >= filas || columna < 0 || columna >= columnas) {
-        return false;
+        return false; // Fuera de límites
       }
 
       final celda = obtenerCelda(fila, columna);
-      if (celda == null || celda.tieneBarco) return false;
+      if (celda == null || celda.tieneBarco) return false; // Ya ocupada
     }
 
     return true;
   }
 
-  /// Actualiza la posición del barco si es válida y actualiza las celdas.
+  /// Mueve o rota un barco a una nueva posición si es válida
   bool actualizarBarco(Barco barco, Vector2 nuevaPos, bool esVertical) {
     final nuevaGrid = worldToGrid(nuevaPos);
 
@@ -208,24 +186,20 @@ class Tablero extends PositionComponent with HasGameRef {
     liberarCeldas(celdasAntiguas);
     ocuparCeldas(celdasNuevas);
 
-    barco.position = gridToWorld(nuevaGrid);
-    barco.esVertical = esVertical;
+    barco.position = gridToWorld(nuevaGrid); // Ajusta posición visual
+    barco.esVertical = esVertical; // Actualiza orientación lógica
 
     return true;
   }
 
-  // ---------------------------------------------------------------------------
-  // Resaltado de celdas (feedback visual)
-  // ---------------------------------------------------------------------------
-
-  /// Resalta visualmente las celdas para mostrar si la posición es válida.
+  /// Resalta las celdas que ocuparía un barco como vista previa
   void resaltarPosicion(
     Vector2 gridPosition,
     int longitud,
     bool esVertical, [
-    List<Vector2> celdasPropias = const [],
+    List<Vector2> celdasPropias = const [], // Celdas que ya ocupa este barco
   ]) {
-    resetearResaltado();
+    resetearResaltado(); // Quita cualquier resaltado anterior
 
     final List<Vector2> celdas = [];
 
@@ -241,7 +215,7 @@ class Tablero extends PositionComponent with HasGameRef {
         return;
       }
 
-      final celda = obtenerCelda(x.toInt(), y.toInt());
+      final celda = obtenerCelda(y.toInt(), x.toInt());
       if (celda == null || (celda.tieneBarco && !celdasPropias.contains(Vector2(x, y)))) {
         _resaltarComoRechazado(celdas);
         return;
@@ -251,35 +225,32 @@ class Tablero extends PositionComponent with HasGameRef {
     }
 
     for (final coord in celdas) {
-      final celda = obtenerCelda(coord.y.toInt(), coord.x.toInt()); // fila = y, columna = x
-      celda?.resaltar();
+      final celda = obtenerCelda(coord.y.toInt(), coord.x.toInt());
+      celda?.resaltar(); // Muestra visualmente que está disponible
     }
   }
 
+  /// Muestra en rojo las celdas que hacen inválida la posición
   void _resaltarComoRechazado(List<Vector2> celdasParciales) {
     for (final coord in celdasParciales) {
-      final celda = obtenerCelda(coord.x.toInt(), coord.y.toInt());
-      celda?.rechazar();
+      final celda = obtenerCelda(coord.y.toInt(), coord.x.toInt());
+      celda?.rechazar(); // Estilo visual de rechazo
     }
   }
 
-  /// Limpia todos los resaltados de las celdas.
+  /// Quita cualquier resaltado aplicado a las celdas
   void resetearResaltado() {
     for (final fila in grilla) {
       for (final celda in fila) {
-        celda.resetearColor();
+        celda.resetearColor(); // Restaura el color original
       }
     }
   }
 }
 
-// ---------------------------------------------------------------------------
-// Extensiones utilitarias para conversión de coordenadas
-// ---------------------------------------------------------------------------
-
-/// Extensión utilitaria para convertir entre coordenadas del mundo y de grilla.
+/// Extensión utilitaria para convertir entre coordenadas del mundo y del grid
 extension TableroUtils on Tablero {
-  /// Convierte una posición del mundo a una posición de grilla.
+  /// Convierte una posición del mundo (píxeles) a coordenadas de grilla (columna, fila)
   Vector2 worldToGrid(Vector2 worldPosition) {
     return Vector2(
       ((worldPosition.x - position.x) / tamanioCelda),
@@ -287,7 +258,7 @@ extension TableroUtils on Tablero {
     );
   }
 
-  /// Convierte una posición de grilla a una posición del mundo.
+  /// Convierte una coordenada de grilla a posición visual en el mundo
   Vector2 gridToWorld(Vector2 gridPosition) {
     return Vector2(
       position.x + gridPosition.x * tamanioCelda + tamanioCelda / 2,

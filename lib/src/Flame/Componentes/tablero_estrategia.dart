@@ -1,7 +1,7 @@
 /// ---------------------------------------------------------------------------
-/// `TableroEstrategia` - Componente principal que combina la funcionalidad del
-/// tablero de juego y el almacén de barcos. Permite a los jugadores arrastrar
-/// y colocar barcos desde el almacén al tablero para su despliegue estratégico.
+/// `TableroEstrategia` - Componente principal que gestiona el tablero de juego
+/// y la interacción con los barcos. Permite a los jugadores arrastrar y colocar
+/// barcos dentro de su área.
 /// ---------------------------------------------------------------------------
 library;
 
@@ -14,7 +14,8 @@ import 'coordenada.dart';
 
 /// ---------------------------------------------------------------------------
 /// CLASE PRINCIPAL: TableroEstrategia
-/// Combina la lógica del tablero de juego y el almacén de barcos en un solo componente.
+/// Gestiona la lógica del tablero de juego y la interacción de arrastre y colocación
+/// de los barcos dentro de su área designada.
 /// ---------------------------------------------------------------------------
 class TableroEstrategia extends PositionComponent with HasGameRef {
   // ===========================================================================
@@ -29,17 +30,17 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
   final List<Barco> barcosEnTablero = []; // Lista de barcos colocados en el tablero
 
   // ===========================================================================
-  // 📦 CONFIGURACIÓN DEL ALMACÉN DE BARCOS
+  // 📦 CONFIGURACIÓN INICIAL DE LOS BARCOS
   // ===========================================================================
 
-  /// Lista de datos de los barcos iniciales (usados como plantillas).
+  /// Lista de datos de los barcos iniciales para crear las instancias.
   final List<Map<String, dynamic>> datosBarcosIniciales;
 
-  /// Espaciado horizontal entre cada barco en píxeles.
+  /// Espaciado horizontal entre cada barco en la disposición inicial.
   final double espacioEntreBarcos;
 
-  /// Componente interno que contiene y organiza visualmente los barcos del almacén.
-  late final PositionComponent contenedorScrollAlmacen;
+  /// Componente interno que contiene y organiza visualmente los barcos iniciales.
+  late final PositionComponent contenedorBarcosIniciales;
 
   // ===========================================================================
   // 🏗️ CONSTRUCTOR
@@ -60,7 +61,20 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
        );
 
   /// Área rectangular que ocupa el tablero en coordenadas globales.
-  Rect get areaTablero => position.toOffset() & size.toSize();
+  Rect get areaTablero => Rect.fromLTWH(
+    position.x + tamanioCelda,
+    position.y + tamanioCelda,
+    columnas * tamanioCelda,
+    filas * tamanioCelda,
+  );
+
+  /// Área rectangular que ocupa la sección inicial de los barcos.
+  Rect get areaBarcosIniciales => Rect.fromLTWH(
+    position.x,
+    position.y + filas * tamanioCelda + tamanioCelda * 2, // Ajusta según tu diseño
+    size.x,
+    size.y - (filas * tamanioCelda + tamanioCelda * 2),
+  );
 
   // ===========================================================================
   // 🚀 CICLO DE VIDA - CARGA DEL COMPONENTE
@@ -72,10 +86,10 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
     await _crearCeldas();
     _agregarCoordenadasVisuales();
 
-    // Inicializar el almacén de barcos
-    contenedorScrollAlmacen = PositionComponent();
-    add(contenedorScrollAlmacen);
-    await _inicializarAlmacenBarcos();
+    // Inicializar la disposición inicial de los barcos
+    contenedorBarcosIniciales = PositionComponent();
+    add(contenedorBarcosIniciales);
+    await _inicializarBarcosIniciales();
   }
 
   // ===========================================================================
@@ -89,8 +103,8 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
         final celda =
             grilla[fila][columna]
               ..position = Vector2(
-                columna * tamanioCelda + tamanioCelda,
-                fila * tamanioCelda + tamanioCelda,
+                position.x + columna * tamanioCelda + tamanioCelda,
+                position.y + fila * tamanioCelda + tamanioCelda,
               )
               ..size = Vector2.all(tamanioCelda);
         add(celda);
@@ -106,7 +120,10 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
       coordenadas.add(
         Coordenada(
           texto: letras[columna],
-          posicion: Vector2(columna * tamanioCelda + tamanioCelda + tamanioCelda / 2, 0),
+          posicion: Vector2(
+            position.x + columna * tamanioCelda + tamanioCelda + tamanioCelda / 2,
+            position.y,
+          ),
         ),
       );
     }
@@ -115,7 +132,10 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
       coordenadas.add(
         Coordenada(
           texto: '${fila + 1}',
-          posicion: Vector2(0, fila * tamanioCelda + tamanioCelda + tamanioCelda / 2),
+          posicion: Vector2(
+            position.x,
+            position.y + fila * tamanioCelda + tamanioCelda + tamanioCelda / 2,
+          ),
         ),
       );
     }
@@ -274,105 +294,72 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
   }
 
   // ===========================================================================
-  // ⚓ MÉTODOS PRIVADOS - GESTIÓN DEL ALMACÉN DE BARCOS
+  // ⚓ MÉTODOS PRIVADOS - GESTIÓN INICIAL DE LOS BARCOS
   // ===========================================================================
 
-  /// Inicializa visualmente el almacén y coloca los barcos.
-  Future<void> _inicializarAlmacenBarcos() async {
-    double xOffset = 60; // Desplazamiento horizontal inicial
+  /// Inicializa y posiciona los barcos en su disposición inicial.
+  Future<void> _inicializarBarcosIniciales() async {
+    double xOffset = position.x * 10; // Desplazamiento horizontal inicial
 
     // Itera sobre la configuración de cada barco inicial
     for (final datosBarco in datosBarcosIniciales) {
-      final barcoVisual = _crearBarcoAlmacen(datosBarco);
-      barcoVisual.position = Vector2(
-        xOffset,
-        (size.y - barcoVisual.size.y) / 2, // Centrado vertical del barco
+      final barco = _crearBarcoInicial(datosBarco);
+      barco.position = Vector2(
+        position.x + xOffset,
+        position.y +
+            (filas * tamanioCelda) +
+            (tamanioCelda * 4) +
+            (areaBarcosIniciales.height - barco.size.y) / 3,
       );
 
-      contenedorScrollAlmacen.add(barcoVisual);
+      contenedorBarcosIniciales.add(barco);
       xOffset += espacioEntreBarcos;
     }
 
     // Ajusta el tamaño del contenedor para que abarque todos los barcos
-    contenedorScrollAlmacen.size = Vector2(xOffset - espacioEntreBarcos, size.y);
+    contenedorBarcosIniciales.size = Vector2(
+      xOffset - espacioEntreBarcos,
+      areaBarcosIniciales.height,
+    );
   }
 
-  /// Crea una instancia visual del `Barco` para el almacén a partir de los datos de configuración.
-  Barco _crearBarcoAlmacen(Map<String, dynamic> datos) {
+  /// Crea una instancia del `Barco` para la disposición inicial.
+  Barco _crearBarcoInicial(Map<String, dynamic> datos) {
     final int longitud = datos['longitud'];
     final Map<String, String> rutasSprites = Map<String, String>.from(datos['sprites']);
-    const double escala = 0.6; // Puedes hacerlo configurable si es necesario
 
     return Barco(
       longitud: longitud,
       rutasSprites: rutasSprites,
-      escala: escala,
-      // Los barcos en el almacén inician el proceso de arrastre
+      tamanioesCelda: tamanioCelda,
+      // Los barcos inician el proceso de arrastre
       onDragStartCallback: (barcoArrastrado) {
-        // Crea una nueva instancia del barco que se va a arrastrar al tablero
-        final nuevoBarco = _clonarBarcoParaTablero(barcoArrastrado);
-        // Añade el nuevo barco a la escena en la posición del barco del almacén
-        gameRef.add(nuevoBarco..position = barcoArrastrado.position.clone());
-        // Establece el barco original del almacén como no visible durante el arrastre
-        barcoArrastrado.removeFromParent();
+        // Establece el barco como arrastrándose
+        barcoArrastrado.estaSiendoArrastrado = true;
+        // Asegúrate de que esté en la parte superior
+        barcoArrastrado.priority = 1;
       },
       onDragEndCallback: (barcoArrastrado) async {
+        // Restablece la prioridad
+        barcoArrastrado.priority = 0;
+        barcoArrastrado.estaSiendoArrastrado = false;
+
         // Cuando se suelta el barco, intentamos colocarlo en el tablero
         final gridPosition = worldToGrid(barcoArrastrado.position);
-        final esValida = esPosicionValida(
-          gridPosition,
-          barcoArrastrado.longitud,
-          barcoArrastrado.esVertical,
-        );
+        final esValidaEnTablero =
+            areaTablero.contains(barcoArrastrado.position.toOffset()) &&
+            esPosicionValida(gridPosition, barcoArrastrado.longitud, barcoArrastrado.esVertical);
 
-        if (esValida) {
+        if (esValidaEnTablero) {
           agregarBarco(barcoArrastrado, gridPosition, barcoArrastrado.esVertical);
+          // Opcional: eliminar el barco de la disposición inicial
+          barcoArrastrado.removeFromParent();
         } else {
-          // Si la colocación no es válida, espera un breve momento antes de eliminar
-          await Future.delayed(const Duration(milliseconds: 50));
-          if (barcoArrastrado.isMounted) {
-            barcoArrastrado.removeFromParent();
-            // Re-crea el barco en el almacén
-            final datosOriginal = datosBarcosIniciales.firstWhere(
-              (data) =>
-                  data['longitud'] == barcoArrastrado.longitud &&
-                  data['sprites'].toString() == barcoArrastrado.barcoVisual.sprites.toString(),
-            );
-            final nuevoBarcoAlmacen = _crearBarcoAlmacen(datosOriginal);
-            nuevoBarcoAlmacen.position = barcoArrastrado.position.clone();
-            contenedorScrollAlmacen.add(nuevoBarcoAlmacen);
-            _reorganizarBarcosAlmacen(); // Opcional: reorganizar visualmente el almacén
-          }
+          // Si la colocación no es válida, devuelve el barco a su posición inicial
+          barcoArrastrado.position = barcoArrastrado.posicionAnterior;
         }
       },
     );
-  }
-
-  /// Crea una nueva instancia del `Barco` a partir de otra instancia para arrastrar al tablero.
-  Barco _clonarBarcoParaTablero(Barco barcoOriginal) {
-    return Barco(
-      longitud: barcoOriginal.longitud,
-      rutasSprites: Map<String, String>.from(
-        barcoOriginal.rutasSprites,
-      ), // Usamos rutasSprites del Barco original
-      escala: barcoOriginal.scale.x,
-      onDragStartCallback: (barco) {}, // No necesitamos este callback en la copia
-      onDragEndCallback: (barco) {}, // La lógica de soltar se maneja en el Tablero
-      id: UniqueKey().toString(), // Aseguramos que la copia tenga un nuevo ID
-    );
-  }
-
-  /// Reorganiza la posición de los barcos en el almacén después de un arrastre cancelado.
-  void _reorganizarBarcosAlmacen() {
-    contenedorScrollAlmacen.removeAll(contenedorScrollAlmacen.children.whereType<Barco>());
-    double xOffset = 0;
-    for (final datosBarco in datosBarcosIniciales) {
-      final barcoVisual = _crearBarcoAlmacen({...datosBarco}); // Crea una nueva instancia
-      barcoVisual.position = Vector2(xOffset, (size.y - barcoVisual.size.y) / 2);
-      contenedorScrollAlmacen.add(barcoVisual);
-      xOffset += barcoVisual.size.x + espacioEntreBarcos;
-    }
-    contenedorScrollAlmacen.size = Vector2(xOffset - espacioEntreBarcos, size.y);
   }
 }
 
@@ -383,16 +370,16 @@ extension TableroEstrategiaUtils on TableroEstrategia {
   /// Convierte una posición absoluta del mundo a una celda de la grilla.
   Vector2 worldToGrid(Vector2 worldPos) {
     return Vector2(
-      (worldPos.x - position.x) / tamanioCelda,
-      (worldPos.y - position.y) / tamanioCelda,
+      ((worldPos.x - position.x - tamanioCelda) / tamanioCelda).round().toDouble(),
+      ((worldPos.y - position.y - tamanioCelda) / tamanioCelda).round().toDouble(),
     );
   }
 
   /// Convierte coordenadas de grilla a posición absoluta en el mundo.
   Vector2 gridToWorld(Vector2 gridPos) {
     return Vector2(
-      position.x + gridPos.x * tamanioCelda + tamanioCelda / 2,
-      position.y + gridPos.y * tamanioCelda + tamanioCelda / 2,
+      position.x + gridPos.x * tamanioCelda + tamanioCelda + tamanioCelda / 2,
+      position.y + gridPos.y * tamanioCelda + tamanioCelda + tamanioCelda / 2,
     );
   }
 }

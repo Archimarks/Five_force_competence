@@ -16,10 +16,10 @@ class SpritesBarco extends SpriteComponent {
     required this.direccionActual,
     required Vector2 tamano,
   }) : super(size: tamano, anchor: Anchor.topLeft) {
-    _cargarSprites(rutasSprites);
+    _cargarSprites(rutasSprites, tamano); // Pasa el tamaño al cargar los sprites
   }
 
-  Future<void> _cargarSprites(Map<String, String> rutas) async {
+  Future<void> _cargarSprites(Map<String, String> rutas, Vector2 tamano) async {
     sprites[Direccion.arriba] = await Sprite.load(rutas['arriba']!);
     sprites[Direccion.derecha] = await Sprite.load(rutas['derecha']!);
     sprites[Direccion.abajo] = await Sprite.load(rutas['abajo']!);
@@ -27,8 +27,8 @@ class SpritesBarco extends SpriteComponent {
 
     sprite = sprites[direccionActual];
 
-    // Ajusta el tamaño al sprite original
-    size = sprite!.originalSize;
+    // Establece el tamaño al valor proporcionado en el constructor
+    size = tamano;
   }
 
   /// Cambia el sprite actual según la nueva dirección

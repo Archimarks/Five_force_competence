@@ -12,33 +12,33 @@ class ImagePaths {
   static final Map<String, Map<String, String>> todosLosSpritesPorDireccion = {
     '1': {
       'arriba': 'barco1_arriba.png',
+      'derecha': 'barco1_derecha.png',
       'abajo': 'barco1_abajo.png',
       'izquierda': 'barco1_izquierda.png',
-      'derecha': 'barco1_derecha.png',
     },
     '2': {
       'arriba': 'barco2_arriba.png',
+      'derecha': 'barco2_derecha.png',
       'abajo': 'barco2_abajo.png',
       'izquierda': 'barco2_izquierda.png',
-      'derecha': 'barco2_derecha.png',
     },
     '3': {
       'arriba': 'barco3_arriba.png',
+      'derecha': 'barco3_derecha.png',
       'abajo': 'barco3_abajo.png',
       'izquierda': 'barco3_izquierda.png',
-      'derecha': 'barco3_derecha.png',
     },
     '4': {
       'arriba': 'barco4_arriba.png',
+      'derecha': 'barco4_derecha.png',
       'abajo': 'barco4_abajo.png',
       'izquierda': 'barco4_izquierda.png',
-      'derecha': 'barco4_derecha.png',
     },
     '5': {
       'arriba': 'barco5_arriba.png',
+      'derecha': 'barco5_derecha.png',
       'abajo': 'barco5_abajo.png',
       'izquierda': 'barco5_izquierda.png',
-      'derecha': 'barco5_derecha.png',
     },
   };
 

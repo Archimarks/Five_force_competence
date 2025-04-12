@@ -21,8 +21,7 @@ class SetupGame extends FlameGame {
   // ⚙️ PARÁMETROS DE CONFIGURACIÓN GENERAL
   // ===========================================================================
 
-  static const double _margen = 20;
-  static const double _espacioExtra = 50;
+  static const double _margen = 5;
 
   static const double _tamanioCelda = 25;
   static const int _filas = 12;
@@ -83,8 +82,8 @@ class SetupGame extends FlameGame {
     final sizeTablero = Vector2.all(_tamanioCelda * _filas);
     final posicionTablero =
         esVertical
-            ? Vector2((size.x - sizeTablero.x) / 3, _margen)
-            : Vector2(_margen + 150, (size.y - sizeTablero.y) / 2 + 50);
+            ? Vector2((size.x - sizeTablero.x) / 10, _margen)
+            : Vector2(_margen + 150, (size.y - sizeTablero.y) / 2);
 
     final datosBarcosIniciales = <Map<String, dynamic>>[
       {'id': '5', 'longitud': 5, 'sprites': ImagePaths.todosLosSpritesPorDireccion['5']!},
@@ -94,9 +93,6 @@ class SetupGame extends FlameGame {
       {'id': '1', 'longitud': 1, 'sprites': ImagePaths.todosLosSpritesPorDireccion['1']!},
     ];
 
-    // Calcula la altura del almacén (fijo)
-    const double alturaAlmacen = 400;
-
     tableroEstrategia = TableroEstrategia(
       filas: _filas,
       columnas: _columnas,
@@ -104,14 +100,9 @@ class SetupGame extends FlameGame {
       datosBarcosIniciales: datosBarcosIniciales,
       espacioEntreBarcos: _separacionBarcos,
       position: posicionTablero,
-      size: Vector2(
-        sizeTablero.x,
-        sizeTablero.y + _espacioExtra + alturaAlmacen,
-      ), // Ajusta el tamaño del componente combinado
+      size: Vector2(sizeTablero.x, sizeTablero.y), // Ajusta el tamaño del componente combinado
     );
 
     add(tableroEstrategia);
-
-    // No necesitamos crear AlmacenBarco por separado, ya está integrado en TableroEstrategia
   }
 }

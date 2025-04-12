@@ -146,7 +146,7 @@ class SetupGame extends FlameGame {
     final double posY = tablero.position.y + tablero.size.y + _espacioExtra;
 
     // 🔥 Altura provisional, puedes calcularla dinámicamente si prefieres
-    const double alturaAlmacen = 100;
+    const double alturaAlmacen = 150;
 
     almacenBarco = AlmacenBarco(
       barcosIniciales: barcosIniciales,

@@ -297,7 +297,7 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
       base = gameRef.tableroEstrategia.gridToWorldCentro(gridPosition);
     } else {
       // Para barcos de longitud > 1, usamos la esquina superior izquierda de la celda
-      base = gameRef.tableroEstrategia.gridToWorldEsquina(gridPosition);
+      base = gameRef.tableroEstrategia.gridToWorldEsquina(gridPosition, longitud);
     }
 
     double offsetX = 0.0;

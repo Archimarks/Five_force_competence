@@ -238,7 +238,7 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
           gridToWorldCentro(nuevaGrid) -
           Vector2(barco.tamanioesCelda / 2, barco.tamanioesCelda / 2);
     } else {
-      final base = gridToWorldEsquina(nuevaGrid);
+      final base = gridToWorldEsquina(nuevaGrid, barco.longitud);
       final offsetX =
           nuevaOrientacionVertical ? 0.0 : ((barco.longitud - 1) / 2) * barco.tamanioesCelda;
       final offsetY =
@@ -406,10 +406,29 @@ extension TableroEstrategiaUtils on TableroEstrategia {
   }
 
   /// Convierte coordenadas de grilla a la esquina superior izquierda de la celda.
-  Vector2 gridToWorldEsquina(Vector2 gridPos) {
+  Vector2 gridToWorldEsquina(Vector2 gridPos, int longitud) {
+    // <--- AÑADE 'int longitud' como parámetro
+    // Ajuste en el eje Y para barcos de más de dos celdas
+    double ajusteY = 0.0;
+    switch (longitud) {
+      case 2:
+        ajusteY = -tamanioCelda / 2; // Ajuste para barcos de longitud 2
+        break;
+      case 3:
+        ajusteY = 0; // Ajuste para barcos de longitud 3
+        break;
+      case 4:
+        ajusteY = tamanioCelda / 2; // Ajuste para barcos de longitud 4
+        break;
+      case 5:
+      default:
+        ajusteY = tamanioCelda; // Ajuste para barcos de longitud 5
+        break;
+    }
+
     return Vector2(
       position.x + gridPos.x * tamanioCelda + tamanioCelda,
-      position.y + gridPos.y * tamanioCelda + tamanioCelda,
+      position.y + gridPos.y * tamanioCelda + tamanioCelda + ajusteY,
     );
   }
 

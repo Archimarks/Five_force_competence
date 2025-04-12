@@ -180,10 +180,11 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
     final celdas = calcularCeldasOcupadas(gridPos, barco.longitud, esVertical);
     ocuparCeldas(celdas);
 
-    // Actualiza la posición del barco en el mundo basada en la gridPos
-    barco.position = gridToWorld(gridPos);
+    // Calcula la posición centrada del barco
+    barco.position = barco.calcularPosicionCentrada(gridPos);
+
     // Asegúrate de que la orientación del barco sea la correcta
-    barco.rotar(esVertical); // Llama al método rotar del Barco
+    barco.rotar(esVertical);
 
     barcosEnTablero.add(barco);
     add(barco);
@@ -351,9 +352,9 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
             esPosicionValida(gridPosition, barcoArrastrado.longitud, barcoArrastrado.esVertical);
 
         if (esValidaEnTablero) {
-          // Eliminamos el barco del contenedor inicial ANTES de agregarlo al tablero
+          // Eliminamos el barco del contenedor inicial ANTES de que *el Barco* lo agregue al tablero
           contenedorBarcosIniciales.remove(barcoArrastrado);
-          agregarBarco(barcoArrastrado, gridPosition, barcoArrastrado.esVertical);
+          // REMOVE THIS LINE: agregarBarco(barcoArrastrado, gridPosition, barcoArrastrado.esVertical);
         } else {
           // Si la colocación no es válida, devuelve el barco a su posición inicial
           barcoArrastrado.position = barcoArrastrado.posicionAnterior;

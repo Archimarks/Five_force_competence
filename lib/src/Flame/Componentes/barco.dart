@@ -120,6 +120,16 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
 
     add(barcoVisual);
 
+    // AGREGAR TEMPORALMENTE UN COLOR DE FONDO PARA DEBUGGING
+    add(
+      RectangleComponent(
+        size: size.clone(),
+        paint: Paint()..color = Colors.red.withOpacity(0.5), // Color rojo semi-transparente
+        anchor: Anchor.topLeft,
+        priority: -1, // Asegúrate de que esté detrás del sprite
+      ),
+    );
+
     // Agrega el RectangleHitbox para que toda el área del barco sea táctil
     add(RectangleHitbox(size: size.clone()));
   }
@@ -160,7 +170,7 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
     super.onDragEnd(event);
     estaSiendoArrastrado = false;
     priority = _prioridadNormal;
-    onDragEndCallback(this); // <--- MANTENER ESTA LLAMADA AL CALLBACK
+    onDragEndCallback(this); // Mantenemos la llamada al callback en TableroEstrategia
 
     final gridPosition = gameRef.tableroEstrategia.worldToGrid(position);
     final esValidaEnTablero =
@@ -170,7 +180,7 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
 
     if (esValidaEnTablero) {
       parent?.remove(this);
-      // REMOVER ESTA LINEA: gameRef.tableroEstrategia.agregarBarco(this, gridPosition, esVertical);
+      gameRef.tableroEstrategia.agregarBarco(this, gridPosition, esVertical);
     } else {
       position = _posicionAnterior;
       _resetearVisualizacionTablero();
@@ -226,7 +236,7 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
   /// Calcula y aplica la nueva posición del barco en el tablero.
   void _actualizarPosicionEnTablero(Vector2 gridPosition) {
     gameRef.tableroEstrategia.liberarCeldas(_celdasOcupadas);
-    position = _calcularPosicionCentrada(gridPosition);
+    position = calcularPosicionCentrada(gridPosition);
     _celdasOcupadas = _calcularCeldasOcupadas(gridPosition);
     gameRef.tableroEstrategia.ocuparCeldas(_celdasOcupadas);
   }
@@ -278,12 +288,23 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
   }
 
   /// Calcula la posición en el mundo que centra el barco en el grid.
-  Vector2 _calcularPosicionCentrada(Vector2 gridPosition) {
+  Vector2 calcularPosicionCentrada(Vector2 gridPosition) {
     final tamanoCelda = gameRef.tableroEstrategia.tamanioCelda;
     final base = gameRef.tableroEstrategia.gridToWorld(gridPosition);
-    final offsetX = esVertical ? 0.0 : ((longitud - 1) * tamanoCelda / 2);
-    final offsetY = esVertical ? ((longitud - 1) * tamanoCelda / 2) : 0.0;
-    return base - Vector2(offsetX, offsetY);
+    double offsetX = 0.0;
+    double offsetY = 0.0;
+    Vector2 resultado;
+
+    if (longitud > 1) {
+      offsetX = esVertical ? 0.0 : ((longitud - 1) / 2) * tamanoCelda;
+      offsetY = esVertical ? ((longitud - 1) / 2) * tamanoCelda : 0.0;
+      resultado = base - Vector2(offsetX, offsetY);
+    } else {
+      // Para barcos de longitud 1, centramos la esquina superior izquierda en el centro de la celda
+      resultado = base - Vector2(tamanoCelda / 2, tamanoCelda / 2);
+    }
+
+    return resultado;
   }
 
   /// Resalta la posición en el tablero donde se movería el barco.

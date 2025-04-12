@@ -121,7 +121,7 @@ class Tablero extends PositionComponent with HasGameRef {
       coordenadas.add(
         Coordenada(
           texto: letras[columna],
-          posicion: Vector2((columna * tamanioCelda) + tamanioCelda + tamanioCelda / 2 - 8, 0),
+          posicion: Vector2((columna * tamanioCelda) + tamanioCelda + tamanioCelda / 2, 0),
         ),
       );
     }
@@ -130,7 +130,7 @@ class Tablero extends PositionComponent with HasGameRef {
       coordenadas.add(
         Coordenada(
           texto: '${fila + 1}',
-          posicion: Vector2(0, (fila * tamanioCelda) + tamanioCelda + tamanioCelda / 2 - 8),
+          posicion: Vector2(0, (fila * tamanioCelda) + tamanioCelda + tamanioCelda / 2),
         ),
       );
     }

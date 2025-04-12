@@ -232,7 +232,20 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
     liberarCeldas(celdasAntiguas);
     ocuparCeldas(celdasNuevas);
 
-    barco.position = gridToWorld(nuevaGrid);
+    // Calcula la nueva posición basada en la longitud del barco
+    if (barco.longitud == 1) {
+      barco.position =
+          gridToWorldCentro(nuevaGrid) -
+          Vector2(barco.tamanioesCelda / 2, barco.tamanioesCelda / 2);
+    } else {
+      final base = gridToWorldEsquina(nuevaGrid);
+      final offsetX =
+          nuevaOrientacionVertical ? 0.0 : ((barco.longitud - 1) / 2) * barco.tamanioesCelda;
+      final offsetY =
+          nuevaOrientacionVertical ? ((barco.longitud - 1) / 2) * barco.tamanioesCelda : 0.0;
+      barco.position = base + Vector2(0, barco.tamanioesCelda) - Vector2(offsetX, offsetY);
+    }
+
     barco.rotar(nuevaOrientacionVertical);
 
     return true;
@@ -392,8 +405,16 @@ extension TableroEstrategiaUtils on TableroEstrategia {
     );
   }
 
-  /// Convierte coordenadas de grilla a posición absoluta en el mundo.
-  Vector2 gridToWorld(Vector2 gridPos) {
+  /// Convierte coordenadas de grilla a la esquina superior izquierda de la celda.
+  Vector2 gridToWorldEsquina(Vector2 gridPos) {
+    return Vector2(
+      position.x + gridPos.x * tamanioCelda + tamanioCelda,
+      position.y + gridPos.y * tamanioCelda + tamanioCelda,
+    );
+  }
+
+  /// Convierte coordenadas de grilla al centro de la celda.
+  Vector2 gridToWorldCentro(Vector2 gridPos) {
     return Vector2(
       position.x + gridPos.x * tamanioCelda + tamanioCelda + tamanioCelda / 2,
       position.y + gridPos.y * tamanioCelda + tamanioCelda + tamanioCelda / 2,

@@ -290,7 +290,16 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
   /// Calcula la posición en el mundo que centra el barco en el grid.
   Vector2 calcularPosicionCentrada(Vector2 gridPosition) {
     final tamanoCelda = gameRef.tableroEstrategia.tamanioCelda;
-    final base = gameRef.tableroEstrategia.gridToWorld(gridPosition);
+    Vector2 base;
+
+    if (longitud == 1) {
+      // Para barcos de longitud 1, usamos el centro de la celda
+      base = gameRef.tableroEstrategia.gridToWorldCentro(gridPosition);
+    } else {
+      // Para barcos de longitud > 1, usamos la esquina superior izquierda de la celda
+      base = gameRef.tableroEstrategia.gridToWorldEsquina(gridPosition);
+    }
+
     double offsetX = 0.0;
     double offsetY = 0.0;
     Vector2 resultado;
@@ -298,9 +307,11 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
     if (longitud > 1) {
       offsetX = esVertical ? 0.0 : ((longitud - 1) / 2) * tamanoCelda;
       offsetY = esVertical ? ((longitud - 1) / 2) * tamanoCelda : 0.0;
-      resultado = base - Vector2(offsetX, offsetY);
+      resultado =
+          base +
+          Vector2(0, tamanoCelda) -
+          Vector2(offsetX, offsetY); // Ajuste para esquina superior izquierda
     } else {
-      // Para barcos de longitud 1, centramos la esquina superior izquierda en el centro de la celda
       resultado = base - Vector2(tamanoCelda / 2, tamanoCelda / 2);
     }
 

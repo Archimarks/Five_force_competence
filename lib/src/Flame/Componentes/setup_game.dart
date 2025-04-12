@@ -10,14 +10,12 @@ library;
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
-import 'almacen_barco.dart';
 import 'barco.dart';
 import 'image_paths.dart';
-import 'tablero.dart';
+import 'tablero_estrategia.dart'; // Importa la nueva clase combinada
 
 /// Escena principal donde los jugadores configuran sus unidades estratégicas
-/// antes de iniciar el juego. Se compone de un `Tablero` interactivo y un
-/// `AlmacenBarco` desde donde los barcos son arrastrados y colocados.
+/// antes de iniciar el juego. Se compone de un `TableroEstrategia` interactivo.
 class SetupGame extends FlameGame {
   // ===========================================================================
   // ⚙️ PARÁMETROS DE CONFIGURACIÓN GENERAL
@@ -26,11 +24,10 @@ class SetupGame extends FlameGame {
   static const double _margen = 20;
   static const double _espacioExtra = 50;
 
-  static const double _tamanioCelda = 25.0;
+  static const double _tamanioCelda = 25;
   static const int _filas = 12;
   static const int _columnas = 12;
 
-  static const double _escalaBarco = 0.8;
   static const double _separacionBarcos = 50;
 
   late final bool esVertical; // Determina orientación del dispositivo
@@ -39,8 +36,7 @@ class SetupGame extends FlameGame {
   // 🧩 COMPONENTES DEL JUEGO
   // ===========================================================================
 
-  late final Tablero tablero;
-  late final AlmacenBarco almacenBarco;
+  late final TableroEstrategia tableroEstrategia;
 
   /// Lista de barcos colocados correctamente sobre el tablero.
   final List<Barco> barcosEnTablero = [];
@@ -65,8 +61,7 @@ class SetupGame extends FlameGame {
     esVertical = size.y >= size.x;
 
     await _precargarSprites();
-    _crearTablero();
-    _crearAlmacenBarcos();
+    _crearTableroEstrategia();
   }
 
   // ===========================================================================
@@ -80,94 +75,43 @@ class SetupGame extends FlameGame {
   }
 
   // ===========================================================================
-  // 🔲 TABLERO - Creación y Posicionamiento
+  // 🔲 TABLERO ESTRATEGIA - Creación y Posicionamiento
   // ===========================================================================
 
-  /// Crea el tablero principal donde se colocan los barcos.
-  void _crearTablero() {
+  /// Crea el componente principal que gestiona el tablero y el almacén de barcos.
+  void _crearTableroEstrategia() {
     final sizeTablero = Vector2.all(_tamanioCelda * _filas);
     final posicionTablero =
         esVertical
             ? Vector2((size.x - sizeTablero.x) / 3, _margen)
             : Vector2(_margen + 150, (size.y - sizeTablero.y) / 2 + 50);
 
-    tablero = Tablero(
+    final datosBarcosIniciales = <Map<String, dynamic>>[
+      {'id': '5', 'longitud': 5, 'sprites': ImagePaths.todosLosSpritesPorDireccion['5']!},
+      {'id': '4', 'longitud': 4, 'sprites': ImagePaths.todosLosSpritesPorDireccion['4']!},
+      {'id': '3', 'longitud': 3, 'sprites': ImagePaths.todosLosSpritesPorDireccion['3']!},
+      {'id': '2', 'longitud': 2, 'sprites': ImagePaths.todosLosSpritesPorDireccion['2']!},
+      {'id': '1', 'longitud': 1, 'sprites': ImagePaths.todosLosSpritesPorDireccion['1']!},
+    ];
+
+    // Calcula la altura del almacén (fijo)
+    const double alturaAlmacen = 400;
+
+    tableroEstrategia = TableroEstrategia(
       filas: _filas,
       columnas: _columnas,
       tamanioCelda: _tamanioCelda,
-      position: posicionTablero,
-      size: sizeTablero,
-    );
-
-    add(tablero);
-  }
-
-  // ===========================================================================
-  // ⚓ ALMACÉN DE BARCOS - Configuración Inicial
-  // ===========================================================================
-
-  /// Crea el componente visual que contiene los barcos disponibles al jugador.
-  void _crearAlmacenBarcos() {
-    final barcosDisponibles = <(String id, int longitud)>[
-      ('1', 1),
-      ('2', 2),
-      ('3', 3),
-      ('4', 4),
-      ('5', 5),
-    ];
-
-    final List<Barco> barcosIniciales = [];
-
-    // Genera instancias de barcos con sus respectivos callbacks
-    for (final (id, longitud) in barcosDisponibles) {
-      final barco = Barco(
-        id: id,
-        longitud: longitud,
-        rutasSprites: ImagePaths.todosLosSpritesPorDireccion[id]!,
-        posicionInicial: Vector2.zero(),
-        escala: _escalaBarco,
-        onPosicionCambiada: (_) {}, // Se puede usar para animaciones o feedback
-        onBarcoColocadoEnTablero: (barco) {
-          final gridPos = tablero.worldToGrid(barco.position);
-
-          // Verifica si la posición es válida antes de fijarlo
-          if (tablero.esPosicionValida(gridPos, barco.longitud, barco.esVertical)) {
-            tablero.agregarBarco(barco, gridPos, barco.esVertical);
-            barcosEnTablero.add(barco);
-
-            // Limpia callbacks innecesarios tras colocación definitiva
-            barco.onBarcoColocadoEnTablero = null;
-            barco.validarColocacion = null;
-          } else {
-            // Remueve el barco si la posición no es válida
-            barco.removeFromParent();
-            barcosEnTablero.remove(barco);
-          }
-        },
-        validarColocacion: (barco) {
-          final gridPos = tablero.worldToGrid(barco.position);
-          return tablero.esPosicionValida(gridPos, barco.longitud, barco.esVertical);
-        },
-      );
-
-      barcosIniciales.add(barco);
-    }
-
-    // Calcula la posición y tamaño del almacén
-    final double anchoAlmacen = size.x - _margen * 2;
-    final double posX = _margen;
-    final double posY = tablero.position.y + tablero.size.y + _espacioExtra;
-
-    // Altura fija, ajustable si se desea hacerlo dinámico
-    const double alturaAlmacen = 150;
-
-    almacenBarco = AlmacenBarco(
-      barcosIniciales: barcosIniciales,
-      position: Vector2(posX, posY),
-      size: Vector2(anchoAlmacen, alturaAlmacen),
+      datosBarcosIniciales: datosBarcosIniciales,
       espacioEntreBarcos: _separacionBarcos,
+      position: posicionTablero,
+      size: Vector2(
+        sizeTablero.x,
+        sizeTablero.y + _espacioExtra + alturaAlmacen,
+      ), // Ajusta el tamaño del componente combinado
     );
 
-    add(almacenBarco);
+    add(tableroEstrategia);
+
+    // No necesitamos crear AlmacenBarco por separado, ya está integrado en TableroEstrategia
   }
 }

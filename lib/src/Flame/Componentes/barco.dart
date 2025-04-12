@@ -5,17 +5,23 @@
 /// Fecha: 2025
 ///
 /// Descripción:
-/// Este componente representa un barco dentro del tablero de batalla.
+/// Este componente representa un barco arrastrable y rotable sobre un tablero.
 /// Permite interacción mediante gestos: arrastrar para posicionar,
 /// tocar para rotar, y valida las posiciones para evitar colisiones
 /// o ubicaciones inválidas.
 ///
 /// Cada barco está compuesto visualmente por un conjunto de imágenes
 /// (una por dirección) y se adapta automáticamente al grid del tablero.
+///
+/// [onDragStartCallback]: Callback llamado cuando comienza el arrastre,
+///                         pasando la instancia del barco.
+/// [onDragEndCallback]: Callback llamado cuando finaliza el arrastre,
+///                        pasando la instancia del barco.
 /// ------------------------------------------------------------------------
 
 library;
 
+import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +29,7 @@ import 'package:flutter/material.dart';
 import 'direccion.dart';
 import 'setup_game.dart';
 import 'sprites_barco.dart';
-import 'tablero.dart';
+import 'tablero_estrategia.dart'; // Importa la clase combinada
 
 /// Componente que representa un barco arrastrable y rotable sobre un tablero.
 ///
@@ -43,6 +49,8 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
   /// Componente visual del barco que administra sprites según dirección.
   late final SpritesBarco barcoVisual;
 
+  final Map<String, String> rutasSprites;
+
   /// Índice de rotación actual (0: arriba, 1: derecha, 2: abajo, 3: izquierda).
   int indiceRotacion = 0;
 
@@ -50,6 +58,7 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
   bool estaSiendoArrastrado = false;
 
   /// Guarda la posición previa al arrastre para revertir si es inválido.
+  // ignore: unused_field
   late Vector2 _posicionAnterior;
 
   /// Lista de coordenadas (en grid) ocupadas por el barco en el tablero.
@@ -58,8 +67,11 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
   /// Callback ejecutado cuando el barco cambia su posición (durante arrastre).
   void Function(Vector2 nuevaPosicion)? onPosicionCambiada;
 
-  /// Callback ejecutado cuando el barco es colocado correctamente.
-  void Function(Barco barco)? onBarcoColocadoEnTablero;
+  /// Callback llamado cuando comienza el arrastre de este barco.
+  final void Function(Barco) onDragStartCallback;
+
+  /// Callback llamado cuando finaliza el arrastre de este barco.
+  final void Function(Barco) onDragEndCallback;
 
   /// Función personalizada para validar si una posición es válida.
   bool Function(Barco barco)? validarColocacion;
@@ -77,15 +89,16 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
 
   /// Constructor del componente Barco.
   ///
-  /// Requiere longitud, rutas de sprites y escala. Puede incluir una posición inicial
-  /// y funciones de validación o eventos personalizados.
+  /// Requiere longitud, rutas de sprites, escala y los callbacks de arrastre.
+  /// Puede incluir una posición inicial y funciones de validación.
   Barco({
     required this.longitud,
-    required Map<String, String> rutasSprites,
+    required this.rutasSprites,
     Vector2? posicionInicial,
     required double escala,
     this.onPosicionCambiada,
-    this.onBarcoColocadoEnTablero,
+    required this.onDragStartCallback,
+    required this.onDragEndCallback,
     this.validarColocacion,
     String? id,
   }) : super(
@@ -103,6 +116,9 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
     );
 
     add(barcoVisual);
+
+    // Agrega el RectangleHitbox para que toda el área del barco sea táctil
+    add(RectangleHitbox(size: size.clone()));
   }
 
   // ------------------------------------------------------------------------
@@ -116,13 +132,14 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
     _rotar();
   }
 
-  /// Evento de inicio de arrastre: eleva prioridad y guarda la posición actual.
+  /// Evento de inicio de arrastre: eleva prioridad, guarda la posición actual y llama al callback.
   @override
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
     estaSiendoArrastrado = true;
     priority = _prioridadArrastrando;
     _posicionAnterior = position.clone();
+    onDragStartCallback(this); // Llama al callback al inicio del arrastre
   }
 
   /// Evento durante el arrastre: actualiza la posición y visualización del tablero.
@@ -134,25 +151,17 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
     _actualizarVisualizacionTablero();
   }
 
-  /// Evento al finalizar el arrastre: valida y coloca o revierte.
+  /// Evento al finalizar el arrastre: revierte prioridad, llama al callback y gestiona la colocación.
   @override
   void onDragEnd(DragEndEvent event) {
     super.onDragEnd(event);
     estaSiendoArrastrado = false;
     priority = _prioridadNormal;
+    onDragEndCallback(this); // Llama al callback al final del arrastre
 
-    final gridPosition = gameRef.tablero.worldToGrid(position);
-    final esValida =
-        validarColocacion?.call(this) ??
-        gameRef.tablero.esPosicionValida(gridPosition, longitud, esVertical);
-
-    if (esValida) {
-      _actualizarPosicionEnTablero(gridPosition);
-      onBarcoColocadoEnTablero?.call(this);
-    } else {
-      position = _posicionAnterior;
-    }
-
+    // La lógica de validación y colocación ahora se gestionará principalmente en TableroEstrategia.
+    // Aquí podríamos tener una lógica de "revertir" si TableroEstrategia indica que la colocación falló.
+    // Por ahora, solo reseteamos la visualización.
     _resetearVisualizacionTablero();
   }
 
@@ -172,13 +181,13 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
     indiceRotacion = (indiceRotacion + 1) % 4;
     _actualizarTamanioYVisual();
 
-    final gridPosition = gameRef.tablero.worldToGrid(position);
+    final gridPosition = gameRef.tableroEstrategia.worldToGrid(position);
     final esValida =
         validarColocacion?.call(this) ??
-        gameRef.tablero.esPosicionValida(gridPosition, longitud, esVertical);
+        gameRef.tableroEstrategia.esPosicionValida(gridPosition, longitud, esVertical);
 
     if (esValida) {
-      gameRef.tablero.liberarCeldas(celdasPrevias);
+      gameRef.tableroEstrategia.liberarCeldas(celdasPrevias);
       _actualizarPosicionEnTablero(gridPosition);
     } else {
       // Revertir cambios
@@ -195,11 +204,11 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
   /// Este método es público para que pueda ser usado por el tablero.
   /// Internamente usa `_rotar()` las veces necesarias para alcanzar la orientación deseada.
   void rotar(bool esVertical) {
-    if (esVertical == esVertical) return;
+    if (esVertical == this.esVertical) return;
 
     // Intentamos rotar hasta alcanzar la orientación deseada (máximo 3 rotaciones)
     int intentos = 0;
-    while (esVertical != esVertical && intentos < 4) {
+    while (esVertical != this.esVertical && intentos < 4) {
       _rotar();
       intentos++;
     }
@@ -207,10 +216,10 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
 
   /// Calcula y aplica la nueva posición del barco en el tablero.
   void _actualizarPosicionEnTablero(Vector2 gridPosition) {
-    gameRef.tablero.liberarCeldas(_celdasOcupadas);
+    gameRef.tableroEstrategia.liberarCeldas(_celdasOcupadas);
     position = _calcularPosicionCentrada(gridPosition);
     _celdasOcupadas = _calcularCeldasOcupadas(gridPosition);
-    gameRef.tablero.ocuparCeldas(_celdasOcupadas);
+    gameRef.tableroEstrategia.ocuparCeldas(_celdasOcupadas);
   }
 
   /// Devuelve `true` si este barco colisiona visualmente con otro.
@@ -258,8 +267,8 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
 
   /// Calcula la posición en el mundo que centra el barco en el grid.
   Vector2 _calcularPosicionCentrada(Vector2 gridPosition) {
-    final tamanoCelda = gameRef.tablero.tamanioCelda;
-    final base = gameRef.tablero.gridToWorld(gridPosition);
+    final tamanoCelda = gameRef.tableroEstrategia.tamanioCelda;
+    final base = gameRef.tableroEstrategia.gridToWorld(gridPosition);
     final offsetX = esVertical ? 0.0 : ((longitud - 1) * tamanoCelda / 2);
     final offsetY = esVertical ? ((longitud - 1) * tamanoCelda / 2) : 0.0;
     return base - Vector2(offsetX, offsetY);
@@ -267,13 +276,13 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
 
   /// Resalta la posición en el tablero donde se movería el barco.
   void _actualizarVisualizacionTablero() {
-    final gridPosition = gameRef.tablero.worldToGrid(position);
-    gameRef.tablero.resaltarPosicion(gridPosition, longitud, esVertical, _celdasOcupadas);
+    final gridPosition = gameRef.tableroEstrategia.worldToGrid(position);
+    gameRef.tableroEstrategia.resaltarPosicion(gridPosition, longitud, esVertical, _celdasOcupadas);
   }
 
   /// Elimina cualquier resaltado del tablero.
   void _resetearVisualizacionTablero() {
-    gameRef.tablero.resetearResaltado();
+    gameRef.tableroEstrategia.resetearResaltado();
   }
 
   // ------------------------------------------------------------------------

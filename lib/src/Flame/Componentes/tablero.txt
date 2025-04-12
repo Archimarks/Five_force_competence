@@ -136,6 +136,11 @@ class Tablero extends PositionComponent with HasGameRef {
     final celdas = calcularCeldasOcupadas(gridPos, barco.longitud, esVertical);
     ocuparCeldas(celdas);
 
+    // Actualiza la posición del barco en el mundo basada en la gridPos
+    barco.position = gridToWorld(gridPos);
+    // Asegúrate de que la orientación del barco sea la correcta
+    barco.rotar(esVertical); // Llama al método rotar del Barco
+
     barcos.add(barco);
     add(barco);
   }

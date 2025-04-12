@@ -5,7 +5,7 @@ import 'direccion.dart';
 /// Componente visual que representa un barco con sprites separados por dirección.
 class SpritesBarco extends SpriteComponent {
   /// Mapa de direcciones a sus respectivos sprites
-  final Map<Direccion, Sprite> _sprites = {};
+  final Map<Direccion, Sprite> sprites = {};
 
   /// Dirección actual mostrada
   Direccion direccionActual;
@@ -20,12 +20,12 @@ class SpritesBarco extends SpriteComponent {
   }
 
   Future<void> _cargarSprites(Map<String, String> rutas) async {
-    _sprites[Direccion.arriba] = await Sprite.load(rutas['arriba']!);
-    _sprites[Direccion.derecha] = await Sprite.load(rutas['derecha']!);
-    _sprites[Direccion.abajo] = await Sprite.load(rutas['abajo']!);
-    _sprites[Direccion.izquierda] = await Sprite.load(rutas['izquierda']!);
+    sprites[Direccion.arriba] = await Sprite.load(rutas['arriba']!);
+    sprites[Direccion.derecha] = await Sprite.load(rutas['derecha']!);
+    sprites[Direccion.abajo] = await Sprite.load(rutas['abajo']!);
+    sprites[Direccion.izquierda] = await Sprite.load(rutas['izquierda']!);
 
-    sprite = _sprites[direccionActual];
+    sprite = sprites[direccionActual];
 
     // Ajusta el tamaño al sprite original
     size = sprite!.originalSize;
@@ -34,6 +34,6 @@ class SpritesBarco extends SpriteComponent {
   /// Cambia el sprite actual según la nueva dirección
   void cambiarDireccion(Direccion nuevaDireccion) {
     direccionActual = nuevaDireccion;
-    sprite = _sprites[direccionActual];
+    sprite = sprites[direccionActual];
   }
 }

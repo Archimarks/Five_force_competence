@@ -174,20 +174,36 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
   }
 
   /// Intenta agregar un barco en la posición indicada si es válida.
+  /// Intenta agregar un barco en la posición indicada si es válida.
   void agregarBarco(Barco barco, Vector2 gridPos, bool esVertical) {
-    if (!esPosicionValida(gridPos, barco.longitud, esVertical)) return;
+    print(
+      'AGREGAR BARCO LLAMADO - gridPos: $gridPos, longitud: ${barco.longitud}, esVertical: $esVertical',
+    );
+    print('Posición del barco ANTES de calcularPosicionCentrada: ${barco.position}');
+
+    if (!esPosicionValida(gridPos, barco.longitud, esVertical)) {
+      print('AGREGAR BARCO: La posición NO es válida para gridPos: $gridPos');
+      return;
+    }
 
     final celdas = calcularCeldasOcupadas(gridPos, barco.longitud, esVertical);
+    print('AGREGAR BARCO: Celdas ocupadas: $celdas');
     ocuparCeldas(celdas);
 
     // Calcula la posición centrada del barco
     barco.position = barco.calcularPosicionCentrada(gridPos);
+    print('Posición del barco DESPUÉS de calcularPosicionCentrada: ${barco.position}');
 
     // Asegúrate de que la orientación del barco sea la correcta
     barco.rotar(esVertical);
+    print(
+      'Orientación del barco DESPUÉS de rotar: esVertical = $esVertical, índice de rotación = ${barco.indiceRotacion}',
+    );
+    print('Tamaño del barco DESPUÉS de rotar: ${barco.size}');
 
     barcosEnTablero.add(barco);
     add(barco);
+    print('AGREGAR BARCO: Barco agregado al tablero en la posición: ${barco.position}');
   }
 
   /// Actualiza posición y orientación de un barco, validando primero.

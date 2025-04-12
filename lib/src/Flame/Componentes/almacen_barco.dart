@@ -1,74 +1,94 @@
 /// ---------------------------------------------------------------------------
-/// `AlmacenBarco` - Componente lateral del juego que contiene barcos iniciales
-/// disponibles para arrastrar hacia el tablero. Permite visualización clara
-/// y separación del tablero de juego.
+/// `AlmacenBarco` - Componente lateral o inferior del juego que contiene los
+/// barcos iniciales disponibles para ser arrastrados y colocados en el tablero.
+/// Actúa como inventario visual de barcos antes del despliegue estratégico.
 /// ---------------------------------------------------------------------------
 library;
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 
-import 'barco.dart'; // Importa la clase Barco, que define los componentes de los barcos
+import 'barco.dart'; // Clase `Barco`, que representa individualmente cada unidad flotante.
 
-/// Componente que actúa como un "almacén" visual donde se muestran los barcos
-/// iniciales antes de ser colocados en el tablero. Los jugadores pueden
-/// arrastrar estos barcos desde aquí hacia el tablero.
+/// ---------------------------------------------------------------------------
+/// CLASE PRINCIPAL: AlmacenBarco
+/// Representa un área tipo "contenedor de barcos" en la UI del juego, permitiendo
+/// a los jugadores ver y arrastrar los barcos hacia el tablero.
+/// ---------------------------------------------------------------------------
 class AlmacenBarco extends PositionComponent with HasGameRef, DragCallbacks {
-  /// Lista de barcos que se mostrarán inicialmente en el almacén.
+  // ===========================================================================
+  // 🔗 PARÁMETROS DE CONFIGURACIÓN
+  // ===========================================================================
+
+  /// Lista de barcos disponibles al inicio del juego.
   final List<Barco> barcosIniciales;
 
-  /// Espacio horizontal en píxeles entre cada barco dentro del contenedor.
+  /// Espaciado horizontal entre cada barco en píxeles.
   final double espacioEntreBarcos;
 
-  /// Contenedor que organiza visualmente los barcos dentro del almacén.
+  /// Componente interno que contiene y organiza visualmente los barcos.
   late final PositionComponent contenedorScroll;
 
-  /// Constructor que inicializa posición, tamaño del almacén, barcos y espacio.
+  // ===========================================================================
+  // 🏗️ CONSTRUCTOR
+  // ===========================================================================
+
+  /// Crea un nuevo `AlmacenBarco` en una posición específica y con tamaño dado.
+  ///
+  /// - [barcosIniciales]: barcos mostrados como disponibles al jugador.
+  /// - [espacioEntreBarcos]: separación horizontal entre cada barco.
+  /// - [position]: posición del componente en la pantalla.
+  /// - [size]: dimensiones del área del almacén.
   AlmacenBarco({
     required this.barcosIniciales,
     required this.espacioEntreBarcos,
-    required Vector2 position, // Posición del almacén en el mundo del juego
-    required Vector2 size, // Tamaño del área del almacén
+    required Vector2 position,
+    required Vector2 size,
   }) : super(position: position, size: size);
 
-  /// Método que se ejecuta al cargar el componente en el juego.
-  /// Se asegura de que todos los barcos estén cargados y luego los posiciona.
+  // ===========================================================================
+  // 🚀 CICLO DE VIDA - CARGA DEL COMPONENTE
+  // ===========================================================================
+
+  /// Se llama automáticamente cuando el componente es insertado en el juego.
+  /// Se encarga de inicializar visualmente el almacén y colocar los barcos.
   @override
   Future<void> onLoad() async {
-    // Espera a que todos los barcos iniciales terminen su proceso de carga.
-    await Future.wait(barcosIniciales.map((b) async => b.onLoad()));
-
-    // Crea un contenedor para agrupar los barcos dentro del almacén.
+    // Crea un contenedor que funcionará como scroll horizontal (si se desea).
     contenedorScroll = PositionComponent();
 
-    // Agrega el contenedor como hijo de este componente para que se renderice.
+    // Inserta el contenedor como hijo de este componente visual.
     add(contenedorScroll);
 
-    // Llama al método encargado de colocar visualmente los barcos en línea.
+    // Posiciona visualmente los barcos dentro del contenedor.
     await _colocarBarcos();
   }
 
-  /// Método privado que posiciona los barcos dentro del contenedor.
-  /// Calcula la posición horizontal de cada barco dejando espacio entre ellos.
-  Future<void> _colocarBarcos() async {
-    double xOffset = 0; // Posición horizontal inicial para el primer barco.
+  // ===========================================================================
+  // 🧭 MÉTODO PRIVADO: Posicionamiento de Barcos
+  // ===========================================================================
 
-    // Itera sobre todos los barcos y los coloca alineados horizontalmente.
+  /// Posiciona todos los barcos iniciales horizontalmente dentro del contenedor,
+  /// aplicando el espaciado definido y centrado vertical en el almacén.
+  Future<void> _colocarBarcos() async {
+    double xOffset = 0; // Desplazamiento horizontal inicial
+
+    // Itera sobre todos los barcos disponibles
     for (final barco in barcosIniciales) {
-      // Centra verticalmente el barco dentro del contenedor del almacén.
+      // Calcula su posición relativa dentro del almacén (centrado vertical)
       barco.position = Vector2(
         xOffset,
-        (size.y - barco.size.y) / 2, // Centrado vertical en el almacén
+        (size.y - barco.size.y) / 2, // Centrado vertical del barco
       );
 
-      // Agrega el barco al contenedor visual.
+      // Añade el barco al contenedor visual
       contenedorScroll.add(barco);
 
-      // Aumenta el desplazamiento horizontal para el próximo barco.
+      // Actualiza la posición horizontal para el siguiente barco
       xOffset += espacioEntreBarcos;
     }
 
-    // Ajusta el tamaño del contenedor para que abarque todos los barcos colocados.
+    // Ajusta el tamaño del contenedor para que abarque todos los barcos
     contenedorScroll.size = Vector2(xOffset, size.y);
   }
 }

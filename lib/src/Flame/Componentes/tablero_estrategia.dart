@@ -351,9 +351,9 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
             esPosicionValida(gridPosition, barcoArrastrado.longitud, barcoArrastrado.esVertical);
 
         if (esValidaEnTablero) {
+          // Eliminamos el barco del contenedor inicial ANTES de agregarlo al tablero
+          contenedorBarcosIniciales.remove(barcoArrastrado);
           agregarBarco(barcoArrastrado, gridPosition, barcoArrastrado.esVertical);
-          // Opcional: eliminar el barco de la disposición inicial
-          barcoArrastrado.removeFromParent();
         } else {
           // Si la colocación no es válida, devuelve el barco a su posición inicial
           barcoArrastrado.position = barcoArrastrado.posicionAnterior;

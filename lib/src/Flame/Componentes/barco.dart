@@ -160,9 +160,8 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
     super.onDragEnd(event);
     estaSiendoArrastrado = false;
     priority = _prioridadNormal;
-    onDragEndCallback(this); // Llama al callback al final del arrastre
+    onDragEndCallback(this); // <--- MANTENER ESTA LLAMADA AL CALLBACK
 
-    // La lógica de validación y colocación ahora se gestiona en TableroEstrategia.
     final gridPosition = gameRef.tableroEstrategia.worldToGrid(position);
     final esValidaEnTablero =
         gameRef.tableroEstrategia.areaTablero.contains(position.toOffset()) &&
@@ -170,14 +169,13 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
             gameRef.tableroEstrategia.esPosicionValida(gridPosition, longitud, esVertical));
 
     if (esValidaEnTablero) {
-      gameRef.tableroEstrategia.agregarBarco(this, gridPosition, esVertical);
+      parent?.remove(this);
+      // REMOVER ESTA LINEA: gameRef.tableroEstrategia.agregarBarco(this, gridPosition, esVertical);
     } else {
-      // Si la colocación no es válida, devuelve el barco a su posición anterior
       position = _posicionAnterior;
       _resetearVisualizacionTablero();
     }
   }
-
   // ------------------------------------------------------------------------
   // FUNCIONALIDAD DEL BARCO
   // ------------------------------------------------------------------------

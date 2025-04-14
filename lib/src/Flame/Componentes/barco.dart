@@ -59,6 +59,9 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
   /// Guarda la posición previa al arrastre para revertir si es inválido.
   late Vector2 _posicionAnterior;
 
+  /// Guarda la posición inicial al arrastre para revertir si es inválido.
+  late Vector2 _posicionInicial;
+
   /// Lista de coordenadas (en grid) ocupadas por el barco en el tablero.
   List<Vector2> _celdasOcupadas = [];
 
@@ -79,6 +82,9 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
 
   /// Devuelve la posición anterior del barco.
   Vector2 get posicionAnterior => _posicionAnterior;
+
+  /// Devuelve la posición inicial del barco.
+  Vector2 get posicionInicial => _posicionInicial;
 
   // Prioridades visuales
   static const int _prioridadNormal = 0;

@@ -212,20 +212,26 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
     final esValidaEnTablero = !estaFueraDelTablero && (validarColocacion?.call(this) ?? gameRef.tableroEstrategia.esPosicionValida(gridPosition, longitud, esVertical));
 
     if (estaFueraDelContenedorBarco && estaFueraDelTablero && !esValidaEnTablero) {
+      gameRef.tableroEstrategia.liberarCeldas(_celdasOcupadas);
+      _celdasOcupadas.clear();
       position = _posicionInicial;
       _resetearVisualizacionTablero();
       return;
     } else if (estaFueraDelContenedorBarco && !estaFueraDelTablero && esValidaEnTablero) {
-      parent?.remove(this);
+      gameRef.tableroEstrategia.liberarCeldas(_celdasOcupadas);
+      _celdasOcupadas.clear();
+      _celdasOcupadas = _calcularCeldasOcupadas(gridPosition);
       gameRef.tableroEstrategia.agregarBarco(this, gridPosition, esVertical);
       return;
     } else if (estaFueraDelContenedorBarco && estaFueraDelTablero && !esValidaEnTablero) {
+      _celdasOcupadas = _calcularCeldasOcupadas(gridPosition);
       position = _posicionInicial;
       _resetearVisualizacionTablero();
       return;
     } else {
       position = _posicionAnterior;
       _resetearVisualizacionTablero();
+      return;
     }
   }
 

@@ -58,7 +58,7 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
   }) : grilla = List.generate(filas, (fila) => List.generate(columnas, (col) => Celda(fila: fila, columna: col)));
 
   /// Área rectangular que ocupa el tablero en coordenadas globales.
-  Rect get areaTablero => Rect.fromLTWH(position.x + tamanioCelda, position.y + tamanioCelda, columnas * tamanioCelda, filas * tamanioCelda);
+  Rect get areaTablero => Rect.fromLTWH(position.x, position.y, columnas * tamanioCelda, filas * tamanioCelda);
 
   /// Área rectangular que ocupa la sección inicial de los barcos.
   Rect get areaBarcosIniciales => Rect.fromLTWH(position.x, position.y + filas * tamanioCelda + tamanioCelda * 2, size.x, size.y - (filas * tamanioCelda + tamanioCelda * 2));
@@ -129,11 +129,8 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
     for (final pos in posiciones) {
       final celda = obtenerCelda(pos.y.toInt(), pos.x.toInt());
       if (celda != null) {
-        print('Liberando celda en ${pos.y.toInt()}, ${pos.x.toInt()}');
         celda.liberar();
-      } else {
-        print('No se encontró celda en ${pos.y.toInt()}, ${pos.x.toInt()}');
-      }
+      } else {}
     }
   }
 

@@ -45,8 +45,7 @@ class Celda extends PositionComponent {
   EstadoCelda estado;
 
   /// Constructor principal. Inicializa la celda como vacía por defecto.
-  Celda({required this.fila, required this.columna, this.estado = EstadoCelda.vacia})
-    : super(size: Vector2.all(50.0)); // Tamaño estándar 50x50
+  Celda({required this.fila, required this.columna, this.estado = EstadoCelda.vacia}) : super(size: Vector2.all(50.0)); // Tamaño estándar 50x50
 
   /// Devuelve `true` si la celda contiene un barco.
   bool get tieneBarco => estado == EstadoCelda.barco;
@@ -136,8 +135,7 @@ class Celda extends PositionComponent {
 
   /// Define la igualdad entre celdas comparando su posición lógica.
   @override
-  bool operator ==(Object other) =>
-      other is Celda && other.fila == fila && other.columna == columna;
+  bool operator ==(Object other) => other is Celda && other.fila == fila && other.columna == columna;
 
   /// Devuelve un hash único en función de la posición lógica.
   @override

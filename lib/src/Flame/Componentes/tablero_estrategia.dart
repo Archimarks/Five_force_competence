@@ -304,27 +304,51 @@ extension TableroEstrategiaUtils on TableroEstrategia {
   }
 
   /// Convierte coordenadas de grilla a la esquina superior izquierda de la celda.
+  ///
+  /// Si **esVertical** ??  False = horizontal : True = vertical
   Vector2 gridToWorldEsquina(Vector2 gridPos, int longitud, bool esVertical) {
-    // <--- AÑADE 'int longitud' como parámetro
-    // Ajuste en el eje Y para barcos de más de dos celdas
+    // Ajuste en el eje X y Y para barcos igual o más de dos celdas
+    //Cada caso es el valor de la longitud
     double ajusteY = 0.0;
-    switch (longitud) {
-      case 2:
-        ajusteY = -tamanioCelda / 2; // Ajuste para barcos de longitud 2
-        break;
-      case 3:
-        ajusteY = 0; // Ajuste para barcos de longitud 3
-        break;
-      case 4:
-        ajusteY = tamanioCelda / 2; // Ajuste para barcos de longitud 4
-        break;
-      case 5:
-      default:
-        ajusteY = tamanioCelda; // Ajuste para barcos de longitud 5
-        break;
+    double ajusteX = 0.0;
+    if (!esVertical) {
+      switch (longitud) {
+        case 2:
+          ajusteX = tamanioCelda / 2;
+          ajusteY = -tamanioCelda;
+          break;
+        case 3:
+          ajusteX = tamanioCelda;
+          ajusteY = -tamanioCelda;
+          break;
+        case 4:
+          ajusteX = tamanioCelda * 1.5;
+          ajusteY = -tamanioCelda;
+          break;
+        case 5:
+        default:
+          ajusteX = tamanioCelda * 2;
+          ajusteY = -tamanioCelda;
+      }
+      return Vector2(position.x + gridPos.x * tamanioCelda + tamanioCelda + ajusteX, position.y + gridPos.y * tamanioCelda + tamanioCelda + ajusteY);
+    } else {
+      switch (longitud) {
+        case 2:
+          ajusteY = -tamanioCelda / 2; // Ajuste para barcos de longitud 2
+          break;
+        case 3:
+          ajusteY = 0; // Ajuste para barcos de longitud 3
+          break;
+        case 4:
+          ajusteY = tamanioCelda / 2; // Ajuste para barcos de longitud 4
+          break;
+        case 5:
+        default:
+          ajusteY = tamanioCelda; // Ajuste para barcos de longitud 5
+          break;
+      }
+      return Vector2(position.x + gridPos.x * tamanioCelda + tamanioCelda, position.y + gridPos.y * tamanioCelda + tamanioCelda + ajusteY);
     }
-
-    return Vector2(position.x + gridPos.x * tamanioCelda + tamanioCelda, position.y + gridPos.y * tamanioCelda + tamanioCelda + ajusteY);
   }
 
   /// Convierte coordenadas de grilla al centro de la celda.

@@ -45,7 +45,7 @@ class Celda extends PositionComponent {
   EstadoCelda estado;
 
   /// Constructor principal. Inicializa la celda como vacía por defecto.
-  Celda({required this.fila, required this.columna, this.estado = EstadoCelda.vacia}) : super(size: Vector2.all(50.0)); // Tamaño estándar 50x50
+  Celda({required this.fila, required this.columna, this.estado = EstadoCelda.vacia}) : super(size: Vector2.all(54.0)); // Tamaño estándar 50x50
 
   /// Devuelve `true` si la celda contiene un barco.
   bool get tieneBarco => estado == EstadoCelda.barco;

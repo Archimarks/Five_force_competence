@@ -175,12 +175,11 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
     liberarCeldas(celdasAntiguas);
 
     ocuparCeldas(celdasNuevas);
-
     // Calcula la nueva posición basada en la longitud del barco
     if (barco.longitud == 1) {
       barco.position = gridToWorldCentro(nuevaGrid) - Vector2(barco.tamanioesCelda / 2, barco.tamanioesCelda / 2);
     } else {
-      final base = gridToWorldEsquina(nuevaGrid, barco.longitud);
+      final base = gridToWorldEsquina(nuevaGrid, barco.longitud, barco.esVertical);
       final offsetX = nuevaOrientacionVertical ? 0.0 : ((barco.longitud - 1) / 2) * barco.tamanioesCelda;
       final offsetY = nuevaOrientacionVertical ? ((barco.longitud - 1) / 2) * barco.tamanioesCelda : 0.0;
       barco.position = base + Vector2(0, barco.tamanioesCelda) - Vector2(offsetX, offsetY);
@@ -257,17 +256,20 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
 
   /// Inicializa y posiciona los barcos en su disposición inicial.
   Future<void> _inicializarBarcosIniciales() async {
-    double xOffset = position.x * 10; // Desplazamiento horizontal inicial
+    double xOffset = position.x * 3; // Desplazamiento horizontal inicial
+    double yOffset = tamanioCelda; // Desplazamiento horizontal inicial
+
     // Itera sobre la configuración de cada barco inicial
     for (final datosBarco in datosBarcosIniciales) {
       final barco = _crearBarcoInicial(datosBarco);
-      barco.position = Vector2(position.x + xOffset, position.y + (filas * tamanioCelda) + (tamanioCelda * 4) + (areaBarcosIniciales.height - barco.size.y) / 3);
+      barco.position = Vector2(position.x + xOffset, position.y + yOffset + (filas * tamanioCelda) + (tamanioCelda * 4) + (areaBarcosIniciales.height - barco.size.y) / 3);
       barco.actualizarPosicionInicial(barco.position);
       contenedorBarcosIniciales.add(barco);
       xOffset += espacioEntreBarcos;
+      yOffset += tamanioCelda;
     }
     // Ajusta el tamaño del contenedor para que abarque todos los barcos
-    contenedorBarcosIniciales.size = Vector2(xOffset - espacioEntreBarcos, areaBarcosIniciales.height);
+    contenedorBarcosIniciales.size = Vector2(xOffset - espacioEntreBarcos, areaBarcosIniciales.height + yOffset);
   }
 
   /// Crea una instancia del `Barco` para la disposición inicial.
@@ -302,7 +304,7 @@ extension TableroEstrategiaUtils on TableroEstrategia {
   }
 
   /// Convierte coordenadas de grilla a la esquina superior izquierda de la celda.
-  Vector2 gridToWorldEsquina(Vector2 gridPos, int longitud) {
+  Vector2 gridToWorldEsquina(Vector2 gridPos, int longitud, bool esVertical) {
     // <--- AÑADE 'int longitud' como parámetro
     // Ajuste en el eje Y para barcos de más de dos celdas
     double ajusteY = 0.0;

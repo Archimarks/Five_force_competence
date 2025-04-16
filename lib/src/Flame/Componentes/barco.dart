@@ -171,11 +171,14 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
   // GESTOS DE USUARIO
   // ------------------------------------------------------------------------
 
-  /// Evento de tap: al tocar el barco, se rota.
+  /// Evento de tap: al tocar el barco, se rota si no está en el tablero.
   @override
   void onTapUp(TapUpEvent event) {
     super.onTapUp(event);
-    _rotar();
+    final estaEnTablero = gameRef.tableroEstrategia.areaTablero.contains(position.toOffset());
+    if (!estaEnTablero) {
+      _rotar();
+    }
   }
 
   /// Evento de inicio de arrastre: eleva prioridad, guarda la posición actual y llama al callback.
@@ -239,30 +242,10 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
   // FUNCIONALIDAD DEL BARCO
   // ------------------------------------------------------------------------
 
-  /// Gira el barco 90° en sentido horario y valida la nueva posición.
+  /// Gira el barco 90° en sentido horario.
   void _rotar() {
-    final rotacionAnterior = indiceRotacion;
-    final sizeAnterior = size.clone();
-    final posicionAnterior = position.clone();
-    final celdasPrevias = _celdasOcupadas.toList();
-
     indiceRotacion = (indiceRotacion + 1) % 4;
     _actualizarTamanioYVisual();
-
-    final gridPosition = gameRef.tableroEstrategia.worldToGrid(position);
-    final esValida = validarColocacion?.call(this) ?? gameRef.tableroEstrategia.esPosicionValida(gridPosition, longitud, esVertical);
-
-    if (esValida && gameRef.tableroEstrategia.areaTablero.contains(position.toOffset())) {
-      gameRef.tableroEstrategia.liberarCeldas(celdasPrevias);
-      _actualizarPosicionEnTablero(gridPosition);
-    } else {
-      // Revertir cambios
-      indiceRotacion = rotacionAnterior;
-      size.setFrom(sizeAnterior);
-      position.setFrom(posicionAnterior);
-      barcoVisual.size.setFrom(sizeAnterior);
-      barcoVisual.cambiarDireccion(_obtenerDireccionDesdeIndice(rotacionAnterior));
-    }
   }
 
   /// Cambia la orientación del barco a vertical u horizontal según `esVertical`.
@@ -281,12 +264,12 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
   }
 
   /// Calcula y aplica la nueva posición del barco en el tablero.
-  void _actualizarPosicionEnTablero(Vector2 gridPosition) {
-    gameRef.tableroEstrategia.liberarCeldas(_celdasOcupadas);
-    position = calcularPosicionCentrada(gridPosition);
-    _celdasOcupadas = _calcularCeldasOcupadas(gridPosition);
-    gameRef.tableroEstrategia.ocuparCeldas(_celdasOcupadas);
-  }
+  //void _actualizarPosicionEnTablero(Vector2 gridPosition) {
+  //gameRef.tableroEstrategia.liberarCeldas(_celdasOcupadas);
+  //position = calcularPosicionCentrada(gridPosition);
+  //_celdasOcupadas = _calcularCeldasOcupadas(gridPosition);
+  //gameRef.tableroEstrategia.ocuparCeldas(_celdasOcupadas);
+  //}
 
   /// Devuelve `true` si este barco colisiona visualmente con otro.
   bool colisionaCon(Barco otroBarco) => toRect().overlaps(otroBarco.toRect());
@@ -335,7 +318,7 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
       base = gameRef.tableroEstrategia.gridToWorldCentro(gridPosition);
     } else {
       // Para barcos de longitud > 1, usamos la esquina superior izquierda de la celda
-      base = gameRef.tableroEstrategia.gridToWorldEsquina(gridPosition, longitud);
+      base = gameRef.tableroEstrategia.gridToWorldEsquina(gridPosition, longitud, esVertical);
     }
 
     double offsetX = 0.0;

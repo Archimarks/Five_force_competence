@@ -23,11 +23,11 @@ class SetupGame extends FlameGame {
 
   static const double _margen = 5;
 
-  static const double _tamanioCelda = 25;
+  static const double _tamanioCelda = 27;
   static const int _filas = 12;
   static const int _columnas = 12;
 
-  static const double _separacionBarcos = 50;
+  static const double _separacionBarcos = 70;
 
   late final bool esVertical; // Determina orientación del dispositivo
 
@@ -80,10 +80,7 @@ class SetupGame extends FlameGame {
   /// Crea el componente principal que gestiona el tablero y el almacén de barcos.
   void _crearTableroEstrategia() {
     final sizeTablero = Vector2.all(_tamanioCelda * _filas);
-    final posicionTablero =
-        esVertical
-            ? Vector2((size.x - sizeTablero.x) / 10, _margen)
-            : Vector2(_margen + 150, (size.y - sizeTablero.y) / 2);
+    final posicionTablero = esVertical ? Vector2((size.x - sizeTablero.x) / 10, _margen) : Vector2(_margen + 150, (size.y - sizeTablero.y) / 2);
 
     final datosBarcosIniciales = <Map<String, dynamic>>[
       {'id': '5', 'longitud': 5, 'sprites': ImagePaths.todosLosSpritesPorDireccion['5']!},

@@ -27,7 +27,7 @@ import 'package:flutter/material.dart';
 import 'direccion.dart';
 import 'setup_game.dart';
 import 'sprites_barco.dart';
-import 'tablero_estrategia.dart'; // Importa la clase combinada
+import 'tablero_estrategia.dart';
 
 /// Componente que representa un barco arrastrable y rotable dentro del
 /// `TableroEstrategia`.
@@ -254,8 +254,6 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
   /// Internamente usa `_rotar()` las veces necesarias para alcanzar la orientación deseada.
   void rotar(bool esVertical) {
     if (esVertical == this.esVertical) return;
-
-    // Intentamos rotar hasta alcanzar la orientación deseada (máximo 3 rotaciones)
     int intentos = 0;
     while (esVertical != this.esVertical && intentos < 4) {
       _rotar();
@@ -328,7 +326,7 @@ class Barco extends PositionComponent with DragCallbacks, TapCallbacks, HasGameR
     if (longitud > 1) {
       offsetX = esVertical ? 0.0 : ((longitud - 1) / 2) * tamanoCelda;
       offsetY = esVertical ? ((longitud - 1) / 2) * tamanoCelda : 0.0;
-      resultado = base + Vector2(0, tamanoCelda) - Vector2(offsetX, offsetY); // Ajuste para esquina superior izquierda
+      resultado = base + Vector2(0, tamanoCelda) - Vector2(offsetX, offsetY);
     } else {
       resultado = base - Vector2(tamanoCelda / 2, tamanoCelda / 2);
     }

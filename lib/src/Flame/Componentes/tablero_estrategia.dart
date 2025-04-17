@@ -6,9 +6,9 @@
 library;
 
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart'; // Import para UniqueKey
+import 'package:flutter/material.dart';
 
-import 'barco.dart'; // Clase `Barco`, que representa individualmente cada unidad flotante.
+import 'barco.dart';
 import 'celda.dart';
 import 'coordenada.dart';
 
@@ -98,7 +98,7 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
 
   /// Genera etiquetas visuales (A–Z y 1–N) alrededor del tablero.
   void _agregarCoordenadasVisuales() {
-    const letras = 'ABCDEFGHIJKL'; // Puedes hacerlo dinámico si quieres más columnas
+    const letras = 'ABCDEFGHIJKL';
 
     for (int columna = 0; columna < columnas; columna++) {
       coordenadas.add(Coordenada(texto: letras[columna], posicion: Vector2(position.x + columna * tamanioCelda + tamanioCelda + tamanioCelda / 2, position.y)));
@@ -154,9 +154,6 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
 
     // Calcula la posición centrada del barco
     barco.position = barco.calcularPosicionCentrada(gridPos);
-
-    //Asegúrate de que la orientación del barco sea la correcta
-    //barco.rotar(esVertical);
 
     barcosEnTablero.add(barco);
     add(barco);
@@ -334,17 +331,17 @@ extension TableroEstrategiaUtils on TableroEstrategia {
     } else {
       switch (longitud) {
         case 2:
-          ajusteY = -tamanioCelda / 2; // Ajuste para barcos de longitud 2
+          ajusteY = -tamanioCelda / 2;
           break;
         case 3:
-          ajusteY = 0; // Ajuste para barcos de longitud 3
+          ajusteY = 0;
           break;
         case 4:
-          ajusteY = tamanioCelda / 2; // Ajuste para barcos de longitud 4
+          ajusteY = tamanioCelda / 2;
           break;
         case 5:
         default:
-          ajusteY = tamanioCelda; // Ajuste para barcos de longitud 5
+          ajusteY = tamanioCelda;
           break;
       }
       return Vector2(position.x + gridPos.x * tamanioCelda + tamanioCelda, position.y + gridPos.y * tamanioCelda + tamanioCelda + ajusteY);

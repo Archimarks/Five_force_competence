@@ -76,7 +76,9 @@ class Celda extends PositionComponent {
 
   /// Restaura la celda a su estado original si estaba resaltada o rechazada.
   void resetearColor() {
-    if (estado == EstadoCelda.resaltada || estado == EstadoCelda.rechazada) {
+    if (estado == EstadoCelda.barco) {
+      estado = EstadoCelda.barco;
+    } else if (estado == EstadoCelda.resaltada || estado == EstadoCelda.rechazada) {
       estado = EstadoCelda.vacia;
     }
   }

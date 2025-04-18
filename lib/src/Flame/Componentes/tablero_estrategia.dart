@@ -309,7 +309,7 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
   }
 
   /// Resalta un área como válida o inválida para colocar un barco,
-  /// teniendo en cuenta el sector activo.
+  /// teniendo en cuenta el sector activo.55
   void resaltarPosicion(Vector2 gridPos, int longitudBarco, bool esVertical, [List<Vector2> celdasPropias = const []]) {
     final celdas = <Vector2>[];
     for (int i = 0; i < longitudBarco; i++) {
@@ -358,7 +358,9 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
         final celda = grilla[fila][columna];
         final worldPosCelda = celda.position + Vector2(tamanioCelda / 2, tamanioCelda / 2);
         final gridPosCelda = Vector2(columna.toDouble(), fila.toDouble());
-        if (!sector.contiene(worldPosCelda) && !celdasEnSector.contains(gridPosCelda)) {
+        if (celda.estado == EstadoCelda.barco) {
+          celda.estado = EstadoCelda.barco;
+        } else if (!sector.contiene(worldPosCelda) && !celdasEnSector.contains(gridPosCelda)) {
           celda.estado = EstadoCelda.rechazada; // Puedes usar otro estado o modificar el color directamente
         } else if (!celdasEnSector.contains(gridPosCelda) && celda.estado == EstadoCelda.rechazada) {
           celda.estado = EstadoCelda.vacia; // Restaurar si ya no está fuera del sector y no es parte del barco
@@ -425,7 +427,9 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
         resetearResaltado(); // Limpiar cualquier resaltado
         for (final fila in grilla) {
           for (final celda in fila) {
-            celda.estado = EstadoCelda.vacia; // Restaurar el estado visual de las celdas
+            if (!celda.tieneBarco) {
+              celda.estado = EstadoCelda.vacia; // Restaurar el estado visual de las celdas
+            }
           }
         }
       },

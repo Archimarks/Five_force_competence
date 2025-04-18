@@ -16,11 +16,14 @@ class Sector {
   /// Nombre del sector, correspondiente a una de las Fuerzas de Porter.
   final String nombre;
 
+  /// valor del sector, correspondiente a una de las Fuerzas de Porter que es igual a la logitud del barco.
+  final int valor;
+
   /// Rectángulo que define los límites del sector dentro del tablero.
   final Rect rect;
 
   /// Crea un nuevo `Sector`.
-  Sector({required this.id, required this.nombre, required this.rect});
+  Sector({required this.id, required this.valor, required this.nombre, required this.rect});
 
   /// Verifica si una posición (Vector2) está dentro de los límites de este sector.
   bool contiene(Vector2 posicion) {

@@ -127,8 +127,10 @@ class Celda extends PositionComponent {
       case EstadoCelda.impactada:
         return Colors.red;
       case EstadoCelda.resaltada:
+        // ignore: deprecated_member_use
         return Colors.green.withOpacity(0.5);
       case EstadoCelda.rechazada:
+        // ignore: deprecated_member_use
         return Colors.red.withOpacity(0.5);
     }
   }

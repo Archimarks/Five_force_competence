@@ -7,10 +7,12 @@ library;
 
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'barco.dart';
 import 'celda.dart';
 import 'coordenada.dart';
+import 'sector.dart';
 
 /// ---------------------------------------------------------------------------
 /// CLASE PRINCIPAL: TableroEstrategia
@@ -28,6 +30,8 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
   late final List<List<Celda>> grilla; // Matriz 2D de celdas
   final List<Coordenada> coordenadas = []; // Coordenadas visuales (A, B, C / 1, 2, 3)
   final List<Barco> barcosEnTablero = []; // Lista de barcos colocados en el tablero
+  late final List<Sector> sectores; // Sectore  (A, B, C, D, E)
+  Sector? sectorActivo;
 
   // ===========================================================================
   // 📦 CONFIGURACIÓN INICIAL DE LOS BARCOS
@@ -72,6 +76,7 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
     // Inicializar el tablero
     await _crearCeldas();
     _agregarCoordenadasVisuales();
+    await _inicializarSectores();
 
     // Inicializar la disposición inicial de los barcos
     contenedorBarcosIniciales = PositionComponent();
@@ -82,6 +87,92 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
   // ===========================================================================
   // 🛠️ MÉTODOS PRIVADOS - GESTIÓN DEL TABLERO
   // ===========================================================================
+
+  /// Inicializa la definición de los sectores del tablero, leyendo los valores de SharedPreferences.
+  Future<void> _inicializarSectores() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    sectores = [
+      Sector(
+        id: 'A',
+        nombre: 'POTENCIALES COMPETIDORES',
+        valor: _obtenerValorSector(prefs, 'POTENCIALES COMPETIDORES'),
+        rect: Rect.fromLTRB(
+          position.x + 0 * tamanioCelda + tamanioCelda, // left (columna 0)
+          position.y + 0 * tamanioCelda + tamanioCelda, // top (fila 0)
+          position.x + 7 * tamanioCelda, // right (columna 6 + 1)
+          position.y + 7 * tamanioCelda, // bottom (fila 6 + 1)
+        ),
+      ),
+      Sector(
+        id: 'B',
+        nombre: 'RIVALIDAD ENTRE COMPETIDORES',
+        valor: _obtenerValorSector(prefs, 'RIVALIDAD ENTRE COMPETIDORES'),
+        rect: Rect.fromLTRB(
+          position.x + 0 * tamanioCelda + tamanioCelda, // left (columna 0)
+          position.y + 6 * tamanioCelda + tamanioCelda, // top (fila 6)
+          position.x + 7 * tamanioCelda, // right (columna 6 + 1)
+          position.y + 13 * tamanioCelda, // bottom (fila 12 + 1)
+        ),
+      ),
+      Sector(
+        id: 'C',
+        nombre: 'PODER DE NEGOCIACION DE COMPRADORES',
+        valor: _obtenerValorSector(prefs, 'PODER DE NEGOCIACION DE COMPRADORES'),
+        rect: Rect.fromLTRB(
+          position.x + 6 * tamanioCelda + tamanioCelda, // left (columna 6)
+          position.y + 0 * tamanioCelda + tamanioCelda, // top (fila 0)
+          position.x + 13 * tamanioCelda, // right (columna 12 + 1)
+          position.y + 7 * tamanioCelda, // bottom (fila 6 + 1)
+        ),
+      ),
+      Sector(
+        id: 'D',
+        nombre: 'PODER DE NEGOCIACION DE PROVEEDORES',
+        valor: _obtenerValorSector(prefs, 'PODER DE NEGOCIACION DE PROVEEDORES'),
+        rect: Rect.fromLTRB(
+          position.x + 6 * tamanioCelda + tamanioCelda, // left (columna 6)
+          position.y + 6 * tamanioCelda + tamanioCelda, // top (fila 6)
+          position.x + 13 * tamanioCelda, // right (columna 12 + 1)
+          position.y + 13 * tamanioCelda, // bottom (fila 12 + 1)
+        ),
+      ),
+      Sector(
+        id: 'E',
+        nombre: 'PRODUCTOS SUSTITUTOS',
+        valor: _obtenerValorSector(prefs, 'PRODUCTOS SUSTITUTOS'),
+        rect: Rect.fromLTRB(
+          position.x + 3 * tamanioCelda + tamanioCelda, // left (columna 3)
+          position.y + 3 * tamanioCelda + tamanioCelda, // top (fila 3)
+          position.x + 10 * tamanioCelda, // right (columna 9 + 1)
+          position.y + 10 * tamanioCelda, // bottom (fila 9 + 1)
+        ),
+      ),
+    ];
+  }
+
+  /// Función auxiliar para obtener el valor de un sector desde SharedPreferences y mapearlo a un entero.
+  int _obtenerValorSector(SharedPreferences prefs, String nombreSector) {
+    String? valorString = prefs.getString(nombreSector);
+
+    if (valorString != null && valorString.isNotEmpty) {
+      switch (valorString.toUpperCase()) {
+        case 'MUY ALTA':
+          return 5;
+        case 'ALTA':
+          return 4;
+        case 'MEDIO':
+          return 3;
+        case 'BAJA':
+          return 2;
+        case 'MUY BAJA':
+        default:
+          return 1;
+      }
+    } else {
+      return 1;
+    }
+  }
 
   /// Posiciona las celdas correctamente en la grilla y las agrega a la escena.
   Future<void> _crearCeldas() async {
@@ -163,7 +254,9 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
   bool actualizarBarco(Barco barco, Vector2 nuevaPos, bool nuevaOrientacionVertical, {required bool orientacionActualVertical}) {
     final nuevaGrid = worldToGrid(nuevaPos);
 
-    if (!esPosicionValida(nuevaGrid, barco.longitud, nuevaOrientacionVertical)) return false;
+    if (!esPosicionValida(nuevaGrid, barco.longitud, nuevaOrientacionVertical)) {
+      return false;
+    }
 
     final celdasAntiguas = calcularCeldasOcupadas(worldToGrid(barco.posicionAnterior), barco.longitud, orientacionActualVertical);
 
@@ -192,30 +285,51 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
     final int startX = gridPos.x.floor();
     final int startY = gridPos.y.floor();
 
+    if (sectorActivo != null && longitud != sectorActivo!.valor) {
+      return false; // La longitud del barco debe coincidir con el valor del sector activo
+    }
+
     for (int i = 0; i < longitud; i++) {
       final fila = esVertical ? startY + i : startY;
       final columna = esVertical ? startX : startX + i;
 
       final celda = obtenerCelda(fila, columna);
-      if (celda == null || celda.tieneBarco) return false;
+      if (celda == null || celda.tieneBarco) {
+        return false;
+      }
+      // Comprobar si la celda actual pertenece al sector activo
+      if (sectorActivo != null) {
+        final worldPosCelda = gridToWorldCentro(Vector2(columna.toDouble(), fila.toDouble()));
+        if (!sectorActivo!.contiene(worldPosCelda)) {
+          return false; // Si alguna celda está fuera del sector activo, la posición no es válida
+        }
+      }
     }
     return true;
   }
 
-  /// Resalta un área como válida o inválida para colocar un barco.
-  void resaltarPosicion(Vector2 gridPos, int longitud, bool esVertical, [List<Vector2> celdasPropias = const []]) {
-    resetearResaltado();
+  /// Resalta un área como válida o inválida para colocar un barco,
+  /// teniendo en cuenta el sector activo.
+  void resaltarPosicion(Vector2 gridPos, int longitudBarco, bool esVertical, [List<Vector2> celdasPropias = const []]) {
     final celdas = <Vector2>[];
-    for (int i = 0; i < longitud; i++) {
+    for (int i = 0; i < longitudBarco; i++) {
       final x = gridPos.x + (esVertical ? 0 : i.toDouble());
       final y = gridPos.y + (esVertical ? i.toDouble() : 0);
       if (x >= columnas || y >= filas) {
         _resaltarComoRechazado(celdas);
+        _oscurecerCeldasFueraDeSector(sectorActivo, celdas); // Oscurecer fuera del sector
         return;
       }
       final celda = obtenerCelda(y.toInt(), x.toInt());
       if (celda == null || (celda.tieneBarco && !celdasPropias.contains(Vector2(x, y)))) {
         _resaltarComoRechazado(celdas);
+        _oscurecerCeldasFueraDeSector(sectorActivo, celdas); // Oscurecer fuera del sector
+        return;
+      }
+      final worldPosCelda = gridToWorldCentro(Vector2(x, y));
+      if (sectorActivo != null && !sectorActivo!.contiene(worldPosCelda)) {
+        _resaltarComoRechazado(celdas);
+        _oscurecerCeldasFueraDeSector(sectorActivo, celdas); // Oscurecer fuera del sector
         return;
       }
       celdas.add(Vector2(x, y));
@@ -223,12 +337,33 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
     for (final coord in celdas) {
       obtenerCelda(coord.y.toInt(), coord.x.toInt())?.resaltar();
     }
+    _oscurecerCeldasFueraDeSector(sectorActivo, celdas); // Asegurar que el resto esté oscuro
   }
 
   /// Muestra las celdas como inválidas visualmente (color rojo, por ejemplo).
   void _resaltarComoRechazado(List<Vector2> celdasParciales) {
     for (final coord in celdasParciales) {
       obtenerCelda(coord.y.toInt(), coord.x.toInt())?.rechazar();
+    }
+  }
+
+  /// Oscurece las celdas del tablero que no pertenecen al sector dado.
+  void _oscurecerCeldasFueraDeSector(Sector? sector, List<Vector2> celdasEnSector) {
+    if (sector == null) {
+      // Si no hay sector activo, no oscurecer nada
+      return;
+    }
+    for (int fila = 0; fila < filas; fila++) {
+      for (int columna = 0; columna < columnas; columna++) {
+        final celda = grilla[fila][columna];
+        final worldPosCelda = celda.position + Vector2(tamanioCelda / 2, tamanioCelda / 2);
+        final gridPosCelda = Vector2(columna.toDouble(), fila.toDouble());
+        if (!sector.contiene(worldPosCelda) && !celdasEnSector.contains(gridPosCelda)) {
+          celda.estado = EstadoCelda.rechazada; // Puedes usar otro estado o modificar el color directamente
+        } else if (!celdasEnSector.contains(gridPosCelda) && celda.estado == EstadoCelda.rechazada) {
+          celda.estado = EstadoCelda.vacia; // Restaurar si ya no está fuera del sector y no es parte del barco
+        }
+      }
     }
   }
 
@@ -282,10 +417,17 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
       onDragStartCallback: (barcoArrastrado) {
         barcoArrastrado.estaSiendoArrastrado = true;
         barcoArrastrado.priority = 1;
+        sectorActivo = sectores.firstWhere((sector) => sector.valor == longitud);
       },
       onDragEndCallback: (barcoArrastrado) async {
         barcoArrastrado.priority = 0;
         barcoArrastrado.estaSiendoArrastrado = false;
+        resetearResaltado(); // Limpiar cualquier resaltado
+        for (final fila in grilla) {
+          for (final celda in fila) {
+            celda.estado = EstadoCelda.vacia; // Restaurar el estado visual de las celdas
+          }
+        }
       },
     );
   }

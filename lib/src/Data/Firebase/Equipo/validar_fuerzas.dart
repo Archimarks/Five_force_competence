@@ -2,6 +2,7 @@
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// ---------------------------------------------------------------------------
 /// # ValidarFuerzas
@@ -10,7 +11,8 @@ import 'package:flutter/material.dart';
 /// en la interfaz contra las fuerzas correctas definidas en Firebase.**
 ///
 /// Además, guarda los resultados de la comparación en la base de datos
-/// bajo el nodo `RESPUESTA FUERZAS`, e inactiva el estado del turno del equipo.
+/// bajo el nodo `RESPUESTA FUERZAS`, inactiva el estado del turno del equipo,
+/// y **actualiza los valores correctos de las fuerzas en SharedPreferences.**
 ///
 /// ### Autor:
 /// *Marcos Alejandro Collazos Marmolejo*
@@ -37,27 +39,25 @@ class ValidarFuerzas {
   /// - `partidaActual`: ID de la partida actual.
   /// - `equipo`: ID del equipo que responde.
   /// - `respuestasUsuario`: Lista de respuestas seleccionadas por el usuario,
-  ///   en el mismo orden que las claves definidas.
+  ///    en el mismo orden que las claves definidas.
   ///
   /// ### Flujo:
   /// - Compara cada fuerza seleccionada por el usuario con la respuesta correcta.
   /// - Guarda en Firebase si el usuario 'ACERTÓ' o 'NO ACERTÓ' en cada fuerza.
   /// - Cambia el estado del turno del equipo a 'INACTIVO'.
+  /// - **Carga los valores correctos de las fuerzas desde Firebase.**
+  /// - **Guarda los valores correctos de las fuerzas en SharedPreferences.**
   ///
   /// ### Ejemplo de uso:
   /// ```dart
   /// await validarFuerzas.validarSeleccionUsuario(
   ///   partidaActual: 'partida_123',
   ///   equipo: 'equipo_abc',
-  ///   respuestasUsuario: ['ALTO', 'BAJO', 'MEDIO', 'BAJO', 'ALTO'],
+  ///   respuestasUsuario: ['MUY ALTA', 'ALTA', 'MEDIO', 'BAJA', 'MUY BAJA'],
   /// );
   /// ```
   /// -------------------------------------------------------------------------
-  Future<void> validarSeleccionUsuario({
-    required String partidaActual,
-    required String equipo,
-    required List<String?> respuestasUsuario,
-  }) async {
+  Future<void> validarSeleccionUsuario({required String partidaActual, required String equipo, required List<String?> respuestasUsuario}) async {
     final String basePath = 'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipo';
 
     final DatabaseReference fuerzasRef = _dbRef.child('$basePath/FUERZAS');
@@ -73,11 +73,9 @@ class ValidarFuerzas {
         return;
       }
 
-      final Map<String, dynamic> fuerzasCorrectas = Map<String, dynamic>.from(
-        snapshot.value as Map,
-      );
+      final Map<String, dynamic> fuerzasCorrectas = Map<String, dynamic>.from(snapshot.value as Map);
 
-      // Claves a validar
+      // Claves a validar y guardar en SharedPreferences
       final List<String> claves = [
         'PODER DE NEGOCIACION DE COMPRADORES',
         'PODER DE NEGOCIACION DE PROVEEDORES',
@@ -87,6 +85,7 @@ class ValidarFuerzas {
       ];
 
       final Map<String, String> resultado = {};
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
 
       for (int i = 0; i < claves.length; i++) {
         final clave = claves[i];
@@ -96,16 +95,17 @@ class ValidarFuerzas {
         final estado = (respuestaUsuario == respuestaCorrecta) ? 'ACERTÓ' : 'NO ACERTÓ';
         resultado['RESPUESTA $clave'] = estado;
 
-        debugPrint(
-          'Comparando $clave: usuario="$respuestaUsuario", correcto="$respuestaCorrecta" => $estado',
-        );
+        // Guardar el valor correcto en SharedPreferences
+        await prefs.setString(clave, respuestaCorrecta.toString());
+
+        debugPrint('Comparando $clave: usuario="$respuestaUsuario", correcto="$respuestaCorrecta" => $estado');
       }
 
       // Guardar resultado en Firebase y desactivar turno
       await respuestaRef.set(resultado);
       await estadoTurnoRef.set('INACTIVO');
 
-      debugPrint('Respuestas guardadas correctamente. ESTADO TURNO actualizado a INACTIVO.');
+      debugPrint('Respuestas guardadas correctamente. ESTADO TURNO actualizado a INACTIVO. Valores correctos guardados en SharedPreferences.');
     } catch (e) {
       debugPrint('Error al validar las respuestas: $e');
     }

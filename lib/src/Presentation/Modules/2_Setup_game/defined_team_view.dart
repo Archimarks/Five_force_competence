@@ -135,7 +135,7 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: customAppBar(
           context: context,
-          title: nombreEquipo,
+          title: 'Define las fuerza de la empresa: $nombreEquipo',
           backgroundColor: colorEquipo,
           onLeadingPressed: () {
             Navigator.pushReplacementNamed(context, Routes.joinGame);
@@ -159,14 +159,6 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const SizedBox(height: 10),
-                            const Text(
-                              'Define las fuerzas de tu empresa',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black87),
-                            ),
-                            const SizedBox(height: 25),
-
                             /// Diseño adaptativo según orientación
                             isLandscape ? _buildHorizontalLayout() : _buildVerticalLayout(),
 
@@ -209,6 +201,7 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
         Row(children: [_dropdownFuerza(2, 'Tercer fuerza (3 pines)'), const SizedBox(width: 12), _dropdownFuerza(1, 'Segunda fuerza (4 pines)')]),
         const SizedBox(height: 16),
         Row(children: [_dropdownFuerza(4, 'Menor fuerza (1 pin)')]),
+        const SizedBox(height: 16),
       ],
     );
   }

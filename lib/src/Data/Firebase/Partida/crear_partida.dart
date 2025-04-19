@@ -106,12 +106,7 @@ class CrearPartida {
   Map<String, dynamic> _crearPlantillaPartida() {
     return {
       'TURNO': '',
-      'CONFIGURACIONES': {
-        'SECTOR': '',
-        'ESTADO': 'ACTIVO',
-        'TIEMPO TURNO': 0,
-        'CANTIDAD COMODINES': 2,
-      },
+      'CONFIGURACIONES': {'SECTOR': '', 'ESTADO': 'ACTIVO', 'TIEMPO TURNO': 0, 'CANTIDAD COMODINES': 2},
       'EQUIPOS': {},
     };
   }

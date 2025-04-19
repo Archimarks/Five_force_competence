@@ -53,13 +53,7 @@ class ActualizarEquipo {
   /// ### Logs:
   /// - Imprime en consola el estado de la actualización y si hubo errores.
   /// -------------------------------------------------------------------------
-  Future<void> actualizarPreGame(
-    String partidaActual,
-    int equipoId,
-    String empresa,
-    String color,
-    String sector,
-  ) async {
+  Future<void> actualizarPreGame(String partidaActual, int equipoId, String empresa, String color, String sector) async {
     // Extrae solo números del ID de partida para generar el código
     String numeroPartida = partidaActual.replaceAll(RegExp(r'\D'), '');
 
@@ -67,17 +61,13 @@ class ActualizarEquipo {
     String codigo = '$numeroPartida${equipoId % 10}${_generarCodigoAleatorio(2)}';
 
     // Referencia al equipo específico
-    final DatabaseReference equipoRef = _dbRef.child(
-      'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/EQUIPO $equipoId',
-    );
+    final DatabaseReference equipoRef = _dbRef.child('Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/EQUIPO $equipoId');
 
     // Actualiza los campos del equipo en Firebase
     await equipoRef.update({'EMPRESA': empresa, 'COLOR': color, 'CODIGO': codigo});
 
     // Referencias a las fuerzas de la empresa y del equipo
-    final DatabaseReference fuerzasEmpresaRef = _dbRef.child(
-      'Five Force Competence/DATOS PERSISTENTES/SECTORES/$sector/EMPRESAS/$empresa/FUERZAS',
-    );
+    final DatabaseReference fuerzasEmpresaRef = _dbRef.child('Five Force Competence/DATOS PERSISTENTES/SECTORES/$sector/EMPRESAS/$empresa/FUERZAS');
     final DatabaseReference fuerzasEquipoRef = equipoRef.child('FUERZAS');
 
     try {
@@ -92,9 +82,7 @@ class ActualizarEquipo {
       debugPrint('❌ Error al copiar las fuerzas: $e');
     }
 
-    debugPrint(
-      '✅ Equipo actualizado: $equipoId | CODIGO: $codigo | EMPRESA: $empresa | COLOR: $color',
-    );
+    debugPrint('✅ Equipo actualizado: $equipoId | CODIGO: $codigo | EMPRESA: $empresa | COLOR: $color');
   }
 
   /// -------------------------------------------------------------------------

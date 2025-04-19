@@ -82,9 +82,7 @@ class TraerTodosSectores {
   Future<Map<String, dynamic>?> obtenerEmpresa() async {
     String? partidaActual = await obtenerPartidaGuardada();
 
-    final DatabaseReference sectoresRef = _dbRef.child(
-      'Five Force Competence/PARTIDAS/$partidaActual/CONFIGURACIONES/SECTOR',
-    );
+    final DatabaseReference sectoresRef = _dbRef.child('Five Force Competence/PARTIDAS/$partidaActual/CONFIGURACIONES/SECTOR');
 
     try {
       DataSnapshot snapshot = await sectoresRef.get();

@@ -68,9 +68,7 @@ class GuardarTiempo {
     }
 
     try {
-      DatabaseReference ref = _dbRef.child(
-        'Five Force Competence/PARTIDAS/$partidaActual/CONFIGURACIONES/TIEMPO TURNO',
-      );
+      DatabaseReference ref = _dbRef.child('Five Force Competence/PARTIDAS/$partidaActual/CONFIGURACIONES/TIEMPO TURNO');
 
       await ref
           .set(seleccion)

@@ -40,9 +40,7 @@ class TraerTodosTiempos {
   /// ```
   /// -------------------------------------------------------------------------
   Future<Map<String, dynamic>?> obtenerSectores() async {
-    final DatabaseReference sectoresRef = _dbRef.child(
-      'Five Force Competence/DATOS PERSISTENTES/TIEMPOS',
-    );
+    final DatabaseReference sectoresRef = _dbRef.child('Five Force Competence/DATOS PERSISTENTES/TIEMPOS');
 
     try {
       DataSnapshot snapshot = await sectoresRef.get();

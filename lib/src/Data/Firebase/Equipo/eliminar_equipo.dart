@@ -39,9 +39,7 @@ class EliminarEquipo {
   /// - `equipoId`: Identificador del equipo a eliminar.
   /// -------------------------------------------------------------------------
   Future<void> eliminarEquipo(String partidaActual, String equipoId) async {
-    final equipoRef = _dbRef.child(
-      'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoId',
-    );
+    final equipoRef = _dbRef.child('Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoId');
 
     final snapshot = await equipoRef.get();
     if (snapshot.exists) {

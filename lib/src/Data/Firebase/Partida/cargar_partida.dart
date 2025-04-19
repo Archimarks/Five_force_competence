@@ -65,9 +65,7 @@ class CargarPartida {
     String? partidaId = prefs.getString('partidaId');
 
     if (partidaId != null) {
-      final DatabaseReference partidaRef = _dbRef.child(
-        'Five Force Competence/PARTIDAS/$partidaId',
-      );
+      final DatabaseReference partidaRef = _dbRef.child('Five Force Competence/PARTIDAS/$partidaId');
 
       DataSnapshot snapshot = await partidaRef.get();
       if (snapshot.exists) {

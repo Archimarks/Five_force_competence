@@ -18,10 +18,7 @@ class AdminRepository {
   final DatabaseReference _dbRef;
 
   /// Constructor que permite inyección de dependencias para facilitar pruebas unitarias.
-  AdminRepository({DatabaseReference? databaseReference})
-    : _dbRef =
-          databaseReference ??
-          FirebaseDatabase.instance.ref('Five Force Competence/ADMINISTRADORES');
+  AdminRepository({DatabaseReference? databaseReference}) : _dbRef = databaseReference ?? FirebaseDatabase.instance.ref('Five Force Competence/ADMINISTRADORES');
 
   /// Verifica si el correo pertenece a un administrador activo en la base de datos.
   ///

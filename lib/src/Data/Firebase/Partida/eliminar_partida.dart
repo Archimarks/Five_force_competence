@@ -51,9 +51,7 @@ class EliminarPartida {
     String? partidaId = prefs.getString('partidaId');
 
     if (partidaId != null) {
-      final DatabaseReference partidaRef = _dbRef.child(
-        'Five Force Competence/PARTIDAS/$partidaId',
-      );
+      final DatabaseReference partidaRef = _dbRef.child('Five Force Competence/PARTIDAS/$partidaId');
 
       // Eliminar la partida de Firebase
       await partidaRef.remove();

@@ -60,11 +60,7 @@ class EquipoCodigo {
               final equipo = equipos[equipoKey] as Map;
 
               if (equipo['CODIGO'] == codigoBuscado) {
-                await _guardarEnSharedPreferences(
-                  equipo: equipo,
-                  equipoKey: equipoKey,
-                  partidaKey: partidaKey,
-                );
+                await _guardarEnSharedPreferences(equipo: equipo, equipoKey: equipoKey, partidaKey: partidaKey);
                 debugPrint('✅ Datos del equipo guardados exitosamente.');
                 return;
               }
@@ -91,11 +87,7 @@ class EquipoCodigo {
   /// - `equipoKey`: ID del equipo dentro de Firebase.
   /// - `partidaKey`: ID de la partida donde fue encontrado.
   /// -------------------------------------------------------------------------
-  Future<void> _guardarEnSharedPreferences({
-    required Map equipo,
-    required String equipoKey,
-    required String partidaKey,
-  }) async {
+  Future<void> _guardarEnSharedPreferences({required Map equipo, required String equipoKey, required String partidaKey}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     await prefs.setString('EQUIPO', equipoKey);
@@ -109,22 +101,10 @@ class EquipoCodigo {
 
     final fuerzas = equipo['FUERZAS'] as Map? ?? {};
 
-    await prefs.setString(
-      'PODER DE NEGOCIACION DE COMPRADORES',
-      fuerzas['PODER DE NEGOCIACION DE COMPRADORES']?['NIVEL'] ?? '',
-    );
-    await prefs.setString(
-      'PODER DE NEGOCIACION DE PROVEEDORES',
-      fuerzas['PODER DE NEGOCIACION DE PROVEEDORES']?['NIVEL'] ?? '',
-    );
-    await prefs.setString(
-      'POTENCIALES COMPETIDORES',
-      fuerzas['POTENCIALES COMPETIDORES']?['NIVEL'] ?? '',
-    );
+    await prefs.setString('PODER DE NEGOCIACION DE COMPRADORES', fuerzas['PODER DE NEGOCIACION DE COMPRADORES']?['NIVEL'] ?? '');
+    await prefs.setString('PODER DE NEGOCIACION DE PROVEEDORES', fuerzas['PODER DE NEGOCIACION DE PROVEEDORES']?['NIVEL'] ?? '');
+    await prefs.setString('POTENCIALES COMPETIDORES', fuerzas['POTENCIALES COMPETIDORES']?['NIVEL'] ?? '');
     await prefs.setString('PRODUCTOS SUSTITUTOS', fuerzas['PRODUCTOS SUSTITUTOS']?['NIVEL'] ?? '');
-    await prefs.setString(
-      'RIVALIDAD ENTRE COMPETIDORES',
-      fuerzas['RIVALIDAD ENTRE COMPETIDORES']?['NIVEL'] ?? '',
-    );
+    await prefs.setString('RIVALIDAD ENTRE COMPETIDORES', fuerzas['RIVALIDAD ENTRE COMPETIDORES']?['NIVEL'] ?? '');
   }
 }

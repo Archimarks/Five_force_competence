@@ -67,9 +67,7 @@ class CrearEquipo {
   /// - `true` si el equipo ya existe, `false` en caso contrario.
   /// -------------------------------------------------------------------------
   Future<bool> _equipoExiste(String partidaActual, String equipoId) async {
-    final equipoRef = _dbRef.child(
-      'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoId',
-    );
+    final equipoRef = _dbRef.child('Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoId');
     final snapshot = await equipoRef.get();
     return snapshot.exists;
   }
@@ -102,9 +100,7 @@ class CrearEquipo {
   /// - `equipoId`: Identificador del equipo (`EQUIPO 1`, `EQUIPO 2`, etc).
   /// -------------------------------------------------------------------------
   Future<void> crearEquipoEspecifico(String partidaActual, String equipoId) async {
-    final equipoRef = _dbRef.child(
-      'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoId',
-    );
+    final equipoRef = _dbRef.child('Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoId');
 
     final snapshot = await equipoRef.get();
     if (!snapshot.exists) {
@@ -124,9 +120,7 @@ class CrearEquipo {
   /// - `equipoId`: Identificador del equipo a eliminar.
   /// -------------------------------------------------------------------------
   Future<void> eliminarEquipo(String partidaActual, String equipoId) async {
-    final equipoRef = _dbRef.child(
-      'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoId',
-    );
+    final equipoRef = _dbRef.child('Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoId');
 
     await equipoRef.remove();
     debugPrint('🗑️ Equipo eliminado: $equipoId');
@@ -186,19 +180,7 @@ class CrearEquipo {
         'VALOR INICIAL X': '',
         'VALOR INICIAL Y': '',
         'CUADRANTE A': {
-          'ENTIDAD': {
-            'DIRECCION': '',
-            'ESTADO': '',
-            'NOMBRE': '',
-            'PINES': '',
-            'POS 1': '',
-            'POS 2': '',
-            'POS 3': '',
-            'POS 4': '',
-            'POS 5': '',
-            'PUNTOS': '',
-            'PUNTOS ATAQUE': '',
-          },
+          'ENTIDAD': {'DIRECCION': '', 'ESTADO': '', 'NOMBRE': '', 'PINES': '', 'POS 1': '', 'POS 2': '', 'POS 3': '', 'POS 4': '', 'POS 5': '', 'PUNTOS': '', 'PUNTOS ATAQUE': ''},
           'CELDA 0 0': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
           'CELDA 0 1': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
           'CELDA 0 2': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
@@ -237,19 +219,7 @@ class CrearEquipo {
           'CELDA 5 5': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
         },
         'CUADRANTE B': {
-          'ENTIDAD': {
-            'DIRECCION': '',
-            'ESTADO': '',
-            'NOMBRE': '',
-            'PINES': '',
-            'POS 1': '',
-            'POS 2': '',
-            'POS 3': '',
-            'POS 4': '',
-            'POS 5': '',
-            'PUNTOS': '',
-            'PUNTOS ATAQUE': '',
-          },
+          'ENTIDAD': {'DIRECCION': '', 'ESTADO': '', 'NOMBRE': '', 'PINES': '', 'POS 1': '', 'POS 2': '', 'POS 3': '', 'POS 4': '', 'POS 5': '', 'PUNTOS': '', 'PUNTOS ATAQUE': ''},
           'CELDA 0 6': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
           'CELDA 0 7': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
           'CELDA 0 8': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
@@ -288,19 +258,7 @@ class CrearEquipo {
           'CELDA 5 11': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
         },
         'CUADRANTE C': {
-          'ENTIDAD': {
-            'DIRECCION': '',
-            'ESTADO': '',
-            'NOMBRE': '',
-            'PINES': '',
-            'POS 1': '',
-            'POS 2': '',
-            'POS 3': '',
-            'POS 4': '',
-            'POS 5': '',
-            'PUNTOS': '',
-            'PUNTOS ATAQUE': '',
-          },
+          'ENTIDAD': {'DIRECCION': '', 'ESTADO': '', 'NOMBRE': '', 'PINES': '', 'POS 1': '', 'POS 2': '', 'POS 3': '', 'POS 4': '', 'POS 5': '', 'PUNTOS': '', 'PUNTOS ATAQUE': ''},
           'CELDA 6 0': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
           'CELDA 6 1': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
           'CELDA 6 2': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
@@ -339,19 +297,7 @@ class CrearEquipo {
           'CELDA 11 5': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
         },
         'CUADRANTE D': {
-          'ENTIDAD': {
-            'DIRECCION': '',
-            'ESTADO': '',
-            'NOMBRE': '',
-            'PINES': '',
-            'POS 1': '',
-            'POS 2': '',
-            'POS 3': '',
-            'POS 4': '',
-            'POS 5': '',
-            'PUNTOS': '',
-            'PUNTOS ATAQUE': '',
-          },
+          'ENTIDAD': {'DIRECCION': '', 'ESTADO': '', 'NOMBRE': '', 'PINES': '', 'POS 1': '', 'POS 2': '', 'POS 3': '', 'POS 4': '', 'POS 5': '', 'PUNTOS': '', 'PUNTOS ATAQUE': ''},
           'CELDA 6 6': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
           'CELDA 6 7': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
           'CELDA 6 8': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
@@ -384,19 +330,7 @@ class CrearEquipo {
           'CELDA 10 11': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
         },
         'CUADRANTE E': {
-          'ENTIDAD': {
-            'DIRECCION': '',
-            'ESTADO': '',
-            'NOMBRE': '',
-            'PINES': '',
-            'POS 1': '',
-            'POS 2': '',
-            'POS 3': '',
-            'POS 4': '',
-            'POS 5': '',
-            'PUNTOS': '',
-            'PUNTOS ATAQUE': '',
-          },
+          'ENTIDAD': {'DIRECCION': '', 'ESTADO': '', 'NOMBRE': '', 'PINES': '', 'POS 1': '', 'POS 2': '', 'POS 3': '', 'POS 4': '', 'POS 5': '', 'PUNTOS': '', 'PUNTOS ATAQUE': ''},
           'CELDA 3 3': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
           'CELDA 3 4': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},
           'CELDA 3 5': {'COMODIN': '', 'EQUIPO ACCION': '', 'ESTADO': '', 'PUNTO': ''},

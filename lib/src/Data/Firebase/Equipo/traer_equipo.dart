@@ -44,9 +44,7 @@ class GestionEquipo {
   /// ```
   /// -------------------------------------------------------------------------
   Future<Map<String, dynamic>?> obtenerEquipos(String partidaActual) async {
-    final DatabaseReference equiposRef = _dbRef.child(
-      'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS',
-    );
+    final DatabaseReference equiposRef = _dbRef.child('Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS');
     DataSnapshot snapshot = await equiposRef.get();
 
     if (snapshot.value != null && snapshot.value is Map) {
@@ -71,13 +69,8 @@ class GestionEquipo {
   /// final equipo = await gestionEquipo.obtenerEquipoPorCodigo('partida_123', 'equipo_001');
   /// ```
   /// -------------------------------------------------------------------------
-  Future<Map<String, dynamic>?> obtenerEquipoPorCodigo(
-    String partidaActual,
-    String equipoCodigo,
-  ) async {
-    final DatabaseReference equipoRef = _dbRef.child(
-      'Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoCodigo',
-    );
+  Future<Map<String, dynamic>?> obtenerEquipoPorCodigo(String partidaActual, String equipoCodigo) async {
+    final DatabaseReference equipoRef = _dbRef.child('Five Force Competence/PARTIDAS/$partidaActual/EQUIPOS/$equipoCodigo');
     DataSnapshot snapshot = await equipoRef.get();
 
     if (snapshot.exists && snapshot.value != null) {

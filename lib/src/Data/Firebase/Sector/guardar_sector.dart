@@ -81,9 +81,7 @@ class GuardarSector {
     }
 
     try {
-      DatabaseReference ref = _dbRef.child(
-        'Five Force Competence/PARTIDAS/$partidaActual/CONFIGURACIONES/SECTOR',
-      );
+      DatabaseReference ref = _dbRef.child('Five Force Competence/PARTIDAS/$partidaActual/CONFIGURACIONES/SECTOR');
 
       await ref.set(seleccion);
       debugPrint('✅ Sector guardado en Firebase correctamente: $seleccion');

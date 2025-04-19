@@ -69,9 +69,7 @@ class TraerTodasEmpresas {
       return {};
     }
 
-    final DatabaseReference empresasRef = _dbRef.child(
-      '/Five Force Competence/DATOS PERSISTENTES/SECTORES/$sectorActual/EMPRESAS',
-    );
+    final DatabaseReference empresasRef = _dbRef.child('/Five Force Competence/DATOS PERSISTENTES/SECTORES/$sectorActual/EMPRESAS');
 
     try {
       DataSnapshot snapshot = await empresasRef.get();

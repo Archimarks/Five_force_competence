@@ -33,9 +33,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   @override
   Future<app_user.User?> getUserData() async {
     final firebaseUser = _firebaseAuth.currentUser;
-    return firebaseUser != null
-        ? app_user.User(uid: firebaseUser.uid, email: firebaseUser.email)
-        : null;
+    return firebaseUser != null ? app_user.User(uid: firebaseUser.uid, email: firebaseUser.email) : null;
   }
 
   /// Verifica si hay un usuario autenticado.
@@ -57,14 +55,9 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       if (googleUser == null) return Either.left(SignInFailure.unknown);
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final firebase_auth.AuthCredential credential = firebase_auth.GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+      final firebase_auth.AuthCredential credential = firebase_auth.GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
 
-      final firebase_auth.UserCredential userCredential = await _firebaseAuth.signInWithCredential(
-        credential,
-      );
+      final firebase_auth.UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
       final firebase_auth.User? firebaseUser = userCredential.user;
 
       if (firebaseUser == null) return Either.left(SignInFailure.unknown);

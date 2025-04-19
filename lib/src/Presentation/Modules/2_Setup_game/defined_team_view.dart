@@ -82,24 +82,16 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
   Future<void> _confirmarSeleccion() async {
     if (partidaId == null || equipo == null) {
       if (!mounted) return; // Verifica si el widget sigue en el árbol
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: no se encontraron los datos del equipo o partida.')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error: no se encontraron los datos del equipo o partida.')));
       return;
     }
 
     final validador = ValidarFuerzas();
-    await validador.validarSeleccionUsuario(
-      partidaActual: partidaId!,
-      equipo: equipo!,
-      respuestasUsuario: seleccionadas,
-    );
+    await validador.validarSeleccionUsuario(partidaActual: partidaId!, equipo: equipo!, respuestasUsuario: seleccionadas);
 
     if (!mounted) return; // Verifica después del await
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Fuerzas validadas correctamente.')));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Fuerzas validadas correctamente.')));
 
     // Redirige a la vista de ingreso de código de equipo
     Navigator.pushNamed(context, Routes.setupGame);
@@ -148,25 +140,13 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
           onLeadingPressed: () {
             Navigator.pushReplacementNamed(context, Routes.joinGame);
           },
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Image.asset('assets/Icon/LOGO.png', height: 40),
-            ),
-          ],
+          actions: [Padding(padding: const EdgeInsets.only(right: 12), child: Image.asset('assets/Icon/LOGO.png', height: 40))],
         ),
       ),
       body: Stack(
         children: [
           /// Fondo con imagen decorativa
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/Icon/FONDO GENERAL.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+          Container(decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/Icon/FONDO GENERAL.png'), fit: BoxFit.cover))),
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -183,11 +163,7 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
                             const Text(
                               'Define las fuerzas de tu empresa',
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
+                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black87),
                             ),
                             const SizedBox(height: 25),
 
@@ -201,12 +177,7 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
                               height: 50,
                               child: ElevatedButton(
                                 onPressed: _confirmarSeleccion,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.black,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                                 child: const Text('Confirmar', style: TextStyle(fontSize: 18)),
                               ),
                             ),
@@ -226,36 +197,16 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
 
   /// Construye el layout vertical de los dropdowns (modo retrato).
   Widget _buildVerticalLayout() {
-    return Column(
-      children: List.generate(
-        fuerzas.length,
-        (index) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _dropdownFuerza(index, _etiqueta(index)),
-        ),
-      ),
-    );
+    return Column(children: List.generate(fuerzas.length, (index) => Padding(padding: const EdgeInsets.only(bottom: 12), child: _dropdownFuerza(index, _etiqueta(index)))));
   }
 
   /// Construye el layout horizontal de los dropdowns (modo apaisado).
   Widget _buildHorizontalLayout() {
     return Column(
       children: [
-        Row(
-          children: [
-            _dropdownFuerza(0, 'Fuerza principal (5 pines)'),
-            const SizedBox(width: 12),
-            _dropdownFuerza(3, 'Cuarta fuerza (2 pines)'),
-          ],
-        ),
+        Row(children: [_dropdownFuerza(0, 'Fuerza principal (5 pines)'), const SizedBox(width: 12), _dropdownFuerza(3, 'Cuarta fuerza (2 pines)')]),
         const SizedBox(height: 16),
-        Row(
-          children: [
-            _dropdownFuerza(2, 'Tercer fuerza (3 pines)'),
-            const SizedBox(width: 12),
-            _dropdownFuerza(1, 'Segunda fuerza (4 pines)'),
-          ],
-        ),
+        Row(children: [_dropdownFuerza(2, 'Tercer fuerza (3 pines)'), const SizedBox(width: 12), _dropdownFuerza(1, 'Segunda fuerza (4 pines)')]),
         const SizedBox(height: 16),
         Row(children: [_dropdownFuerza(4, 'Menor fuerza (1 pin)')]),
       ],

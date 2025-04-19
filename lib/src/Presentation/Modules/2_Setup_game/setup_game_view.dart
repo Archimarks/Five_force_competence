@@ -67,47 +67,25 @@ class _SetupGameViewState extends State<SetupGameView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: customAppBar(context: context, title: nombreEquipo, backgroundColor: colorEquipo),
-      ),
+      appBar: PreferredSize(preferredSize: const Size.fromHeight(kToolbarHeight), child: customAppBar(context: context, title: nombreEquipo, backgroundColor: colorEquipo)),
       body: Stack(
         children: [
           /// Fondo de imagen personalizado
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/Icon/FONDO GENERAL.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ),
+          Positioned.fill(child: Container(decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/Icon/FONDO GENERAL.png'), fit: BoxFit.cover)))),
 
           Column(
             children: [
               // Título principal
               const Padding(
                 padding: EdgeInsets.only(top: 16.0, bottom: 8.0),
-                child: Text(
-                  'Organiza tus edificaciones',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A2B33),
-                  ),
-                ),
+                child: Text('Organiza tus edificaciones', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1A2B33))),
               ),
 
               // Sección de juego Flame (expande a lo restante)
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child:
-                      nombreEquipo.isEmpty
-                          ? const Center(child: CircularProgressIndicator())
-                          : GameWidget(game: game),
+                  child: nombreEquipo.isEmpty ? const Center(child: CircularProgressIndicator()) : GameWidget(game: game),
                 ),
               ),
 
@@ -121,10 +99,7 @@ class _SetupGameViewState extends State<SetupGameView> {
                     onPressed: () {
                       // Aquí puedes implementar la navegación a la vista de batalla
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                     child: const Text('¡A la batalla!', style: TextStyle(fontSize: 18)),
                   ),
                 ),

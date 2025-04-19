@@ -103,11 +103,7 @@ class _HomeViewState extends State<HomeView> {
           // Fondo de la pantalla utilizando una imagen de fondo
           Positioned.fill(child: Image.asset('assets/Icon/FONDO PRINCIPAL.jpg', fit: BoxFit.cover)),
           // Capa de superposición semitransparente sobre el fondo
-          Positioned.fill(
-            child: Container(
-              color: const Color.fromARGB(255, 130, 130, 130).withAlpha((0.6 * 255).toInt()),
-            ),
-          ),
+          Positioned.fill(child: Container(color: const Color.fromARGB(255, 130, 130, 130).withAlpha((0.6 * 255).toInt()))),
           // Diseño centrado que cambia según la orientación de la pantalla
           Center(
             child:
@@ -144,11 +140,7 @@ class _HomeViewState extends State<HomeView> {
           const SizedBox(height: 20),
         ],
         // Botón para unirse a una partida
-        Button(
-          texto: 'Ingresar a una partida',
-          color: AppColor.azulReal,
-          onPressed: () => Navigator.pushReplacementNamed(context, Routes.joinGame),
-        ),
+        Button(texto: 'Ingresar a una partida', color: AppColor.azulReal, onPressed: () => Navigator.pushReplacementNamed(context, Routes.joinGame)),
         const SizedBox(height: 20),
         // Botón para cerrar sesión
         Button(texto: 'Cerrar sesión', color: AppColor.azulOxford, onPressed: _signOut),
@@ -188,11 +180,7 @@ class _HomeViewState extends State<HomeView> {
                   const SizedBox(height: 20),
                 ],
                 // Botón para unirse a una partida
-                Button(
-                  texto: 'Ingresar a una partida',
-                  color: AppColor.azulReal,
-                  onPressed: () => Navigator.pushReplacementNamed(context, Routes.joinGame),
-                ),
+                Button(texto: 'Ingresar a una partida', color: AppColor.azulReal, onPressed: () => Navigator.pushReplacementNamed(context, Routes.joinGame)),
                 const SizedBox(height: 20),
                 // Botón para cerrar sesión
                 Button(texto: 'Cerrar sesión', color: AppColor.azulOxford, onPressed: _signOut),
@@ -201,13 +189,7 @@ class _HomeViewState extends State<HomeView> {
           ),
           const SizedBox(width: 80), // Espacio entre los botones y la imagen
           // Columna de la imagen (logo de la aplicación)
-          Expanded(
-            flex: 3,
-            child: Align(
-              alignment: Alignment.center,
-              child: Image.asset('assets/Icon/LOGO.png', width: 250),
-            ),
-          ),
+          Expanded(flex: 3, child: Align(alignment: Alignment.center, child: Image.asset('assets/Icon/LOGO.png', width: 250))),
         ],
       ),
     );

@@ -169,26 +169,9 @@ class _CreateGameViewState extends State<CreateGameView> {
       body: Stack(
         children: [
           /// Fondo con imagen y transparencia oscura
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/Icon/FONDO GENERAL.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ),
-          Positioned.fill(
-            child: Container(
-              color: const Color.fromARGB(255, 70, 70, 70).withAlpha((0.6 * 255).toInt()),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child:
-                orientation == Orientation.portrait ? _portraitVertical() : _landscapeHorizontal(),
-          ),
+          Positioned.fill(child: Container(decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/Icon/FONDO GENERAL.png'), fit: BoxFit.cover)))),
+          Positioned.fill(child: Container(color: const Color.fromARGB(255, 70, 70, 70).withAlpha((0.6 * 255).toInt()))),
+          Padding(padding: const EdgeInsets.all(20.0), child: orientation == Orientation.portrait ? _portraitVertical() : _landscapeHorizontal()),
         ],
       ),
     );
@@ -295,8 +278,7 @@ class _CreateGameViewState extends State<CreateGameView> {
         ),
 
         /// Botón de confirmar (solo si hay al menos 2 equipos preparados)
-        if (estadoEquipos.length >= 2 &&
-            estadoEquipos.values.every((estado) => estado == EstadoEquipo.preparado))
+        if (estadoEquipos.length >= 2 && estadoEquipos.values.every((estado) => estado == EstadoEquipo.preparado))
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Align(
@@ -308,10 +290,7 @@ class _CreateGameViewState extends State<CreateGameView> {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return PopupResumen(
-                        partidaId: partidaActual ?? '',
-                        direccion: DireccionR.vertical,
-                      );
+                      return PopupResumen(partidaId: partidaActual ?? '', direccion: DireccionR.vertical);
                     },
                   );
                 },
@@ -422,8 +401,7 @@ class _CreateGameViewState extends State<CreateGameView> {
         ),
 
         /// Botón en la parte inferior
-        if (estadoEquipos.length >= 2 &&
-            estadoEquipos.values.every((estado) => estado == EstadoEquipo.preparado))
+        if (estadoEquipos.length >= 2 && estadoEquipos.values.every((estado) => estado == EstadoEquipo.preparado))
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
@@ -435,10 +413,7 @@ class _CreateGameViewState extends State<CreateGameView> {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return PopupResumen(
-                        partidaId: partidaActual ?? '',
-                        direccion: DireccionR.horizontal,
-                      );
+                      return PopupResumen(partidaId: partidaActual ?? '', direccion: DireccionR.horizontal);
                     },
                   );
                 },

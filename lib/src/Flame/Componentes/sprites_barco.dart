@@ -11,11 +11,7 @@ class SpritesBarco extends SpriteComponent {
   Direccion direccionActual;
 
   /// Constructor del componente visual del barco
-  SpritesBarco({
-    required Map<String, String> rutasSprites,
-    required this.direccionActual,
-    required Vector2 tamano,
-  }) : super(size: tamano, anchor: Anchor.topLeft) {
+  SpritesBarco({required Map<String, String> rutasSprites, required this.direccionActual, required Vector2 tamano}) : super(size: tamano, anchor: Anchor.topLeft) {
     _cargarSprites(rutasSprites, tamano); // Pasa el tamaño al cargar los sprites
   }
 

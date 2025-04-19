@@ -23,10 +23,7 @@ class _SplashViewState extends State<SplashView> {
 
   void _startCheckingInternet() {
     _checkInternet(); // Verifica la conexión inmediatamente
-    _timer = Timer.periodic(
-      const Duration(seconds: 5),
-      (_) => _checkInternet(),
-    ); // Verifica cada 5 segundos
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) => _checkInternet()); // Verifica cada 5 segundos
   }
 
   Future<void> _checkInternet() async {
@@ -70,9 +67,7 @@ class _SplashViewState extends State<SplashView> {
           Positioned.fill(child: Image.asset('assets/Icon/FONDO PRINCIPAL.jpg', fit: BoxFit.cover)),
           Positioned.fill(
             // ignore: deprecated_member_use
-            child: Container(
-              color: const Color.fromARGB(255, 130, 130, 130).withAlpha((0.6 * 255).toInt()),
-            ),
+            child: Container(color: const Color.fromARGB(255, 130, 130, 130).withAlpha((0.6 * 255).toInt())),
           ),
           Center(
             child: OrientationBuilder(
@@ -97,10 +92,7 @@ class _SplashViewState extends State<SplashView> {
         const SizedBox(height: 20),
         const CircularProgressIndicator(),
         const SizedBox(height: 10),
-        const Text(
-          'Conectando...',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
+        const Text('Conectando...', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
       ],
     );
   }
@@ -114,14 +106,7 @@ class _SplashViewState extends State<SplashView> {
         const SizedBox(width: 30),
         const Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 10),
-            Text(
-              'Conectando...',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-          ],
+          children: [CircularProgressIndicator(), SizedBox(height: 10), Text('Conectando...', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))],
         ),
       ],
     );

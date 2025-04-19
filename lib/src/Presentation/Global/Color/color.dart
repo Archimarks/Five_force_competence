@@ -43,7 +43,5 @@ class AppPalette {
     return baseColor.withOpacity(0.6); // Genera automáticamente el color con brillo
   }
 
-  static final Map<AppColor, Color> _glowMap = {
-    for (var entry in _colorMap.entries) entry.key: _applyGlow(entry.value),
-  };
+  static final Map<AppColor, Color> _glowMap = {for (var entry in _colorMap.entries) entry.key: _applyGlow(entry.value)};
 }

@@ -32,12 +32,7 @@ class MyApp extends StatelessWidget {
       onTap: () {
         FocusManager.instance.primaryFocus?.unfocus();
       },
-      child: MaterialApp(
-        title: 'Five Force Competence',
-        debugShowCheckedModeBanner: false,
-        initialRoute: Routes.splash,
-        routes: appRoutes,
-      ),
+      child: MaterialApp(title: 'Five Force Competence', debugShowCheckedModeBanner: false, initialRoute: Routes.splash, routes: appRoutes),
     );
   }
 }

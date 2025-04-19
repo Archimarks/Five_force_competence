@@ -21,11 +21,7 @@ class _SignInViewsState extends State<SignInView> {
       body: Stack(
         children: [
           Positioned.fill(child: Image.asset('assets/Icon/FONDO PRINCIPAL.jpg', fit: BoxFit.cover)),
-          Positioned.fill(
-            child: Container(
-              color: const Color.fromARGB(255, 130, 130, 130).withAlpha((0.6 * 255).toInt()),
-            ),
-          ),
+          Positioned.fill(child: Container(color: const Color.fromARGB(255, 130, 130, 130).withAlpha((0.6 * 255).toInt()))),
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -33,14 +29,7 @@ class _SignInViewsState extends State<SignInView> {
                 Image.asset('assets/Icon/LOGO.png', width: 250),
                 const SizedBox(height: 40),
                 if (_fetching) const CircularProgressIndicator(),
-                if (!_fetching)
-                  Button(
-                    texto: 'Iniciar sesión con Google',
-                    color: AppColor.azulAcero,
-                    width: 250,
-                    height: 50,
-                    onPressed: _signInWithGoogle,
-                  ),
+                if (!_fetching) Button(texto: 'Iniciar sesión con Google', color: AppColor.azulAcero, width: 250, height: 50, onPressed: _signInWithGoogle),
               ],
             ),
           ),
@@ -57,9 +46,7 @@ class _SignInViewsState extends State<SignInView> {
     setState(() => _fetching = false);
 
     result.when(
-      (failure) => ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Error al iniciar sesión con Google'))),
+      (failure) => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al iniciar sesión con Google'))),
       (user) => Navigator.pushReplacementNamed(context, Routes.home),
     );
   }

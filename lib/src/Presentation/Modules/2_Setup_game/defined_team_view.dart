@@ -21,7 +21,7 @@ class DefinedTeamView extends StatefulWidget {
 
 class _DefinedTeamViewState extends State<DefinedTeamView> {
   /// Lista con las 5 fuerzas disponibles a seleccionar.
-  final List<String> fuerzas = [
+  final List<String> fuerzasOriginales = [
     'PODER DE NEGOCIACION DE COMPRADORES',
     'PODER DE NEGOCIACION DE PROVEEDORES',
     'POTENCIALES COMPETIDORES',
@@ -68,11 +68,6 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
     partidaId = cargarPartida.partidaId;
     equipo = prefs.getString('EQUIPO');
 
-    // Inicializar los dropdowns con las fuerzas disponibles
-    for (int i = 0; i < fuerzas.length; i++) {
-      seleccionadas[i] = fuerzas[i];
-    }
-
     setState(() {});
   }
 
@@ -80,6 +75,20 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
   ///
   /// Muestra un `SnackBar` con el resultado de la operación.
   Future<void> _confirmarSeleccion() async {
+    // Verificar si todas las fuerzas han sido seleccionadas
+    if (seleccionadas.any((element) => element == null)) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Por favor, selecciona una fuerza para cada nivel de importancia.')));
+      return;
+    }
+
+    // Verificar si hay fuerzas duplicadas
+    if (seleccionadas.toSet().length < seleccionadas.length) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Por favor, asegúrate de no seleccionar la misma fuerza más de una vez.')));
+      return;
+    }
+
     if (partidaId == null || equipo == null) {
       if (!mounted) return; // Verifica si el widget sigue en el árbol
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error: no se encontraron los datos del equipo o partida.')));
@@ -102,6 +111,16 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
   /// * [index] indica la posición en la lista `seleccionadas`
   /// * [label] es el texto de ayuda que describe el nivel de importancia
   Widget _dropdownFuerza(int index, String label) {
+    // Crear una lista de fuerzas disponibles para este desplegable
+    final List<String> fuerzasDisponibles = List<String>.from(fuerzasOriginales);
+
+    // Excluir las fuerzas que ya han sido seleccionadas en otros desplegables
+    for (int i = 0; i < seleccionadas.length; i++) {
+      if (i != index && seleccionadas[i] != null) {
+        fuerzasDisponibles.remove(seleccionadas[i]);
+      }
+    }
+
     return Flexible(
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration(
@@ -110,11 +129,11 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        hint: Text(label),
+        hint: const Text('Seleccionar fuerza'),
         value: seleccionadas[index],
         isExpanded: true,
         items:
-            fuerzas.map((fuerza) {
+            fuerzasDisponibles.map((fuerza) {
               return DropdownMenuItem(value: fuerza, child: Text(fuerza));
             }).toList(),
         onChanged: (value) {
@@ -189,7 +208,9 @@ class _DefinedTeamViewState extends State<DefinedTeamView> {
 
   /// Construye el layout vertical de los dropdowns (modo retrato).
   Widget _buildVerticalLayout() {
-    return Column(children: List.generate(fuerzas.length, (index) => Padding(padding: const EdgeInsets.only(bottom: 12), child: _dropdownFuerza(index, _etiqueta(index)))));
+    return Column(
+      children: List.generate(fuerzasOriginales.length, (index) => Padding(padding: const EdgeInsets.only(bottom: 12), child: _dropdownFuerza(index, _etiqueta(index)))),
+    );
   }
 
   /// Construye el layout horizontal de los dropdowns (modo apaisado).

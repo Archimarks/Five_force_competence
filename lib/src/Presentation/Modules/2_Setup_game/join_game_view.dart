@@ -3,7 +3,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Core/Utils/injector.dart';
 import '../../../Data/Firebase/Equipo/equipo_codigo.dart';
+import '../../Global/Color/color.dart';
 import '../../Global/Widgets/app_bar.dart';
+import '../../Global/Widgets/button.dart';
 import '../../Routes/routes.dart';
 
 /// ------------------------------------------------------------
@@ -115,46 +117,34 @@ class _JoinGameViewState extends State<JoinGameView> {
   /// * Si el código es correcto, guarda la información del equipo y navega.
   /// * Si es incorrecto, muestra un `SnackBar` de error.
   Widget _buildButton() {
-    return SizedBox(
-      width: 220,
-      height: 50,
-      child: ElevatedButton(
-        onPressed: () async {
-          String teamCode = _codeController.text.trim();
-
-          // Validación de campo vacío
-          if (teamCode.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Por favor ingresa un código.')));
-            return;
-          }
-
-          final equipoCodigo = EquipoCodigo();
-
-          // Mostrar un loader mientras se busca el código en Firebase
-          showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
-
-          // Buscar y guardar los datos del equipo
-          await equipoCodigo.buscarYGuardarDatosPorCodigo(teamCode);
-
-          // Verificar si el código fue guardado correctamente
-          final prefs = await SharedPreferences.getInstance();
-          String? codigoGuardado = prefs.getString('CODIGO');
-
-          // Cerrar el loader
-          if (mounted) Navigator.pop(context);
-
-          if (!mounted) return;
-
-          // Redirigir si el código es válido
-          if (codigoGuardado == teamCode) {
-            Navigator.pushReplacementNamed(context, Routes.definedTeam);
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Código no encontrado. Intenta nuevamente.')));
-          }
-        },
-        style: ElevatedButton.styleFrom(backgroundColor: Colors.black, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-        child: const Text('Ingresar', style: TextStyle(fontSize: 16)),
-      ),
+    return Button(
+      texto: 'Por favor ingresa un código',
+      color: AppColor.azulReal,
+      onPressed: () async {
+        String teamCode = _codeController.text.trim();
+        // Validación de campo vacío
+        if (teamCode.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Por favor ingresa un código.')));
+          return;
+        }
+        final equipoCodigo = EquipoCodigo();
+        // Mostrar un loader mientras se busca el código en Firebase
+        showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
+        // Buscar y guardar los datos del equipo
+        await equipoCodigo.buscarYGuardarDatosPorCodigo(teamCode);
+        // Verificar si el código fue guardado correctamente
+        final prefs = await SharedPreferences.getInstance();
+        String? codigoGuardado = prefs.getString('CODIGO');
+        // Cerrar el loader
+        if (mounted) Navigator.pop(context);
+        if (!mounted) return;
+        // Redirigir si el código es válido
+        if (codigoGuardado == teamCode) {
+          Navigator.pushReplacementNamed(context, Routes.definedTeam);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Código no encontrado. Intenta nuevamente.')));
+        }
+      },
     );
   }
 }

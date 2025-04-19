@@ -334,9 +334,6 @@ class TableroEstrategia extends PositionComponent with HasGameRef {
       }
       celdas.add(Vector2(x, y));
     }
-    for (final coord in celdas) {
-      obtenerCelda(coord.y.toInt(), coord.x.toInt())?.resaltar();
-    }
     _oscurecerCeldasFueraDeSector(sectorActivo, celdas); // Asegurar que el resto esté oscuro
   }
 
